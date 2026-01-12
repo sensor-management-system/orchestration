@@ -11,10 +11,10 @@
 import json
 
 from project import base_url
-from project.api.models import Contact, Device, DeviceCalibrationAction
+from project.api.models import Contact, Device, DeviceCalibrationAction, User
 from project.api.models.base_model import db
 from project.extensions.instances import mqtt
-from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
+from project.tests.base import BaseTestCase, Fixtures, create_token, fake
 from project.tests.models.test_device_calibration_action_model import (
     add_device_calibration_action,
     add_device_property_calibration_model,
@@ -22,6 +22,29 @@ from project.tests.models.test_device_calibration_action_model import (
 from project.tests.models.test_device_calibration_attachment_model import (
     add_device_calibration_attachment,
 )
+
+fixtures = Fixtures()
+
+
+@fixtures.register("contact1", scope=lambda: db.session)
+def create_contact1():
+    """Create a single contact so that it can be used within the tests."""
+    result = Contact(
+        given_name="first", family_name="contact", email="first.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("user1", scope=lambda: db.session)
+@fixtures.use(["contact1"])
+def create_user1(contact1):
+    """Create a normal user to use it in the tests."""
+    result = User(contact=contact1, subject=contact1.email)
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 class TestDeviceCalibrationAction(BaseTestCase):
@@ -49,9 +72,9 @@ class TestDeviceCalibrationAction(BaseTestCase):
             data["data"][0]["attributes"]["description"],
         )
 
-    def test_post_device_calibration_action(self):
+    @fixtures.use
+    def test_post_device_calibration_action(self, contact1, user1):
         """Create DeviceCalibrationAction."""
-        userinfo = generate_userinfo_data()
         device = Device(
             short_name="Device 12",
             manufacturer_name=fake.company(),
@@ -60,12 +83,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
             is_internal=True,
         )
 
-        contact = Contact(
-            given_name=userinfo["given_name"],
-            family_name=userinfo["family_name"],
-            email=userinfo["email"],
-        )
-        db.session.add_all([device, contact])
+        db.session.add_all([device])
         db.session.commit()
         formula = fake.pystr()
         data = {
@@ -80,15 +98,17 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "contact": {"data": {"type": "contact", "id": contact1.id}},
                 },
             }
         }
-        response = super().add_object(
-            url=f"{self.url}?include=device,contact",
-            data_object=data,
-            object_type=self.object_type,
-        )
+
+        with self.run_requests_as(user1):
+            response = super().add_object(
+                url=f"{self.url}?include=device,contact",
+                data_object=data,
+                object_type=self.object_type,
+            )
 
         result_id = response["data"]["id"]
         result_action = (
@@ -107,7 +127,8 @@ class TestDeviceCalibrationAction(BaseTestCase):
         self.expect(notification_data["attributes"]["formula"]).to_equal(formula)
         self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
-    def test_update_device_calibration_action(self):
+    @fixtures.use
+    def test_update_device_calibration_action(self, contact1, user1):
         """Update DeviceCalibration."""
         device_calibration_action = add_device_calibration_action()
         device_calibration_action_updated = {
@@ -119,11 +140,13 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 },
             }
         }
-        response = super().update_object(
-            url=f"{self.url}/{device_calibration_action.id}",
-            data_object=device_calibration_action_updated,
-            object_type=self.object_type,
-        )
+
+        with self.run_requests_as(user1):
+            response = super().update_object(
+                url=f"{self.url}/{device_calibration_action.id}",
+                data_object=device_calibration_action_updated,
+                object_type=self.object_type,
+            )
         result_id = response["data"]["id"]
         result_action = (
             db.session.query(DeviceCalibrationAction).filter_by(id=result_id).first()
@@ -174,7 +197,8 @@ class TestDeviceCalibrationAction(BaseTestCase):
             }
         )
 
-    def test_filtered_by_device(self):
+    @fixtures.use
+    def test_filtered_by_device(self, contact1):
         """Ensure that I can prefilter by a specific device."""
         device1 = Device(
             short_name="sample device",
@@ -193,14 +217,9 @@ class TestDeviceCalibrationAction(BaseTestCase):
         )
         db.session.add(device2)
 
-        contact = Contact(
-            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
-        )
-        db.session.add(contact)
-
         action1 = DeviceCalibrationAction(
             device=device1,
-            contact=contact,
+            contact=contact1,
             description="Some first action",
             current_calibration_date=fake.date_time(),
         )
@@ -208,7 +227,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
         action2 = DeviceCalibrationAction(
             device=device2,
-            contact=contact,
+            contact=contact1,
             description="Some other action",
             current_calibration_date=fake.date_time(),
         )
@@ -262,7 +281,8 @@ class TestDeviceCalibrationAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 404)
 
-    def test_filtered_by_device_id(self):
+    @fixtures.use
+    def test_filtered_by_device_id(self, contact1):
         """Ensure that I can prefilter by filter[device_id]."""
         device1 = Device(
             short_name="sample device",
@@ -281,14 +301,9 @@ class TestDeviceCalibrationAction(BaseTestCase):
         )
         db.session.add(device2)
 
-        contact = Contact(
-            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
-        )
-        db.session.add(contact)
-
         action1 = DeviceCalibrationAction(
             device=device1,
-            contact=contact,
+            contact=contact1,
             description="Some first action",
             current_calibration_date=fake.date_time(),
         )
@@ -296,7 +311,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
         action2 = DeviceCalibrationAction(
             device=device2,
-            contact=contact,
+            contact=contact1,
             description="Some other action",
             current_calibration_date=fake.date_time(),
         )

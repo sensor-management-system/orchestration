@@ -169,8 +169,8 @@ export default class PermissionGroupSelect extends Vue {
 
   get items (): IGenericSelectItem<IPermissionGroup>[] {
     const items = [
-      // all groups the user is member or admin of
-      // if the user is not admin of the group and has not just added the
+      // all groups the user is member of
+      // if the user is not member of the group and has not just added the
       // group, it is disabled so that it can't be removed
       ...this.userGroups.map(group => ({
         text: group.name,
@@ -205,7 +205,7 @@ export default class PermissionGroupSelect extends Vue {
    * checks if a permissiongroup can be removed
    * the group can be removed if:
    * - the user is a super user
-   * - the user is an admin of the group
+   * - the user is a member of the group
    * - the user is a simple member but has just added the group without saving
    *   the entity
    *
@@ -213,7 +213,7 @@ export default class PermissionGroupSelect extends Vue {
    * @returns {boolean} true when the group is removeable, otherwise false
    */
   isRemoveable (group: PermissionGroup): boolean {
-    if ((this.userInfo && this.userInfo.isAdminOf(group)) || (this.userInfo && this.userInfo.isSuperUser)) {
+    if ((this.userInfo && this.userInfo.isMemberOf(group)) || (this.userInfo && this.userInfo.isSuperUser)) {
       return true
     }
     if (this.initialPermissionGroups?.find(i => i.equals(group)) === undefined) {
@@ -230,7 +230,7 @@ export default class PermissionGroupSelect extends Vue {
   }
 
   /**
-   * Displays a custom hint if the user is not an admin of a group or a
+   * Displays a custom hint if the user is not an member of a group or a
    * superuser and the group is not part of the initial groups
    *
    * @return {string} either a warning if a group will not be removable after saving, or the default hint text
@@ -243,14 +243,14 @@ export default class PermissionGroupSelect extends Vue {
       if (this.userInfo && this.userInfo.isSuperUser) {
         return false
       }
-      if (this.userInfo && this.userInfo.isAdminOf(group)) {
+      if (this.userInfo && this.userInfo.isMemberOf(group)) {
         return false
       }
       return true
     })
 
     if (nonRemovable.length > 0) {
-      return `You will not be able to remove the ${pluralize(nonRemovable.length, 'group')} "${nonRemovable.map(group => group.name).join(', ')}" after saving the ${this.entityName} because you are not an admin of this group.`
+      return `You will not be able to remove the ${pluralize(nonRemovable.length, 'group')} "${nonRemovable.map(group => group.name).join(', ')}" after saving the ${this.entityName} because you are not an member of this group.`
     }
 
     return `You must specify the ${pluralize(this.multiple ? 2 : 1, 'group')} that ${pluralize(this.multiple ? 2 : 1, 'is', 'are')} allowed to modify this ` + this.entityName + '.'

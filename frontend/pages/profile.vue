@@ -198,15 +198,7 @@ SPDX-License-Identifier: EUPL-1.2
               Membered permission groups
             </v-col>
             <v-col align-self="end" :cols="secondCol">
-              {{ memberedPermissionGroups | getNames }}
-            </v-col>
-          </v-row>
-          <v-row no-gutters>
-            <v-col class="text-subtitle-2" :cols="firstCol">
-              Administrated permission groups
-            </v-col>
-            <v-col align-self="end" :cols="secondCol">
-              {{ administradedPermissionGroups | getNames }}
+              {{ userGroups | getNames }}
             </v-col>
           </v-row>
         </v-card-text>
@@ -260,7 +252,7 @@ import { LoadContactAction } from '@/store/contacts'
   },
   middleware: ['auth'],
   computed: {
-    ...mapGetters('permissions', ['memberedPermissionGroups', 'administradedPermissionGroups', 'apikey', 'isSuperUser', 'termsOfUseAgreementDate', 'contactId']),
+    ...mapGetters('permissions', ['userGroups', 'apikey', 'isSuperUser', 'termsOfUseAgreementDate', 'contactId']),
     ...mapState('contacts', ['contact'])
   },
   methods: {

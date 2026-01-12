@@ -12,7 +12,7 @@ import json
 import os
 
 from project import base_url
-from project.api.models import Configuration, Contact, GenericConfigurationAction
+from project.api.models import Configuration, Contact, GenericConfigurationAction, User
 from project.api.models.base_model import db
 from project.extensions.instances import mqtt
 from project.tests.base import (
@@ -47,6 +47,16 @@ class TestGenericConfigurationAction(BaseTestCase):
     platform_json_data_url = os.path.join(
         test_file_path, "drafts", "platforms_test_data.json"
     )
+
+    def setUp(self):
+        """Set some data up for the tests."""
+        super().setUp()
+        contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(contact=contact, subject=contact.email)
+        db.session.add_all([contact, self.normal_user])
+        db.session.commit()
 
     def test_get_generic_configuration_action(self):
         """Ensure the GET /generic_configuration_actions route reachable."""
@@ -98,11 +108,12 @@ class TestGenericConfigurationAction(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
-            url=f"{self.url}?include=configuration,contact",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().add_object(
+                url=f"{self.url}?include=configuration,contact",
+                data_object=data,
+                object_type=self.object_type,
+            )
         configuration = (
             db.session.query(Configuration).filter_by(id=configuration.id).first()
         )
@@ -131,11 +142,12 @@ class TestGenericConfigurationAction(BaseTestCase):
                 },
             }
         }
-        _ = super().update_object(
-            url=f"{self.url}/{configuration_action.id}",
-            data_object=gca_updated,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().update_object(
+                url=f"{self.url}/{configuration_action.id}",
+                data_object=gca_updated,
+                object_type=self.object_type,
+            )
         configuration_id = configuration_action.configuration_id
         configuration = (
             db.session.query(Configuration).filter_by(id=configuration_id).first()

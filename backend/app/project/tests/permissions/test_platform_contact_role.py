@@ -9,14 +9,17 @@
 """Tests for the platform contact roles with permission management."""
 
 import json
-from unittest.mock import patch
 
 from project import base_url, db
-from project.api.models import Contact, Platform, PlatformContactRole, User
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
+from project.api.models import (
+    Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
+    Platform,
+    PlatformContactRole,
+    User,
+)
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def generate_platform(
@@ -81,6 +84,38 @@ class TestPlatformContactRolePermissions(BaseTestCase):
 
     url = base_url + "/platform-contact-roles"
     object_type = "platform_contact_role"
+
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+        contact = Contact(
+            given_name="super", family_name="user", email="super.user@localhost"
+        )
+        self.super_user = User(
+            subject=contact.email, contact=contact, is_superuser=True
+        )
+
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                contact,
+                normal_contact,
+                self.normal_user,
+                self.super_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
 
     def test_getlist_public_platform_contact_role(self):
         """Ensure that a contact role for a public platform will be listed."""
@@ -436,92 +471,41 @@ class TestPlatformContactRolePermissions(BaseTestCase):
 
     def test_delete_public_platform_contact_role_member_in_group(self):
         """Ensure that contact role for public platform can be deleted by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        platform_contact_role = generate_platform_contact_role(group_ids=["2"])
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.delete(
-                self.url + f"/{platform_contact_role.id}", headers=access_headers
-            )
+        platform_contact_role = generate_platform_contact_role(
+            group_ids=[str(self.permission_group.id)]
+        )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(self.url + f"/{platform_contact_role.id}")
         self.assertEqual(response.status_code, 200)
 
     def test_delete_public_platform_contact_role_member_for_archived_platform(self):
         """Ensure that contact role for an archived platform can't be deleted."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        platform_contact_role = generate_platform_contact_role(group_ids=["2"])
+        platform_contact_role = generate_platform_contact_role(
+            group_ids=[str(self.permission_group.id)]
+        )
         platform_contact_role.platform.archived = True
         db.session.add(platform_contact_role.platform)
         db.session.commit()
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.delete(
-                self.url + f"/{platform_contact_role.id}", headers=access_headers
-            )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(self.url + f"/{platform_contact_role.id}")
         self.assertEqual(response.status_code, 403)
-
-    def test_delete_public_platform_contact_role_admin_in_group(self):
-        """Ensure that contact role for public platform can be deleted by admin of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        platform_contact_role = generate_platform_contact_role(group_ids=["1"])
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.delete(
-                self.url + f"/{platform_contact_role.id}", headers=access_headers
-            )
-        self.assertEqual(response.status_code, 200)
 
     def test_delete_public_platform_contact_role_not_in_group(self):
         """Ensure that contact role for public platform can't be deleted by non members/admins."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        platform_contact_role = generate_platform_contact_role(group_ids=["4"])
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.delete(
-                self.url + f"/{platform_contact_role.id}", headers=access_headers
-            )
+        platform_contact_role = generate_platform_contact_role(
+            group_ids=[str(self.other_group.id)]
+        )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(self.url + f"/{platform_contact_role.id}")
         self.assertEqual(response.status_code, 403)
 
     def test_delete_public_platform_contact_role_superuser(self):
         """Ensure that contact role for public platform can still be deleted by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        platform_contact_role = generate_platform_contact_role(group_ids=["4"])
-        contact = platform_contact_role.contact
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
+        platform_contact_role = generate_platform_contact_role(
+            group_ids=[str(self.other_group.id)]
         )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
-        )
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.delete(
-                self.url + f"/{platform_contact_role.id}", headers=access_headers
-            )
+        with self.run_requests_as(self.super_user):
+            response = self.client.delete(self.url + f"/{platform_contact_role.id}")
         self.assertEqual(response.status_code, 200)
 
     def test_delete_internal_platform_contact_role_anonymous(self):
@@ -545,83 +529,29 @@ class TestPlatformContactRolePermissions(BaseTestCase):
 
     def test_delete_internal_platform_contact_role_member_in_group(self):
         """Ensure that a contact role for internal platform can be deleted by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
         platform_contact_role = generate_platform_contact_role(
-            internal=True, public=False, group_ids=["2"]
+            internal=True, public=False, group_ids=[str(self.permission_group.id)]
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.delete(
-                self.url + f"/{platform_contact_role.id}", headers=access_headers
-            )
-        self.assertEqual(response.status_code, 200)
-
-    def test_delete_internal_platform_contact_role_admin_in_group(self):
-        """Ensure that a contact role for internal platform can be deleted by admins of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        platform_contact_role = generate_platform_contact_role(
-            internal=True, public=False, group_ids=["1"]
-        )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.delete(
-                self.url + f"/{platform_contact_role.id}", headers=access_headers
-            )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(self.url + f"/{platform_contact_role.id}")
         self.assertEqual(response.status_code, 200)
 
     def test_delete_internal_platform_contact_role_not_in_group(self):
-        """Ensure contact role for internal platform can't be deleted by non members/admins."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
+        """Ensure contact role for internal platform can't be deleted by non members."""
         platform_contact_role = generate_platform_contact_role(
-            internal=True, public=False, group_ids=["4"]
+            internal=True, public=False, group_ids=[str(self.other_group.id)]
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.delete(
-                self.url + f"/{platform_contact_role.id}", headers=access_headers
-            )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(self.url + f"/{platform_contact_role.id}")
         self.assertEqual(response.status_code, 403)
 
     def test_delete_internal_platform_contact_role_superuser(self):
         """Ensure that contact role for internal platform can still be deleted by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
         platform_contact_role = generate_platform_contact_role(
-            internal=True, public=False, group_ids=["4"]
+            internal=True, public=False, group_ids=[str(self.other_group.id)]
         )
-        contact = platform_contact_role.contact
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
-        )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
-        )
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.delete(
-                self.url + f"/{platform_contact_role.id}", headers=access_headers
-            )
+        with self.run_requests_as(self.super_user):
+            response = self.client.delete(self.url + f"/{platform_contact_role.id}")
         self.assertEqual(response.status_code, 200)
 
     def test_delete_private_platform_contact_role_anonymous(self):
@@ -764,9 +694,9 @@ class TestPlatformContactRolePermissions(BaseTestCase):
 
     def test_patch_public_platform_contact_role_member_in_group(self):
         """Ensure that contact role for public platform can be patched by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        platform_contact_role = generate_platform_contact_role(group_ids=["2"])
-        access_headers = create_token()
+        platform_contact_role = generate_platform_contact_role(
+            group_ids=[str(self.permission_group.id)]
+        )
         payload = {
             "data": {
                 "type": self.object_type,
@@ -774,78 +704,44 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.patch(
                 self.url + f"/{platform_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
 
     def test_patch_public_platform_contact_role_member_for_archived_platform(self):
         """Ensure that contact role for archived platform can't be patched.."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        platform_contact_role = generate_platform_contact_role(group_ids=["2"])
+        platform_contact_role = generate_platform_contact_role(
+            group_ids=[str(self.permission_group.id)]
+        )
         platform_contact_role.platform.archived = True
         db.session.add(platform_contact_role.platform)
         db.session.commit()
 
-        access_headers = create_token()
-        payload = {
-            "data": {
-                "type": self.object_type,
-                "id": str(platform_contact_role.id),
-                "attributes": {"role_name": "new role"},
+        with self.run_requests_as(self.normal_user):
+            payload = {
+                "data": {
+                    "type": self.object_type,
+                    "id": str(platform_contact_role.id),
+                    "attributes": {"role_name": "new role"},
+                }
             }
-        }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
                 self.url + f"/{platform_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
-    def test_patch_public_platform_contact_role_admin_in_group(self):
-        """Ensure that contact role for public platform can be patched by admin of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        platform_contact_role = generate_platform_contact_role(group_ids=["1"])
-        access_headers = create_token()
-        payload = {
-            "data": {
-                "type": self.object_type,
-                "id": str(platform_contact_role.id),
-                "attributes": {"role_name": "new role"},
-            }
-        }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.patch(
-                self.url + f"/{platform_contact_role.id}",
-                data=json.dumps(payload),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
-
     def test_patch_public_platform_contact_role_not_in_group(self):
-        """Ensure that contact role for public platform can't be patched by non members/admins."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        platform_contact_role = generate_platform_contact_role(group_ids=["4"])
-        access_headers = create_token()
+        """Ensure that contact role for public platform can't be patched by non members."""
+        platform_contact_role = generate_platform_contact_role(
+            group_ids=[str(self.other_group.id)]
+        )
         payload = {
             "data": {
                 "type": self.object_type,
@@ -853,38 +749,18 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.patch(
                 self.url + f"/{platform_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_public_platform_contact_role_superuser(self):
         """Ensure that contact role for public platform can still be patched by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        platform_contact_role = generate_platform_contact_role(group_ids=["4"])
-        contact = platform_contact_role.contact
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
-        )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
+        platform_contact_role = generate_platform_contact_role(
+            group_ids=[str(self.other_group.id)]
         )
         payload = {
             "data": {
@@ -893,15 +769,11 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.super_user):
             response = self.client.patch(
                 self.url + f"/{platform_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
@@ -949,9 +821,8 @@ class TestPlatformContactRolePermissions(BaseTestCase):
 
     def test_patch_internal_platform_contact_role_member_in_group(self):
         """Ensure that a contact role for internal platform can be patched by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
         platform_contact_role = generate_platform_contact_role(
-            internal=True, public=False, group_ids=["2"]
+            internal=True, public=False, group_ids=[str(self.permission_group.id)]
         )
         payload = {
             "data": {
@@ -960,55 +831,20 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.patch(
                 self.url + f"/{platform_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
-
-    def test_patch_internal_platform_contact_role_admin_in_group(self):
-        """Ensure that a contact role for internal platform can be patched by admins of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        platform_contact_role = generate_platform_contact_role(
-            internal=True, public=False, group_ids=["1"]
-        )
-        access_headers = create_token()
-        payload = {
-            "data": {
-                "type": self.object_type,
-                "id": str(platform_contact_role.id),
-                "attributes": {"role_name": "new role"},
-            }
-        }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.patch(
-                self.url + f"/{platform_contact_role.id}",
-                data=json.dumps(payload),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
 
     def test_patch_internal_platform_contact_role_not_in_group(self):
         """Ensure contact role for internal platform can't be patched by non members/admins."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
         platform_contact_role = generate_platform_contact_role(
-            internal=True, public=False, group_ids=["4"]
+            internal=True, public=False, group_ids=[str(self.other_group.id)]
         )
-        access_headers = create_token()
         payload = {
             "data": {
                 "type": self.object_type,
@@ -1016,40 +852,18 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.patch(
                 self.url + f"/{platform_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_internal_platform_contact_role_superuser(self):
         """Ensure that contact role for internal platform can still be patched by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
         platform_contact_role = generate_platform_contact_role(
-            internal=True, public=False, group_ids=["4"]
-        )
-        contact = platform_contact_role.contact
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
-        )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
+            internal=True, public=False, group_ids=[str(self.other_group.id)]
         )
         payload = {
             "data": {
@@ -1058,15 +872,11 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.super_user):
             response = self.client.patch(
                 self.url + f"/{platform_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
@@ -1129,7 +939,7 @@ class TestPlatformContactRolePermissions(BaseTestCase):
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
 
     def test_patch_private_platform_contact_role_different_user(self):
-        """Ensure patch for different user on private platform."""
+        """Ensure patch for different user on private platform doesn't work."""
         platform_contact_role = generate_platform_contact_role(
             private=True, public=False
         )
@@ -1165,38 +975,10 @@ class TestPlatformContactRolePermissions(BaseTestCase):
         )
         self.assertEqual(response.status_code, 403)
 
-    def test_patch_private_platform_contact_role_different_admin(self):
-        """Ensure patch for different user (but admin) on private platform."""
+    def test_patch_private_platform_contact_role_different_super_user(self):
+        """Ensure patch for different user (but super user) on private platform."""
         platform_contact_role = generate_platform_contact_role(
             private=True, public=False
-        )
-        contact = platform_contact_role.contact
-        user = User(contact=contact, subject=contact.email)
-        platform_contact_role.platform.created_by = user
-
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
-        )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-
-        db.session.add_all(
-            [
-                user,
-                platform_contact_role,
-                other_contact,
-                admin_user,
-                platform_contact_role.platform,
-            ]
-        )
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
         )
         payload = {
             "data": {
@@ -1206,12 +988,12 @@ class TestPlatformContactRolePermissions(BaseTestCase):
             }
         }
 
-        response = self.client.patch(
-            self.url + f"/{platform_contact_role.id}",
-            data=json.dumps(payload),
-            content_type="application/vnd.api+json",
-            headers=access_headers,
-        )
+        with self.run_requests_as(self.super_user):
+            response = self.client.patch(
+                self.url + f"/{platform_contact_role.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
 
@@ -1289,8 +1071,7 @@ class TestPlatformContactRolePermissions(BaseTestCase):
 
     def test_post_public_platform_contact_role_member_in_group(self):
         """Ensure that contact role for public platform can be posted by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        platform = generate_platform(group_ids=["2"])
+        platform = generate_platform(group_ids=[str(self.permission_group.id)])
         contact = generate_contact()
         payload = {
             "data": {
@@ -1315,24 +1096,18 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
 
     def test_post_archived_platform(self):
         """Ensure we can't post for archived platforms."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        platform = generate_platform(group_ids=["2"])
+        platform = generate_platform(group_ids=[str(self.permission_group.id)])
         platform.archived = True
         db.session.add(platform)
         db.session.commit()
@@ -1360,66 +1135,17 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
-    def test_post_public_platform_contact_role_admin_in_group(self):
-        """Ensure that contact role for public platform can be posted by admin of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        platform = generate_platform(group_ids=["1"])
-        contact = generate_contact()
-        payload = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "role_name": "dummy name",
-                    "role_uri": "dummy uri",
-                },
-                "relationships": {
-                    "platform": {
-                        "data": {
-                            "id": str(platform.id),
-                            "type": "platform",
-                        },
-                    },
-                    "contact": {
-                        "data": {
-                            "id": str(contact.id),
-                            "type": "contact",
-                        }
-                    },
-                },
-            }
-        }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.post(
-                self.url,
-                data=json.dumps(payload),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
-
     def test_post_public_platform_contact_role_not_in_group(self):
         """Ensure that contact role for public platform can't be posted by non members/admins."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        platform = generate_platform(group_ids=["4"])
+        platform = generate_platform(group_ids=[str(self.other_group.id)])
         contact = generate_contact()
         payload = {
             "data": {
@@ -1444,24 +1170,17 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
     def test_post_public_platform_contact_role_superuser(self):
         """Ensure that contact role for public platform can still be posted by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        platform = generate_platform(group_ids=["4"])
+        platform = generate_platform(group_ids=[str(self.other_group.id)])
         contact = generate_contact()
         payload = {
             "data": {
@@ -1486,30 +1205,11 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
-        )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
-        )
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.super_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
@@ -1587,8 +1287,9 @@ class TestPlatformContactRolePermissions(BaseTestCase):
 
     def test_post_internal_platform_contact_role_member_in_group(self):
         """Ensure that a contact role for internal platform can be posted by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        platform = generate_platform(internal=True, public=False, group_ids=["2"])
+        platform = generate_platform(
+            internal=True, public=False, group_ids=[str(self.permission_group.id)]
+        )
         contact = generate_contact()
         payload = {
             "data": {
@@ -1613,67 +1314,20 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
-
-    def test_post_internal_platform_contact_role_admin_in_group(self):
-        """Ensure that a contact role for internal platform can be posted by admins of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        platform = generate_platform(internal=True, public=False, group_ids=["1"])
-        contact = generate_contact()
-        payload = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "role_name": "dummy name",
-                    "role_uri": "dummy uri",
-                },
-                "relationships": {
-                    "platform": {
-                        "data": {
-                            "id": str(platform.id),
-                            "type": "platform",
-                        },
-                    },
-                    "contact": {
-                        "data": {
-                            "id": str(contact.id),
-                            "type": "contact",
-                        }
-                    },
-                },
-            }
-        }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.post(
-                self.url,
-                data=json.dumps(payload),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
 
     def test_post_internal_platform_contact_role_not_in_group(self):
         """Ensure contact role for internal platform can't be posted by non members/admins."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        platform = generate_platform(internal=True, public=False, group_ids=["4"])
+        platform = generate_platform(
+            internal=True, public=False, group_ids=[str(self.other_group.id)]
+        )
         contact = generate_contact()
         payload = {
             "data": {
@@ -1698,24 +1352,19 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
     def test_post_internal_platform_contact_role_superuser(self):
         """Ensure that contact role for internal platform can still be posted by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        platform = generate_platform(internal=True, public=False, group_ids=["4"])
+        platform = generate_platform(
+            internal=True, public=False, group_ids=[str(self.other_group.id)]
+        )
         contact = generate_contact()
         payload = {
             "data": {
@@ -1740,30 +1389,11 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
-        )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
-        )
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.super_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
@@ -1960,14 +1590,14 @@ class TestPlatformContactRolePermissions(BaseTestCase):
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id)],
         )
         platform2 = Platform(
             short_name="platform2",
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["2"],
+            group_ids=[str(self.other_group.id)],
         )
         contact = Contact(
             given_name="first",
@@ -1980,11 +1610,7 @@ class TestPlatformContactRolePermissions(BaseTestCase):
             role_name="Owner",
             role_uri="something",
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([platform1, platform2, contact, user, role])
+        db.session.add_all([platform1, platform2, contact, role])
         db.session.commit()
 
         payload = {
@@ -2005,18 +1631,10 @@ class TestPlatformContactRolePermissions(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[*platform1.group_ids],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{role.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{role.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

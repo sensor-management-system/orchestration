@@ -42,6 +42,16 @@ class TestDeviceMountAction(BaseTestCase):
     url = base_url + "/device-mount-actions"
     object_type = "device_mount_action"
 
+    def setUp(self):
+        """Set some test data up for the tests."""
+        super().setUp()
+        contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(contact=contact, subject=contact.email)
+        db.session.add_all([contact, self.normal_user])
+        db.session.commit()
+
     def test_get_device_mount_action(self):
         """Ensure the GET /device_mount_actions route reachable."""
         response = self.client.get(self.url)
@@ -150,12 +160,13 @@ class TestDeviceMountAction(BaseTestCase):
                 },
             }
         }
-        response = super().add_object(
-            url=f"{self.url}?include="
-            + "device,begin_contact,end_contact,parent_platform,configuration",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            response = super().add_object(
+                url=f"{self.url}?include="
+                + "device,begin_contact,end_contact,parent_platform,configuration",
+                data_object=data,
+                object_type=self.object_type,
+            )
         result_id = response["data"]["id"]
         result_device_mount_action = (
             db.session.query(DeviceMountAction).filter_by(id=result_id).first()
@@ -267,12 +278,13 @@ class TestDeviceMountAction(BaseTestCase):
                 },
             }
         }
-        response = super().add_object(
-            url=f"{self.url}?include="
-            + "device,begin_contact,end_contact,parent_device,configuration",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            response = super().add_object(
+                url=f"{self.url}?include="
+                + "device,begin_contact,end_contact,parent_device,configuration",
+                data_object=data,
+                object_type=self.object_type,
+            )
         result_id = response["data"]["id"]
         result_device_mount_action = (
             db.session.query(DeviceMountAction).filter_by(id=result_id).first()
@@ -297,11 +309,12 @@ class TestDeviceMountAction(BaseTestCase):
                 "attributes": {"begin_description": "updated"},
             }
         }
-        response = super().update_object(
-            url=f"{self.url}/{mount_device_action.id}",
-            data_object=mount_device_action_updated,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            response = super().update_object(
+                url=f"{self.url}/{mount_device_action.id}",
+                data_object=mount_device_action_updated,
+                object_type=self.object_type,
+            )
         result_id = response["data"]["id"]
         result_device_mount_action = (
             db.session.query(DeviceMountAction).filter_by(id=result_id).first()
@@ -1734,12 +1747,13 @@ class TestDeviceMountAction(BaseTestCase):
             pidinst, "update_external_metadata"
         ) as update_external_metadata:
             update_external_metadata.return_value = None
-            super().add_object(
-                url=f"{self.url}?include="
-                + "device,begin_contact,end_contact,parent_platform,configuration",
-                data_object=data,
-                object_type=self.object_type,
-            )
+            with self.run_requests_as(self.normal_user):
+                super().add_object(
+                    url=f"{self.url}?include="
+                    + "device,begin_contact,end_contact,parent_platform,configuration",
+                    data_object=data,
+                    object_type=self.object_type,
+                )
             update_external_metadata.assert_called_once()
             self.assertEqual(
                 update_external_metadata.call_args.args[0].id, configuration.id
@@ -1764,11 +1778,12 @@ class TestDeviceMountAction(BaseTestCase):
             pidinst, "update_external_metadata"
         ) as update_external_metadata:
             update_external_metadata.return_value = None
-            super().update_object(
-                url=f"{self.url}/{mount_device_action.id}",
-                data_object=mount_device_action_updated,
-                object_type=self.object_type,
-            )
+            with self.run_requests_as(self.normal_user):
+                super().update_object(
+                    url=f"{self.url}/{mount_device_action.id}",
+                    data_object=mount_device_action_updated,
+                    object_type=self.object_type,
+                )
             update_external_metadata.assert_called_once()
             self.assertEqual(
                 update_external_metadata.call_args.args[0].id, configuration.id

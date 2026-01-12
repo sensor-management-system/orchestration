@@ -18,13 +18,14 @@ from project.api.models import (
     Contact,
     Device,
     DeviceMountAction,
+    PermissionGroup,
+    PermissionGroupMembership,
     Platform,
     PlatformMountAction,
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, mqtt
+from project.extensions.instances import mqtt
 from project.restframework.preconditions.configurations import (
     AllDeviceMountsForConfigurationAreFinishedInThePast,
     AllDynamicLocationsForConfigurationAreFinishedInThePast,
@@ -73,6 +74,11 @@ class TestArchiveConfiguration(BaseTestCase):
             is_internal=False,
             update_description="create;basic data",
         )
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
 
         db.session.add_all(
             [
@@ -83,6 +89,9 @@ class TestArchiveConfiguration(BaseTestCase):
                 self.normal_user,
                 self.super_user,
                 self.public_configuration,
+                self.permission_group,
+                self.other_group,
+                self.membership,
             ]
         )
         db.session.commit()
@@ -103,76 +112,28 @@ class TestArchiveConfiguration(BaseTestCase):
             response = self.client.post(f"{self.configurations_url}/12345/archive")
         self.assertEqual(response.status_code, 404)
 
-    def test_post_user_not_in_idl(self):
-        """Ensure that an ordinary user without an entry in the idl can't archive."""
-        self.public_configuration.cfg_permission_group = "123"
+    def test_post_user_not_in_grop(self):
+        """Ensure that an ordinary user without an entry in the group can't archive."""
+        self.public_configuration.cfg_permission_group = str(self.other_group.id)
         db.session.add(self.public_configuration)
         db.session.commit()
 
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user", return_value=None
-        ):
-            with self.run_requests_as(self.normal_user):
-                response = self.client.post(
-                    f"{self.configurations_url}/{self.public_configuration.id}/archive"
-                )
-            self.assertEqual(response.status_code, 403)
-
-    def test_post_user_not_in_any_group(self):
-        """Ensure that an ordinary user without group membership can't archive."""
-        self.public_configuration.cfg_permisison_group = "123"
-        db.session.add(self.public_configuration)
-        db.session.commit()
-
-        with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-            mock.return_value = UserAccount(
-                id="1000",
-                username=self.normal_user.subject,
-                administrated_permission_groups=[],
-                membered_permission_groups=[],
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.configurations_url}/{self.public_configuration.id}/archive"
             )
-            with self.run_requests_as(self.normal_user):
-                response = self.client.post(
-                    f"{self.configurations_url}/{self.public_configuration.id}/archive"
-                )
-            self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
 
-    def test_post_user_in_a_group(self):
-        """Ensure that an ordinary user can't archive."""
-        self.public_configuration.cfg_perimssion_group = "123"
+    def test_post_member_in_a_group(self):
+        """Ensure that we can set the archived flag as members."""
+        self.public_configuration.cfg_permission_group = str(self.permission_group.id)
         db.session.add(self.public_configuration)
         db.session.commit()
 
-        with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-            mock.return_value = UserAccount(
-                id="1000",
-                username=self.normal_user.subject,
-                administrated_permission_groups=[],
-                membered_permission_groups=["123"],
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.configurations_url}/{self.public_configuration.id}/archive"
             )
-            with self.run_requests_as(self.normal_user):
-                response = self.client.post(
-                    f"{self.configurations_url}/{self.public_configuration.id}/archive"
-                )
-            self.assertEqual(response.status_code, 403)
-
-    def test_post_admin_in_a_group(self):
-        """Ensure that we can set the archived flag as admins."""
-        self.public_configuration.cfg_permission_group = "123"
-        db.session.add(self.public_configuration)
-        db.session.commit()
-
-        with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-            mock.return_value = UserAccount(
-                id="1000",
-                username=self.normal_user.subject,
-                administrated_permission_groups=["123"],
-                membered_permission_groups=[],
-            )
-            with self.run_requests_as(self.normal_user):
-                response = self.client.post(
-                    f"{self.configurations_url}/{self.public_configuration.id}/archive"
-                )
         self.assertEqual(response.status_code, 204)
         reloaded_configuration = (
             db.session.query(Configuration)

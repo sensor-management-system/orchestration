@@ -8,14 +8,18 @@
 
 """OpenIDConnect authentication mechanism."""
 
-import operator
+import logging
 
 import requests
-from cachetools import TTLCache, cachedmethod
+from cachetools import TTLCache
 from flask import current_app, request
 
 from ....api.helpers.errors import AuthenticationFailedError
+from ....api.models import PermissionGroup, PermissionGroupMembership
+from ....api.models.base_model import db
 from .mixins import CreateNewUserByUserinfoMixin
+
+logger = logging.getLogger(__name__)
 
 
 class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
@@ -46,7 +50,6 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             return False
         return True
 
-    @cachedmethod(operator.attrgetter("cache"))
     def get_userinfo(self, authorization):
         """Return the userinfo from the IDP."""
         resp_userinfo = requests.get(
@@ -72,7 +75,20 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
     def authenticate_by_authorization(self, authorization):
         """Return a user object for our current request."""
         try:
-            attributes = self.get_userinfo(authorization)
+            cache_used = False
+            if request.headers.get("Cache-Control") == "no-cache":
+                logger.debug("Skip the chache")
+                attributes = self.get_userinfo(authorization)
+            else:
+                attributes = self.cache.get(authorization)
+                if attributes:
+                    logger.debug("Used the cache")
+                    cache_used = True
+                else:
+                    logger.debug("No cache - need to do the query")
+                    attributes = self.get_userinfo(authorization)
+            self.cache[authorization] = attributes
+
         except AuthenticationFailedError:
             # It can be that there are changes on the IDP config.
             # However, those should not affect our get userinfo endpoint.
@@ -88,4 +104,43 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             # Could be the case for github logins for example.
             attributes.get("sub"),
         )
-        return self.get_user_or_create_new(identity, attributes)
+        user = self.get_user_or_create_new(identity, attributes)
+        if not cache_used:
+            logger.debug("As no cache was used, we sync the permission groups")
+            self.sync_permission_groups_by_entitlements(user, attributes)
+
+        return user
+
+    def sync_permission_groups_by_entitlements(self, user, attributes):
+        """Sync the group memberships by the current entitlements."""
+        set_of_entitlements = set(attributes.get("eduperson_entitlement", []))
+
+        existing_memberships = user.memberships
+        for current_membership in existing_memberships:
+            pm = current_membership.permission_group
+            entitlement = pm.entitlement
+            if entitlement and entitlement not in set_of_entitlements:
+                db.session.delete(current_membership)
+
+        for entitlement in set_of_entitlements:
+            permission_group = (
+                db.session.query(PermissionGroup)
+                .filter_by(entitlement=entitlement)
+                .one_or_none()
+            )
+            if permission_group is None:
+                name = PermissionGroup.convert_entitlement_to_name(entitlement)
+                permission_group = PermissionGroup(name=name, entitlement=entitlement)
+                db.session.add(permission_group)
+            # Either empty, or 1 element
+            membership_entries = [
+                m
+                for m in existing_memberships
+                if m.permission_group_id == permission_group.id
+            ]
+            if not membership_entries:
+                membership = PermissionGroupMembership(
+                    permission_group=permission_group, user=user
+                )
+                db.session.add(membership)
+        db.session.commit()

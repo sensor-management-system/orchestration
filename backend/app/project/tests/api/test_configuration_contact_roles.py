@@ -74,6 +74,19 @@ def create_super_user(super_user_contact):
     return result
 
 
+@fixtures.register("normal_user", scope=lambda: db.session)
+@fixtures.use(["configuration_contact"])
+def create_normal_user(configuration_contact):
+    """Create a normal user to use it in the tests."""
+    result = User(
+        contact=configuration_contact,
+        subject=configuration_contact.email,
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
 def add_a_contact():
     """Add a test contact."""
     userinfo = generate_userinfo_data()
@@ -136,7 +149,8 @@ class TestConfigurationContactRolesServices(BaseTestCase):
             data["data"][0]["attributes"]["role_name"],
         )
 
-    def test_post_a_configuration_contact_role(self):
+    @fixtures.use
+    def test_post_a_configuration_contact_role(self, normal_user):
         """Ensure post a configuration_contact_role behaves correctly."""
         contact = add_a_contact()
         configuration = add_a_configuration()
@@ -159,9 +173,10 @@ class TestConfigurationContactRolesServices(BaseTestCase):
             }
         }
         url = f"{self.url}?include=configuration,contact"
-        result = super().add_object(
-            url=url, data_object=data, object_type=self.object_type
-        )
+        with self.run_requests_as(normal_user):
+            result = super().add_object(
+                url=url, data_object=data, object_type=self.object_type
+            )
         configuration_id = result["data"]["relationships"]["configuration"]["data"][
             "id"
         ]
@@ -179,7 +194,8 @@ class TestConfigurationContactRolesServices(BaseTestCase):
         self.expect(notification_data["attributes"]["role_name"]).to_equal(role_name)
         self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
-    def test_update_a_contact_role(self):
+    @fixtures.use
+    def test_update_a_contact_role(self, normal_user):
         """Ensure update configuration_contact_role behaves correctly."""
         configuration_contact_role = add_configuration_contact_role()
         contact_updated = {
@@ -191,11 +207,12 @@ class TestConfigurationContactRolesServices(BaseTestCase):
                 },
             }
         }
-        result = super().update_object(
-            url=f"{self.url}/{configuration_contact_role.id}",
-            data_object=contact_updated,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(normal_user):
+            result = super().update_object(
+                url=f"{self.url}/{configuration_contact_role.id}",
+                data_object=contact_updated,
+                object_type=self.object_type,
+            )
         configuration_id = result["data"]["relationships"]["configuration"]["data"][
             "id"
         ]
@@ -254,7 +271,8 @@ class TestConfigurationContactRolesServices(BaseTestCase):
         )
         self.assertIsNone(reloaded)
 
-    def test_update_external_metadata_after_post_of_contact_role(self):
+    @fixtures.use
+    def test_update_external_metadata_after_post_of_contact_role(self, normal_user):
         """Ensure we ask the system to update external metadata after posting the contact role."""
         contact = add_a_contact()
         configuration = add_a_configuration()
@@ -286,13 +304,17 @@ class TestConfigurationContactRolesServices(BaseTestCase):
             pidinst, "update_external_metadata"
         ) as update_external_metadata:
             update_external_metadata.return_value = None
-            super().add_object(url=url, data_object=data, object_type=self.object_type)
+            with self.run_requests_as(normal_user):
+                super().add_object(
+                    url=url, data_object=data, object_type=self.object_type
+                )
             update_external_metadata.assert_called_once()
             self.assertEqual(
                 update_external_metadata.call_args.args[0].id, configuration.id
             )
 
-    def test_update_external_metadata_after_patch_of_contact_role(self):
+    @fixtures.use
+    def test_update_external_metadata_after_patch_of_contact_role(self, normal_user):
         """Ensure we ask the system to update external metadata after patching the contact role."""
         configuration_contact_role = add_configuration_contact_role()
         contact_updated = {
@@ -315,11 +337,12 @@ class TestConfigurationContactRolesServices(BaseTestCase):
             pidinst, "update_external_metadata"
         ) as update_external_metadata:
             update_external_metadata.return_value = None
-            super().update_object(
-                url=f"{self.url}/{configuration_contact_role.id}",
-                data_object=contact_updated,
-                object_type=self.object_type,
-            )
+            with self.run_requests_as(normal_user):
+                super().update_object(
+                    url=f"{self.url}/{configuration_contact_role.id}",
+                    data_object=contact_updated,
+                    object_type=self.object_type,
+                )
             update_external_metadata.assert_called_once()
             self.assertEqual(
                 update_external_metadata.call_args.args[0].id, configuration.id

@@ -8,7 +8,6 @@
 
 import datetime
 import json
-from unittest.mock import patch
 
 from project import base_url
 from project.api.models import (
@@ -16,11 +15,12 @@ from project.api.models import (
     ConfigurationParameter,
     ConfigurationParameterValueChangeAction,
     Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, mqtt
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, Fixtures
 
 fixtures = Fixtures()
@@ -95,14 +95,34 @@ def create_super_user(super_user_contact):
     return result
 
 
+@fixtures.register("group1", scope=lambda: db.session)
+def create_group1():
+    """Create a permission group."""
+    result = PermissionGroup(name="group1", entitlement="group1")
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("membership_of_user1_in_group1", scope=lambda: db.session)
+@fixtures.use(["user1", "group1"])
+def create_membership_of_user1_in_group1(user1, group1):
+    """Create a permission group."""
+    result = PermissionGroupMembership(user=user1, permission_group=group1)
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
 @fixtures.register("public_configuration1_in_group1", scope=lambda: db.session)
-def create_public_configuration1_in_group1():
+@fixtures.use(["group1"])
+def create_public_configuration1_in_group1(group1):
     """Create a public configuration that uses group 1 for permission management."""
     result = Configuration(
         label="public configuration1",
         is_internal=False,
         is_public=True,
-        cfg_permission_group="1",
+        cfg_permission_group=str(group1.id),
     )
     db.session.add(result)
     db.session.commit()
@@ -150,13 +170,14 @@ def create_archvied_public_configuration2_in_group1(public_configuration2_in_gro
 
 
 @fixtures.register("public_configuration2_in_group1", scope=lambda: db.session)
-def create_public_configuration2_in_group1():
+@fixtures.use(["group1"])
+def create_public_configuration2_in_group1(group1):
     """Create another public configuration that uses group 1 for permission management."""
     result = Configuration(
         label="public configuration2",
         is_internal=False,
         is_public=True,
-        cfg_permission_group="1",
+        cfg_permission_group=str(group1.id),
     )
     db.session.add(result)
     db.session.commit()
@@ -164,13 +185,14 @@ def create_public_configuration2_in_group1():
 
 
 @fixtures.register("internal_configuration1_in_group1", scope=lambda: db.session)
-def create_internal_configuration1_in_group1():
+@fixtures.use(["group1"])
+def create_internal_configuration1_in_group1(group1):
     """Create an internal configuration that uses group 1 for permission management."""
     result = Configuration(
         label="internal configuration1",
         is_internal=True,
         is_public=False,
-        cfg_permission_group="1",
+        cfg_permission_group=str(group1.id),
     )
     db.session.add(result)
     db.session.commit()
@@ -498,8 +520,12 @@ class TestConfigurationParameterServices(BaseTestCase):
         )
         self.expect(resp.status_code).to_equal(401)
 
-    @fixtures.use(["user1", "public_configuration1_in_group1"])
-    def test_post_member(self, user1, public_configuration1_in_group1):
+    @fixtures.use(
+        ["user1", "public_configuration1_in_group1", "membership_of_user1_in_group1"]
+    )
+    def test_post_member(
+        self, user1, public_configuration1_in_group1, membership_of_user1_in_group1
+    ):
         """Ensure we can post if we are a member of one of the groups."""
         payload = {
             "data": {
@@ -522,20 +548,11 @@ class TestConfigurationParameterServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[
-                        public_configuration1_in_group1.cfg_permission_group
-                    ],
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(201)
         # Test some basic fields.
         self.expect(resp.json["data"]["attributes"]["label"]).to_equal("specialvalue")
@@ -574,46 +591,6 @@ class TestConfigurationParameterServices(BaseTestCase):
         self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     @fixtures.use(["user1", "public_configuration1_in_group1"])
-    def test_post_admin(self, user1, public_configuration1_in_group1):
-        """Ensure we can post if we are a admin of one of the groups."""
-        payload = {
-            "data": {
-                "type": "configuration_parameter",
-                "attributes": {
-                    "label": "specialvalue",
-                    "description": "some description",
-                    "unit_uri": "http://foo/count",
-                    "unit_name": "count",
-                },
-                "relationships": {
-                    "configuration": {
-                        "data": {
-                            "id": str(public_configuration1_in_group1.id),
-                            "type": "configuration",
-                        }
-                    }
-                },
-            }
-        }
-
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[
-                        public_configuration1_in_group1.cfg_permission_group
-                    ],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
-        self.expect(resp.status_code).to_equal(201)
-
-    @fixtures.use(["user1", "public_configuration1_in_group1"])
     def test_post_not_in_group(self, user1, public_configuration1_in_group1):
         """Ensure we can't post if we are a not even member of one of the groups."""
         payload = {
@@ -637,18 +614,11 @@ class TestConfigurationParameterServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(["super_user", "public_configuration1_in_group1"])
@@ -828,6 +798,7 @@ class TestConfigurationParameterServices(BaseTestCase):
             "user1",
             "parameter1_of_public_configuration1_in_group1",
             "public_configuration1_in_group1",
+            "membership_of_user1_in_group1",
         ]
     )
     def test_patch_for_public_configuration_member(
@@ -835,6 +806,7 @@ class TestConfigurationParameterServices(BaseTestCase):
         user1,
         parameter1_of_public_configuration1_in_group1,
         public_configuration1_in_group1,
+        membership_of_user1_in_group1,
     ):
         """Ensure we can patch if we are a member."""
         payload = {
@@ -848,20 +820,11 @@ class TestConfigurationParameterServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[
-                        public_configuration1_in_group1.cfg_permission_group
-                    ],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{parameter1_of_public_configuration1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.patch(
+                f"{self.url}/{parameter1_of_public_configuration1_in_group1.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(200)
         self.expect(resp.json["data"]["attributes"]["label"]).to_equal(
             "super specialvalue"
@@ -902,47 +865,6 @@ class TestConfigurationParameterServices(BaseTestCase):
             "public_configuration1_in_group1",
         ]
     )
-    def test_patch_for_public_configuration_admin(
-        self,
-        user1,
-        parameter1_of_public_configuration1_in_group1,
-        public_configuration1_in_group1,
-    ):
-        """Ensure we can patch if we are an admin of the group."""
-        payload = {
-            "data": {
-                "id": str(parameter1_of_public_configuration1_in_group1.id),
-                "type": "configuration_parameter",
-                "attributes": {
-                    "label": "super specialvalue",
-                },
-            }
-        }
-
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[
-                        public_configuration1_in_group1.cfg_permission_group
-                    ],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{parameter1_of_public_configuration1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
-        self.expect(resp.status_code).to_equal(200)
-
-    @fixtures.use(
-        [
-            "user1",
-            "parameter1_of_public_configuration1_in_group1",
-            "public_configuration1_in_group1",
-        ]
-    )
     def test_patch_for_public_configuration_no_member(
         self,
         user1,
@@ -961,18 +883,11 @@ class TestConfigurationParameterServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{parameter1_of_public_configuration1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.patch(
+                f"{self.url}/{parameter1_of_public_configuration1_in_group1.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(
@@ -1094,6 +1009,7 @@ class TestConfigurationParameterServices(BaseTestCase):
             "user1",
             "parameter1_of_public_configuration1_in_group1",
             "public_configuration1_in_group1",
+            "membership_of_user1_in_group1",
         ]
     )
     def test_delete_for_public_configuration_member(
@@ -1101,21 +1017,13 @@ class TestConfigurationParameterServices(BaseTestCase):
         user1,
         parameter1_of_public_configuration1_in_group1,
         public_configuration1_in_group1,
+        membership_of_user1_in_group1,
     ):
         """Ensure we can delete if we are a member."""
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[
-                        public_configuration1_in_group1.cfg_permission_group
-                    ],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{parameter1_of_public_configuration1_in_group1.id}",
-                )
+            resp = self.client.delete(
+                f"{self.url}/{parameter1_of_public_configuration1_in_group1.id}",
+            )
         self.expect(resp.status_code).to_equal(200)
         # We check that the configuration has a changed update description
 
@@ -1148,35 +1056,6 @@ class TestConfigurationParameterServices(BaseTestCase):
             "public_configuration1_in_group1",
         ]
     )
-    def test_delete_for_public_configuration_admin(
-        self,
-        user1,
-        parameter1_of_public_configuration1_in_group1,
-        public_configuration1_in_group1,
-    ):
-        """Ensure we can delete if we are an admin of the group."""
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[
-                        public_configuration1_in_group1.cfg_permission_group
-                    ],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{parameter1_of_public_configuration1_in_group1.id}",
-                )
-        self.expect(resp.status_code).to_equal(200)
-
-    @fixtures.use(
-        [
-            "user1",
-            "parameter1_of_public_configuration1_in_group1",
-            "public_configuration1_in_group1",
-        ]
-    )
     def test_delete_for_public_configuration_no_member(
         self,
         user1,
@@ -1185,16 +1064,9 @@ class TestConfigurationParameterServices(BaseTestCase):
     ):
         """Ensure we can't delete if we are not even an member of the group."""
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{parameter1_of_public_configuration1_in_group1.id}",
-                )
+            resp = self.client.delete(
+                f"{self.url}/{parameter1_of_public_configuration1_in_group1.id}",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(

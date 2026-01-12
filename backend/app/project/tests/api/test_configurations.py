@@ -22,6 +22,8 @@ from project.api.models import (
     ConfigurationParameterValueChangeAction,
     Contact,
     Device,
+    PermissionGroup,
+    PermissionGroupMembership,
     Platform,
     PlatformMountAction,
     Site,
@@ -29,8 +31,7 @@ from project.api.models import (
     mixin,
 )
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, mqtt, pidinst
+from project.extensions.instances import mqtt, pidinst
 from project.tests.base import (
     BaseTestCase,
     Fixtures,
@@ -118,7 +119,22 @@ class TestConfigurationsService(BaseTestCase):
         self.super_user = User(
             subject=contact2.email, contact=contact2, is_superuser=True
         )
-        db.session.add_all([contact1, contact2, self.normal_user, self.super_user])
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                contact1,
+                contact2,
+                self.normal_user,
+                self.super_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
         db.session.commit()
 
     def test_get_configurations(self):
@@ -131,15 +147,10 @@ class TestConfigurationsService(BaseTestCase):
     def test_add_configuration(self):
         """Ensure POST a new configuration can be added to the database."""
         devices_json = extract_data_from_json_file(self.device_json_data_url, "devices")
+        devices_json[0]["group_ids"] = [str(self.permission_group.id)]
 
         device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
-        with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-            idl_mock.return_value = UserAccount(
-                id="1234",
-                username="User 1234",
-                membered_permission_groups=["12"],
-                administrated_permission_groups=["12"],
-            )
+        with self.run_requests_as(self.normal_user):
             super().add_object(
                 url=self.device_url, data_object=device_data, object_type="device"
             )
@@ -147,30 +158,20 @@ class TestConfigurationsService(BaseTestCase):
         platforms_json = extract_data_from_json_file(
             self.platform_json_data_url, "platforms"
         )
+        platforms_json[0]["group_ids"] = [str(self.permission_group.id)]
 
         platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
 
-        with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-            idl_mock.return_value = UserAccount(
-                id="1234",
-                username="User 1234",
-                membered_permission_groups=["12"],
-                administrated_permission_groups=["12"],
-            )
+        with self.run_requests_as(self.normal_user):
             super().add_object(
                 url=self.platform_url, data_object=platform_data, object_type="platform"
             )
 
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
+        config_json[0]["cfg_permission_group"] = str(self.permission_group.id)
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[0]}}
-        with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-            idl_mock.return_value = UserAccount(
-                id="1234",
-                username="User 1234",
-                membered_permission_groups=["12"],
-                administrated_permission_groups=["12"],
-            )
+        with self.run_requests_as(self.normal_user):
             result_payload = super().add_object(
                 url=self.configurations_url,
                 data_object=config_data,
@@ -355,12 +356,13 @@ class TestConfigurationsService(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
-            url=f"{self.device_mount_url}?include="
-            + "device,begin_contact,parent_platform,configuration",
-            data_object=device_mount_data,
-            object_type="device_mount_action",
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().add_object(
+                url=f"{self.device_mount_url}?include="
+                + "device,begin_contact,parent_platform,configuration",
+                data_object=device_mount_data,
+                object_type="device_mount_action",
+            )
         # Mount a Platform
         platform_mount_data = {
             "data": {
@@ -386,12 +388,13 @@ class TestConfigurationsService(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
-            url=f"{self.platform_mount_url}?include="
-            + "platform,begin_contact,parent_platform,configuration",
-            data_object=platform_mount_data,
-            object_type="platform_mount_action",
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().add_object(
+                url=f"{self.platform_mount_url}?include="
+                + "platform,begin_contact,parent_platform,configuration",
+                data_object=platform_mount_data,
+                object_type="platform_mount_action",
+            )
         url = f"{self.configurations_url}/{configuration.id}"
         self.delete_as_superuser(url)
 
@@ -426,15 +429,15 @@ class TestConfigurationsService(BaseTestCase):
             }
         }
         url = base_url + "/static-location-actions"
-        new_static_location_action_payload = super().add_object(
-            url=url,
-            data_object=action_data,
-            object_type="configuration_static_location_action",
-        )
-        # We add a little test so that we can be sure that
-        # we include relationship data for the static locations.
-        url_ = f"{self.configurations_url}/{configuration.id}"
         with self.run_requests_as(user):
+            new_static_location_action_payload = super().add_object(
+                url=url,
+                data_object=action_data,
+                object_type="configuration_static_location_action",
+            )
+            # We add a little test so that we can be sure that
+            # we include relationship data for the static locations.
+            url_ = f"{self.configurations_url}/{configuration.id}"
             resp = self.client.get(url_)
             self.assertEqual(resp.status_code, 200)
             self.assertTrue(
@@ -479,11 +482,12 @@ class TestConfigurationsService(BaseTestCase):
             }
         }
         url = base_url + "/static-location-actions"
-        _ = super().add_object(
-            url=url,
-            data_object=action_data,
-            object_type="configuration_static_location_action",
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().add_object(
+                url=url,
+                data_object=action_data,
+                object_type="configuration_static_location_action",
+            )
         url = f"{self.configurations_url}/{configuration.id}"
         _ = self.delete_as_superuser(url)
 
@@ -510,15 +514,15 @@ class TestConfigurationsService(BaseTestCase):
             }
         }
         url = base_url + "/dynamic-location-actions"
-        new_dynamic_location_action_payload = super().add_object(
-            url=url,
-            data_object=action_data,
-            object_type="configuration_dynamic_location_action",
-        )
-        # We add a little test so that we can be sure that
-        # we include relationship data for the dynamic locations.
-        url = f"{self.configurations_url}/{configuration.id}"
         with self.run_requests_as(user):
+            new_dynamic_location_action_payload = super().add_object(
+                url=url,
+                data_object=action_data,
+                object_type="configuration_dynamic_location_action",
+            )
+            # We add a little test so that we can be sure that
+            # we include relationship data for the dynamic locations.
+            url = f"{self.configurations_url}/{configuration.id}"
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assertTrue(
@@ -563,11 +567,12 @@ class TestConfigurationsService(BaseTestCase):
             }
         }
         url = base_url + "/dynamic-location-actions"
-        _ = super().add_object(
-            url=url,
-            data_object=action_data,
-            object_type="configuration_dynamic_location_action",
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().add_object(
+                url=url,
+                data_object=action_data,
+                object_type="configuration_dynamic_location_action",
+            )
         url = f"{self.configurations_url}/{configuration.id}"
         _ = self.delete_as_superuser(url)
 
@@ -649,15 +654,10 @@ class TestConfigurationsService(BaseTestCase):
     def test_update_description_after_creation(self):
         """Make sure that update description field is set by creating a cfg."""
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
+        config_json[0]["cfg_permission_group"] = str(self.permission_group.id)
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[0]}}
-        with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-            idl_mock.return_value = UserAccount(
-                id="1234",
-                username="User 1234",
-                membered_permission_groups=["12"],
-                administrated_permission_groups=["12"],
-            )
+        with self.run_requests_as(self.normal_user):
             result = super().add_object(
                 url=self.configurations_url,
                 data_object=config_data,
@@ -683,15 +683,10 @@ class TestConfigurationsService(BaseTestCase):
     def test_update_description_after_update_basic_data(self):
         """Make sure that the update desription field is updated with a patch."""
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
+        config_json[0]["cfg_permission_group"] = str(self.permission_group.id)
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[0]}}
-        with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-            idl_mock.return_value = UserAccount(
-                id="1234",
-                username="User 1234",
-                membered_permission_groups=["12"],
-                administrated_permission_groups=["12"],
-            )
+        with self.run_requests_as(self.normal_user):
             result = super().add_object(
                 url=self.configurations_url,
                 data_object=config_data,
@@ -699,34 +694,20 @@ class TestConfigurationsService(BaseTestCase):
             )
         result_id = result["data"]["id"]
 
-        contact = create_a_test_contact()
-
-        user = User(subject=fake.email(), contact=contact, is_superuser=True)
-        db.session.add_all([user, contact])
-        db.session.commit()
-
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="User 1234",
-                    membered_permission_groups=["12"],
-                    administrated_permission_groups=["12"],
-                )
-                with self.client:
-                    resp = self.client.patch(
-                        self.configurations_url + "/" + result_id,
-                        json={
-                            "data": {
-                                "id": result_id,
-                                "type": "configuration",
-                                "attributes": {
-                                    "label": "updated label",
-                                },
-                            }
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.patch(
+                self.configurations_url + "/" + result_id,
+                json={
+                    "data": {
+                        "id": result_id,
+                        "type": "configuration",
+                        "attributes": {
+                            "label": "updated label",
                         },
-                        headers={"Content-Type": "application/vnd.api+json"},
-                    )
+                    }
+                },
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 200)
 
         config = db.session.query(Configuration).filter_by(id=result_id).first()
@@ -817,7 +798,12 @@ class TestConfigurationsService(BaseTestCase):
 
     def test_post_with_site(self):
         """Ensure we can create a config associated with a site."""
-        site = Site(label="site1", is_public=True, is_internal=False, group_ids=["123"])
+        site = Site(
+            label="site1",
+            is_public=True,
+            is_internal=False,
+            group_ids=[str(self.permission_group.id)],
+        )
         db.session.add(site)
         db.session.commit()
 
@@ -828,7 +814,7 @@ class TestConfigurationsService(BaseTestCase):
                     "label": "config",
                     "is_internal": False,
                     "is_public": True,
-                    "cfg_permission_group": "123",
+                    "cfg_permission_group": str(self.permission_group.id),
                 },
                 "relationships": {
                     "site": {"data": {"id": str(site.id), "type": "site"}}
@@ -837,18 +823,11 @@ class TestConfigurationsService(BaseTestCase):
         }
 
         with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="User 1234",
-                    membered_permission_groups=["123"],
-                    administrated_permission_groups=["123"],
-                )
-                resp = self.client.post(
-                    self.configurations_url,
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+            resp = self.client.post(
+                self.configurations_url,
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 201)
         data_entry = resp.json["data"]
         self.assertEqual(
@@ -866,7 +845,7 @@ class TestConfigurationsService(BaseTestCase):
             label="site1",
             is_public=True,
             is_internal=False,
-            group_ids=["123"],
+            group_ids=[str(self.permission_group.id)],
             archived=True,
         )
         db.session.add(site)
@@ -879,7 +858,7 @@ class TestConfigurationsService(BaseTestCase):
                     "label": "config",
                     "is_internal": False,
                     "is_public": True,
-                    "cfg_permission_group": "123",
+                    "cfg_permission_group": str(self.permission_group.id),
                 },
                 "relationships": {
                     "site": {"data": {"id": str(site.id), "type": "site"}}
@@ -888,28 +867,26 @@ class TestConfigurationsService(BaseTestCase):
         }
 
         with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="User 1234",
-                    membered_permission_groups=["123"],
-                    administrated_permission_groups=["123"],
-                )
-                resp = self.client.post(
-                    self.configurations_url,
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+            resp = self.client.post(
+                self.configurations_url,
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 201)
 
     def test_patch_to_site(self):
         """Ensure we can patch to link to a site."""
-        site = Site(label="site1", is_public=True, is_internal=False, group_ids=["123"])
+        site = Site(
+            label="site1",
+            is_public=True,
+            is_internal=False,
+            group_ids=[str(self.permission_group.id)],
+        )
         configuration = Configuration(
             label="configuration",
             is_public=True,
             is_internal=False,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.permission_group.id),
         )
         db.session.add_all([site, configuration])
         db.session.commit()
@@ -925,18 +902,11 @@ class TestConfigurationsService(BaseTestCase):
         }
 
         with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="User 1234",
-                    membered_permission_groups=["123"],
-                    administrated_permission_groups=["123"],
-                )
-                resp = self.client.patch(
-                    f"{self.configurations_url}/{configuration.id}",
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+            resp = self.client.patch(
+                f"{self.configurations_url}/{configuration.id}",
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 200)
         data_entry = resp.json["data"]
         self.assertEqual(
@@ -954,14 +924,14 @@ class TestConfigurationsService(BaseTestCase):
             label="site1",
             is_public=True,
             is_internal=False,
-            group_ids=["123"],
+            group_ids=[str(self.permission_group.id)],
             archived=True,
         )
         configuration = Configuration(
             label="configuration",
             is_public=True,
             is_internal=False,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.permission_group.id),
         )
         db.session.add_all([site, configuration])
         db.session.commit()
@@ -977,28 +947,26 @@ class TestConfigurationsService(BaseTestCase):
         }
 
         with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="User 1234",
-                    membered_permission_groups=["123"],
-                    administrated_permission_groups=["123"],
-                )
-                resp = self.client.patch(
-                    f"{self.configurations_url}/{configuration.id}",
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+            resp = self.client.patch(
+                f"{self.configurations_url}/{configuration.id}",
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 200)
 
     def test_patch_from_site_to_none(self):
         """Ensure we can remove the link to a site."""
-        site = Site(label="site1", is_public=True, is_internal=False, group_ids=["123"])
+        site = Site(
+            label="site1",
+            is_public=True,
+            is_internal=False,
+            group_ids=[str(self.permission_group.id)],
+        )
         configuration = Configuration(
             label="configuration",
             is_public=True,
             is_internal=False,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.permission_group.id),
             site=site,
         )
         db.session.add_all([site, configuration])
@@ -1017,18 +985,11 @@ class TestConfigurationsService(BaseTestCase):
         }
 
         with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="User 1234",
-                    membered_permission_groups=["123"],
-                    administrated_permission_groups=["123"],
-                )
-                resp = self.client.patch(
-                    f"{self.configurations_url}/{configuration.id}",
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+            resp = self.client.patch(
+                f"{self.configurations_url}/{configuration.id}",
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 200)
         data_entry = resp.json["data"]
         self.assertIsNone(data_entry["relationships"]["site"]["data"])
@@ -1044,14 +1005,14 @@ class TestConfigurationsService(BaseTestCase):
             label="site1",
             is_public=True,
             is_internal=False,
-            group_ids=["123"],
+            group_ids=[str(self.permission_group.id)],
             archived=True,
         )
         configuration = Configuration(
             label="configuration",
             is_public=True,
             is_internal=False,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.permission_group.id),
             site=site,
         )
         db.session.add_all([site, configuration])
@@ -1070,18 +1031,11 @@ class TestConfigurationsService(BaseTestCase):
         }
 
         with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="User 1234",
-                    membered_permission_groups=["123"],
-                    administrated_permission_groups=["123"],
-                )
-                resp = self.client.patch(
-                    f"{self.configurations_url}/{configuration.id}",
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+            resp = self.client.patch(
+                f"{self.configurations_url}/{configuration.id}",
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 200)
 
     def test_delete_with_site(self):

@@ -11,14 +11,6 @@ paths = {
     "/permission-groups": {
         "get": {
             "tags": ["Permission groups"],
-            "parameters": [
-                {
-                    "name": "skip_cache",
-                    "in": "query",
-                    "required": False,
-                    "schema": {"type": "boolean", "default": False},
-                }
-            ],
             "responses": {
                 "200": {"$ref": "#/components/responses/Permissiongroup_coll"}
             },

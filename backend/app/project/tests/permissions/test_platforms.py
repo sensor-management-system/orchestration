@@ -8,25 +8,21 @@
 
 """Tests for the Platform-Permissions."""
 import json
-from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Contact, Platform, User
+from project.api.models import (
+    Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
+    Platform,
+    User,
+)
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.permissions import (
     create_a_test_contact,
     create_a_test_platform,
     create_superuser_token,
-)
-
-IDL_USER_ACCOUNT = UserAccount(
-    id="1000",
-    username="testuser@ufz.de",
-    administrated_permission_groups=["1"],
-    membered_permission_groups=["2", "3"],
 )
 
 
@@ -35,6 +31,38 @@ class TestPlatformPermissions(BaseTestCase):
 
     platform_url = base_url + "/platforms"
     object_type = "platform"
+
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+        contact = Contact(
+            given_name="super", family_name="user", email="super.user@localhost"
+        )
+        self.super_user = User(
+            subject=contact.email, contact=contact, is_superuser=True
+        )
+
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                contact,
+                normal_contact,
+                self.normal_user,
+                self.super_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
 
     def test_add_public_platform(self):
         """Ensure a new platform can be public."""
@@ -93,7 +121,7 @@ class TestPlatformPermissions(BaseTestCase):
 
     def test_add_internal_platform(self):
         """Ensure a new platform can be added to api and is internal."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         platform_data = {
             "data": {
                 "type": "platform",
@@ -108,18 +136,12 @@ class TestPlatformPermissions(BaseTestCase):
             }
         }
 
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.platform_url,
-                    data=json.dumps(platform_data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.platform_url,
+                data=json.dumps(platform_data),
+                content_type="application/vnd.api+json",
+            )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 201)
         self.assertEqual(data["data"]["attributes"]["is_internal"], True)
@@ -302,7 +324,7 @@ class TestPlatformPermissions(BaseTestCase):
 
     def test_add_groups_ids(self):
         """Make sure that a platform with groups ids can be created."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         platform_data = {
             "data": {
                 "type": "platform",
@@ -317,18 +339,12 @@ class TestPlatformPermissions(BaseTestCase):
             }
         }
 
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.platform_url,
-                    data=json.dumps(platform_data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.platform_url,
+                data=json.dumps(platform_data),
+                content_type="application/vnd.api+json",
+            )
 
         data = json.loads(response.data.decode())
 
@@ -402,23 +418,17 @@ class TestPlatformPermissions(BaseTestCase):
 
     def test_patch_platform_as_a_member_in_a_permission_group(self):
         """Make sure that a member in a group (admin/member) can patch a platform."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_member_in_2
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             for platform_data in platforms:
-                with self.client:
-                    response = self.client.post(
-                        self.platform_url,
-                        data=json.dumps(platform_data),
-                        content_type="application/vnd.api+json",
-                        headers=access_headers,
-                    )
+                response = self.client.post(
+                    self.platform_url,
+                    data=json.dumps(platform_data),
+                    content_type="application/vnd.api+json",
+                )
 
                 data = json.loads(response.data.decode())
                 self.assertEqual(response.status_code, 201)
@@ -446,23 +456,17 @@ class TestPlatformPermissions(BaseTestCase):
 
     def test_patch_archived_platform(self):
         """Make sure that we can't patch an archived platform."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_member_in_2
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             for platform_data in platforms:
-                with self.client:
-                    response = self.client.post(
-                        self.platform_url,
-                        data=json.dumps(platform_data),
-                        content_type="application/vnd.api+json",
-                        headers=access_headers,
-                    )
+                response = self.client.post(
+                    self.platform_url,
+                    data=json.dumps(platform_data),
+                    content_type="application/vnd.api+json",
+                )
 
                 data = json.loads(response.data.decode())
 
@@ -494,17 +498,16 @@ class TestPlatformPermissions(BaseTestCase):
     def test_patch_platform_user_not_in_any_permission_group(self):
         """Make sure that a user can only do changes in platforms, where he/she is involved."""
         public_platform = create_a_test_platform(
-            public=True, private=False, internal=False, group_ids=["13"]
+            public=True,
+            private=False,
+            internal=False,
+            group_ids=[str(self.other_group.id)],
         )
 
         db.session.add(public_platform)
         db.session.commit()
 
-        self.assertEqual(public_platform.group_ids, ["13"])
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             platform_data_changed = {
                 "data": {
                     "type": "platform",
@@ -513,35 +516,27 @@ class TestPlatformPermissions(BaseTestCase):
                 }
             }
             url = f"{self.platform_url}/{public_platform.id}"
-            access_headers = create_token()
-            with self.client:
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(platform_data_changed),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+            response = self.client.patch(
+                url,
+                data=json.dumps(platform_data_changed),
+                content_type="application/vnd.api+json",
+            )
             self.assertEqual(response.status, "403 FORBIDDEN")
 
     def test_delete_platform_access_forbidden(self):
         """Make sure that a member in a permission group can't delete the platform."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_member_in_2
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+
+        with self.run_requests_as(self.normal_user):
             for platform_data in platforms:
-                with self.client:
-                    response = self.client.post(
-                        self.platform_url,
-                        data=json.dumps(platform_data),
-                        content_type="application/vnd.api+json",
-                        headers=access_headers,
-                    )
+                response = self.client.post(
+                    self.platform_url,
+                    data=json.dumps(platform_data),
+                    content_type="application/vnd.api+json",
+                )
 
                 data = json.loads(response.data.decode())
 
@@ -552,47 +547,9 @@ class TestPlatformPermissions(BaseTestCase):
                     data["data"]["attributes"]["group_ids"],
                 )
                 url = f"{self.platform_url}/{data['data']['id']}"
-                delete_response = self.client.delete(url, headers=access_headers)
+                delete_response = self.client.delete(url)
                 delete_data = json.loads(delete_response.data.decode())
                 self.assertEqual(delete_data["errors"][0]["status"], 403)
-
-    def test_delete_platform_as_an_admin_in_a_permission_group(self):
-        """
-        Make sure that a permission group admins are not allowed to delete a platform.
-
-        We need a super user to do that.
-        """
-        group_id_test_user_is_member_in_1 = (
-            IDL_USER_ACCOUNT.administrated_permission_groups
-        )
-        platforms = preparation_of_public_and_internal_platform_data(
-            group_id_test_user_is_member_in_1
-        )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
-            for platform_data in platforms:
-                with self.client:
-                    response = self.client.post(
-                        self.platform_url,
-                        data=json.dumps(platform_data),
-                        content_type="application/vnd.api+json",
-                        headers=access_headers,
-                    )
-
-                data = json.loads(response.data.decode())
-
-                self.assertEqual(response.status_code, 201)
-
-                self.assertEqual(
-                    data["data"]["attributes"]["group_ids"],
-                    group_id_test_user_is_member_in_1,
-                )
-                url = f"{self.platform_url}/{data['data']['id']}"
-                delete_response = self.client.delete(url, headers=access_headers)
-                self.assertEqual(delete_response.status_code, 403)
 
     def test_delete_private_platform_as_superuser(self):
         """Make sure that a superuser is allowed to delete not owned private platforms."""
@@ -608,27 +565,21 @@ class TestPlatformPermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_superuser_token()
-        with self.client:
+        with self.run_requests_as(self.super_user):
             response = self.client.post(
                 self.platform_url,
                 data=json.dumps(platform_data),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
 
         data = json.loads(response.data.decode())
 
         self.assertEqual(response.status_code, 201)
 
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
-
+        with self.run_requests_as(self.super_user):
             url = f"{self.platform_url}/{data['data']['id']}"
-            delete_response = self.client.delete(url, headers=access_headers)
-            self.assertEqual(delete_response.status_code, 200)
+            delete_response = self.client.delete(url)
+        self.assertEqual(delete_response.status_code, 200)
 
     def test_delete_platform_as_superuser_not_involved_in_permission_group(self):
         """
@@ -636,55 +587,47 @@ class TestPlatformPermissions(BaseTestCase):
 
         It doesn't matter if the superuser is part of a group or not.
         """
-        group_id_test_user_is_not_included = ["40"]
+        group_id_test_user_is_not_included = [str(self.other_group.id)]
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_not_included
         )
-        access_headers = create_superuser_token()
-        for platform_data in platforms:
-            with self.client:
+        with self.run_requests_as(self.super_user):
+            for platform_data in platforms:
                 response = self.client.post(
                     self.platform_url,
                     data=json.dumps(platform_data),
                     content_type="application/vnd.api+json",
-                    headers=access_headers,
                 )
 
-            data = json.loads(response.data.decode())
+                data = json.loads(response.data.decode())
 
-            self.assertEqual(response.status_code, 201)
+                self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(
-                data["data"]["attributes"]["group_ids"],
-                group_id_test_user_is_not_included,
-            )
+                self.assertEqual(
+                    data["data"]["attributes"]["group_ids"],
+                    group_id_test_user_is_not_included,
+                )
 
-            with patch.object(
-                idl, "get_all_permission_groups_for_a_user"
-            ) as test_get_all_permission_groups:
-                test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 url = f"{self.platform_url}/{data['data']['id']}"
-                delete_response = self.client.delete(url, headers=access_headers)
+                delete_response = self.client.delete(url)
                 self.assertEqual(delete_response.status_code, 200)
 
     def test_delete_platform_with_pid_as_superuser(self):
         """Make sure that even a superuser can't delete a platform with pid."""
-        group_id_test_user_is_not_included = ["40"]
+        group_id_test_user_is_not_included = [str(self.other_group.id)]
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_not_included
         )
-        access_headers = create_superuser_token()
         for idx, platform_data in enumerate(platforms):
             # Make sure that we set a pid
             platform_data["data"]["attributes"][
                 "persistent_identifier"
             ] = platform_data["data"]["attributes"]["short_name"] + str(idx)
-            with self.client:
+            with self.run_requests_as(self.super_user):
                 response = self.client.post(
                     self.platform_url,
                     data=json.dumps(platform_data),
                     content_type="application/vnd.api+json",
-                    headers=access_headers,
                 )
 
             data = json.loads(response.data.decode())
@@ -696,13 +639,10 @@ class TestPlatformPermissions(BaseTestCase):
                 group_id_test_user_is_not_included,
             )
 
-            with patch.object(
-                idl, "get_all_permission_groups_for_a_user"
-            ) as test_get_all_permission_groups:
-                test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            with self.run_requests_as(self.super_user):
                 url = f"{self.platform_url}/{data['data']['id']}"
-                delete_response = self.client.delete(url, headers=access_headers)
-                self.assertEqual(delete_response.status_code, 403)
+                delete_response = self.client.delete(url)
+            self.assertEqual(delete_response.status_code, 403)
 
     def test_add_internal_platform_without_group(self):
         """Ensure a new internal platfrom can't be added without a group."""
@@ -718,13 +658,11 @@ class TestPlatformPermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with self.client:
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.platform_url,
                 data=json.dumps(platform_data),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
@@ -742,13 +680,11 @@ class TestPlatformPermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with self.client:
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.platform_url,
                 data=json.dumps(platform_data),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
@@ -766,13 +702,11 @@ class TestPlatformPermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with self.client:
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.platform_url,
                 data=json.dumps(platform_data),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 201)
 
@@ -782,18 +716,13 @@ class TestPlatformPermissions(BaseTestCase):
             short_name="test platform",
             is_public=False,
             is_internal=True,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id)],
         )
-        contact = Contact(
-            given_name="first",
-            family_name="contact",
-            email="first.contact@localhost",
+        db.session.add_all(
+            [
+                platform,
+            ]
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([platform, contact, user])
         db.session.commit()
 
         payload = {
@@ -801,46 +730,29 @@ class TestPlatformPermissions(BaseTestCase):
                 "type": "platform",
                 "id": platform.id,
                 "attributes": {
-                    "group_ids": ["2"],
+                    "group_ids": [str(self.other_group.id)],
                 },
                 "relationships": {},
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[*platform.group_ids],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.platform_url}/{platform.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.platform_url}/{platform.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_to_remove_permission_group_non_admin(self):
-        """Ensure we can't remove a permission group we aren't admins."""
+        """Ensure we can't remove a permission group we aren't member."""
         platform = Platform(
             short_name="test platform",
             is_public=False,
             is_internal=True,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id), str(self.other_group.id)],
         )
-        contact = Contact(
-            given_name="first",
-            family_name="contact",
-            email="first.contact@localhost",
-        )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([platform, contact, user])
+        db.session.add_all([platform])
         db.session.commit()
 
         payload = {
@@ -848,26 +760,18 @@ class TestPlatformPermissions(BaseTestCase):
                 "type": "platform",
                 "id": platform.id,
                 "attributes": {
-                    "group_ids": ["2"],
+                    "group_ids": [str(self.permission_group.id)],
                 },
                 "relationships": {},
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[*platform.group_ids, "2"],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.platform_url}/{platform.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.platform_url}/{platform.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_from_internal_to_private(self):
@@ -876,18 +780,9 @@ class TestPlatformPermissions(BaseTestCase):
             short_name="test platform",
             is_public=False,
             is_internal=True,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id)],
         )
-        contact = Contact(
-            given_name="first",
-            family_name="contact",
-            email="first.contact@localhost",
-        )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([platform, contact, user])
+        db.session.add_all([platform])
         db.session.commit()
 
         payload = {
@@ -903,20 +798,12 @@ class TestPlatformPermissions(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[*platform.group_ids],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.platform_url}/{platform.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.platform_url}/{platform.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
 

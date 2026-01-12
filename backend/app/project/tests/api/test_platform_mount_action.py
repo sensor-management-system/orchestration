@@ -38,6 +38,16 @@ class TestPlatformMountAction(BaseTestCase):
     url = base_url + "/platform-mount-actions"
     object_type = "platform_mount_action"
 
+    def setUp(self):
+        """Set some test data up for the tests."""
+        super().setUp()
+        contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(contact=contact, subject=contact.email)
+        db.session.add_all([contact, self.normal_user])
+        db.session.commit()
+
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
         configuration1 = Configuration(
@@ -815,12 +825,13 @@ class TestPlatformMountAction(BaseTestCase):
                 },
             }
         }
-        response = super().add_object(
-            url=f"{self.url}?include="
-            + "platform,begin_contact,end_contact,parent_platform,configuration",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            response = super().add_object(
+                url=f"{self.url}?include="
+                + "platform,begin_contact,end_contact,parent_platform,configuration",
+                data_object=data,
+                object_type=self.object_type,
+            )
         result_id = response["data"]["id"]
         result_platform_mount_action = (
             db.session.query(PlatformMountAction).filter_by(id=result_id).first()
@@ -869,11 +880,12 @@ class TestPlatformMountAction(BaseTestCase):
                 },
             }
         }
-        response = super().update_object(
-            url=f"{self.url}/{mount_platform_action.id}",
-            data_object=mount_platform_action_updated,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            response = super().update_object(
+                url=f"{self.url}/{mount_platform_action.id}",
+                data_object=mount_platform_action_updated,
+                object_type=self.object_type,
+            )
         result_id = response["data"]["id"]
         result_platform_mount_action = (
             db.session.query(PlatformMountAction).filter_by(id=result_id).first()
@@ -920,11 +932,12 @@ class TestPlatformMountAction(BaseTestCase):
                 },
             }
         }
-        _ = super().update_object(
-            url=f"{self.url}/{mount_platform_action.id}",
-            data_object=mount_platform_action_updated,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().update_object(
+                url=f"{self.url}/{mount_platform_action.id}",
+                data_object=mount_platform_action_updated,
+                object_type=self.object_type,
+            )
 
     def test_fail_delete_platform_mount_action(self):
         """Fail to delete PlatformMountAction when not logged in."""
@@ -1376,12 +1389,13 @@ class TestPlatformMountAction(BaseTestCase):
             pidinst, "update_external_metadata"
         ) as update_external_metadata:
             update_external_metadata.return_value = None
-            super().add_object(
-                url=f"{self.url}?include="
-                + "platform,begin_contact,end_contact,parent_platform,configuration",
-                data_object=data,
-                object_type=self.object_type,
-            )
+            with self.run_requests_as(self.normal_user):
+                super().add_object(
+                    url=f"{self.url}?include="
+                    + "platform,begin_contact,end_contact,parent_platform,configuration",
+                    data_object=data,
+                    object_type=self.object_type,
+                )
             update_external_metadata.assert_called_once()
             self.assertEqual(
                 update_external_metadata.call_args.args[0].id, configuration.id
@@ -1406,11 +1420,12 @@ class TestPlatformMountAction(BaseTestCase):
             pidinst, "update_external_metadata"
         ) as update_external_metadata:
             update_external_metadata.return_value = None
-            super().update_object(
-                url=f"{self.url}/{mount_platform_action.id}",
-                data_object=mount_platform_action_updated,
-                object_type=self.object_type,
-            )
+            with self.run_requests_as(self.normal_user):
+                super().update_object(
+                    url=f"{self.url}/{mount_platform_action.id}",
+                    data_object=mount_platform_action_updated,
+                    object_type=self.object_type,
+                )
             update_external_metadata.assert_called_once()
             self.assertEqual(
                 update_external_metadata.call_args.args[0].id, configuration.id

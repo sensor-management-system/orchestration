@@ -8,10 +8,9 @@
 
 """Resource classes for the user info endpoint."""
 
-from flask import g, request
+from flask import g
 from flask_rest_jsonapi import ResourceList
 
-from ...extensions.instances import idl
 from ..helpers.errors import MethodNotAllowed, UnauthorizedError
 from ..models import User
 from ..models.base_model import db
@@ -37,33 +36,17 @@ class UserInfo(ResourceList):
         if not g.user:
             raise UnauthorizedError("Authentication required")
 
-        skip_cache_arguments = {}
-        # type is a function where we put the string value in.
-        # A little bit annoying...
-        if request.args.get(
-            "skip_cache", default=False, type=lambda x: x.lower() == "true"
-        ):
-            skip_cache_arguments["skip_cache"] = True
-
-        idl_groups = idl.get_all_permission_groups_for_a_user(
-            g.user.subject, **skip_cache_arguments
-        )
-
         if not g.user.apikey:
             g.user.apikey = User.generate_new_apikey()
             db.session.add(g.user)
             db.session.commit()
+
         data = {
             "data": {
                 "type": "user",
                 "id": str(g.user.id),
                 "attributes": {
-                    "admin": idl_groups.administrated_permission_groups
-                    if idl_groups
-                    else [],
-                    "member": idl_groups.membered_permission_groups
-                    if idl_groups
-                    else [],
+                    "member": [str(m.permission_group.id) for m in g.user.memberships],
                     "active": g.user.active,
                     "is_superuser": g.user.is_superuser,
                     "is_export_control": g.user.is_export_control,

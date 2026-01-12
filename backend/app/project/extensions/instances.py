@@ -15,7 +15,6 @@ from .auth.mechanisms.apikey import ApikeyAuthMechanism
 from .auth.mechanisms.openidconnect import OpenIdConnectAuthMechanism
 from .auth.mechanisms.session import SessionAuthMechanism
 from .b2inst.extension import B2Inst
-from .idl import Idl
 from .mqtt import LazyMqttInitWrapper
 from .openidconnect import WellKnownUrlConfigLoader
 from .page_parameter_middleware import PageParameterMiddleware
@@ -35,7 +34,6 @@ auth = Auth(
         open_id_connect_auth_mechanism,
     ]
 )
-idl = Idl()
 pidinst = Pidinst(pid=Pid(), b2inst=B2Inst())
 remove_slash_redirect_middlware = RemoveSlashRedirectMiddlware()
 page_parameter_middleware = PageParameterMiddleware()

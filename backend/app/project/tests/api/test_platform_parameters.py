@@ -8,22 +8,31 @@
 
 import datetime
 import json
-from unittest.mock import patch
 
 from project import base_url
 from project.api.models import (
     Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
     Platform,
     PlatformParameter,
     PlatformParameterValueChangeAction,
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, mqtt
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, Fixtures
 
 fixtures = Fixtures()
+
+
+@fixtures.register("group1", scope=lambda: db.session)
+def create_group1():
+    """Create a permission group."""
+    result = PermissionGroup(name="group1", entitlement="group1")
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 @fixtures.register("contact1", scope=lambda: db.session)
@@ -128,14 +137,15 @@ def create_parameter1_of_private_platform_of_user1(private_platform_of_user1):
 
 
 @fixtures.register("public_platform1_in_group1", scope=lambda: db.session)
-def create_public_platform1_in_group1():
+@fixtures.use(["group1"])
+def create_public_platform1_in_group1(group1):
     """Create a public platform that uses group 1 for permission management."""
     result = Platform(
         short_name="public platform1",
         is_private=False,
         is_internal=False,
         is_public=True,
-        group_ids=["1"],
+        group_ids=[str(group1.id)],
     )
     db.session.add(result)
     db.session.commit()
@@ -179,14 +189,15 @@ def create_archvied_public_platform2_in_group1(public_platform2_in_group1):
 
 
 @fixtures.register("public_platform2_in_group1", scope=lambda: db.session)
-def create_public_platform2_in_group1():
+@fixtures.use(["group1"])
+def create_public_platform2_in_group1(group1):
     """Create another public platform that uses group 1 for permission management."""
     result = Platform(
         short_name="public platform2",
         is_private=False,
         is_internal=False,
         is_public=True,
-        group_ids=["1"],
+        group_ids=[str(group1.id)],
     )
     db.session.add(result)
     db.session.commit()
@@ -194,15 +205,26 @@ def create_public_platform2_in_group1():
 
 
 @fixtures.register("internal_platform1_in_group1", scope=lambda: db.session)
-def create_internal_platform1_in_group1():
+@fixtures.use(["group1"])
+def create_internal_platform1_in_group1(group1):
     """Create an internal platform that uses group 1 for permission management."""
     result = Platform(
         short_name="internal platform1",
         is_private=False,
         is_internal=True,
         is_public=False,
-        group_ids=["1"],
+        group_ids=[str(group1.id)],
     )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("membership_of_user1_in_group1", scope=lambda: db.session)
+@fixtures.use(["user1", "group1"])
+def create_membership_of_user1_in_group1(user1, group1):
+    """Create a permission group."""
+    result = PermissionGroupMembership(user=user1, permission_group=group1)
     db.session.add(result)
     db.session.commit()
     return result
@@ -658,8 +680,10 @@ class TestPlatformParameterServices(BaseTestCase):
         )
         self.expect(resp.status_code).to_equal(401)
 
-    @fixtures.use(["user1", "public_platform1_in_group1"])
-    def test_post_member(self, user1, public_platform1_in_group1):
+    @fixtures.use
+    def test_post_member(
+        self, user1, public_platform1_in_group1, membership_of_user1_in_group1
+    ):
         """Ensure we can post if we are a member of one of the groups."""
         payload = {
             "data": {
@@ -682,18 +706,11 @@ class TestPlatformParameterServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=public_platform1_in_group1.group_ids,
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(201)
         # Test some basic fields.
         self.expect(resp.json["data"]["attributes"]["label"]).to_equal("specialvalue")
@@ -730,44 +747,6 @@ class TestPlatformParameterServices(BaseTestCase):
         self.expect(notification_data["type"]).to_equal("platform_parameter")
         self.expect(notification_data["attributes"]["label"]).to_equal("specialvalue")
         self.expect(str).of(notification_data["id"]).to_match(r"\d+")
-
-    @fixtures.use(["user1", "public_platform1_in_group1"])
-    def test_post_admin(self, user1, public_platform1_in_group1):
-        """Ensure we can post if we are a admin of one of the groups."""
-        payload = {
-            "data": {
-                "type": "platform_parameter",
-                "attributes": {
-                    "label": "specialvalue",
-                    "description": "some description",
-                    "unit_uri": "http://foo/count",
-                    "unit_name": "count",
-                },
-                "relationships": {
-                    "platform": {
-                        "data": {
-                            "id": str(public_platform1_in_group1.id),
-                            "type": "platform",
-                        }
-                    }
-                },
-            }
-        }
-
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=public_platform1_in_group1.group_ids,
-                    membered_permission_groups=[],
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
-        self.expect(resp.status_code).to_equal(201)
 
     @fixtures.use(["user1", "private_platform_of_user1"])
     def test_post_private_creator(self, user1, private_platform_of_user1):
@@ -886,18 +865,11 @@ class TestPlatformParameterServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(["super_user", "public_platform1_in_group1"])
@@ -1070,18 +1042,13 @@ class TestPlatformParameterServices(BaseTestCase):
         )
         self.expect(resp.status_code).to_equal(401)
 
-    @fixtures.use(
-        [
-            "user1",
-            "parameter1_of_public_platform1_in_group1",
-            "public_platform1_in_group1",
-        ]
-    )
+    @fixtures.use
     def test_patch_for_public_platform_member(
         self,
         user1,
         parameter1_of_public_platform1_in_group1,
         public_platform1_in_group1,
+        membership_of_user1_in_group1,
     ):
         """Ensure we can patch if we are a member."""
         payload = {
@@ -1095,18 +1062,11 @@ class TestPlatformParameterServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=public_platform1_in_group1.group_ids,
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{parameter1_of_public_platform1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.patch(
+                f"{self.url}/{parameter1_of_public_platform1_in_group1.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(200)
         self.expect(resp.json["data"]["attributes"]["label"]).to_equal(
             "super specialvalue"
@@ -1147,45 +1107,6 @@ class TestPlatformParameterServices(BaseTestCase):
             "public_platform1_in_group1",
         ]
     )
-    def test_patch_for_public_platform_admin(
-        self,
-        user1,
-        parameter1_of_public_platform1_in_group1,
-        public_platform1_in_group1,
-    ):
-        """Ensure we can patch if we are an admin of the group."""
-        payload = {
-            "data": {
-                "id": str(parameter1_of_public_platform1_in_group1.id),
-                "type": "platform_parameter",
-                "attributes": {
-                    "label": "super specialvalue",
-                },
-            }
-        }
-
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=public_platform1_in_group1.group_ids,
-                    membered_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{parameter1_of_public_platform1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
-        self.expect(resp.status_code).to_equal(200)
-
-    @fixtures.use(
-        [
-            "user1",
-            "parameter1_of_public_platform1_in_group1",
-            "public_platform1_in_group1",
-        ]
-    )
     def test_patch_for_public_platform_no_member(
         self,
         user1,
@@ -1204,18 +1125,11 @@ class TestPlatformParameterServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{parameter1_of_public_platform1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.patch(
+                f"{self.url}/{parameter1_of_public_platform1_in_group1.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(
@@ -1422,31 +1336,19 @@ class TestPlatformParameterServices(BaseTestCase):
         )
         self.expect(resp.status_code).to_equal(401)
 
-    @fixtures.use(
-        [
-            "user1",
-            "parameter1_of_public_platform1_in_group1",
-            "public_platform1_in_group1",
-        ]
-    )
+    @fixtures.use
     def test_delete_for_public_platform_member(
         self,
         user1,
         parameter1_of_public_platform1_in_group1,
         public_platform1_in_group1,
+        membership_of_user1_in_group1,
     ):
         """Ensure we can delete if we are a member."""
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=public_platform1_in_group1.group_ids,
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{parameter1_of_public_platform1_in_group1.id}",
-                )
+            resp = self.client.delete(
+                f"{self.url}/{parameter1_of_public_platform1_in_group1.id}",
+            )
         self.expect(resp.status_code).to_equal(200)
         # We check that the platform has a changed update description
 
@@ -1479,33 +1381,6 @@ class TestPlatformParameterServices(BaseTestCase):
             "public_platform1_in_group1",
         ]
     )
-    def test_delete_for_public_platform_admin(
-        self,
-        user1,
-        parameter1_of_public_platform1_in_group1,
-        public_platform1_in_group1,
-    ):
-        """Ensure we can delete if we are an admin of the group."""
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=public_platform1_in_group1.group_ids,
-                    membered_permission_groups=[],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{parameter1_of_public_platform1_in_group1.id}",
-                )
-        self.expect(resp.status_code).to_equal(200)
-
-    @fixtures.use(
-        [
-            "user1",
-            "parameter1_of_public_platform1_in_group1",
-            "public_platform1_in_group1",
-        ]
-    )
     def test_delete_for_public_platform_no_member(
         self,
         user1,
@@ -1514,16 +1389,9 @@ class TestPlatformParameterServices(BaseTestCase):
     ):
         """Ensure we can't delete if we are not even an member of the group."""
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{parameter1_of_public_platform1_in_group1.id}",
-                )
+            resp = self.client.delete(
+                f"{self.url}/{parameter1_of_public_platform1_in_group1.id}",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(

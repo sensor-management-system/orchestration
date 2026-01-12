@@ -8,12 +8,11 @@
 
 """Resource class for the list of permission groups."""
 
-from flask import request
 from flask_rest_jsonapi import ResourceList
 
-from ...extensions.idl.models import permission_group
-from ...extensions.instances import idl
 from ..helpers.errors import MethodNotAllowed
+from ..models import PermissionGroup
+from ..models.base_model import db
 
 
 class PermissionGroups(ResourceList):
@@ -25,17 +24,21 @@ class PermissionGroups(ResourceList):
 
         :return: list of Permission Groups.
         """
-        skip_cache_arguments = {}
-        # type is a function where we put the string value in.
-        # A little bit annoying...
-        if request.args.get(
-            "skip_cache", default=False, type=lambda x: x.lower() == "true"
-        ):
-            skip_cache_arguments["skip_cache"] = True
+        data = []
 
-        data = permission_group.permission_groups_to_list_of_jsonapi_dicts(
-            idl.get_permission_groups(**skip_cache_arguments)
-        )
+        for pm in db.session.query(PermissionGroup).all():
+            data.append(
+                {
+                    "id": str(pm.id),
+                    "type": "permission_group",
+                    "attributes": {
+                        "name": pm.name,
+                        "entitlement": pm.entitlement,
+                        "description": "",
+                    },
+                }
+            )
+
         response = {"data": data}
         response.update({"meta": {"count": len(data)}})
         return response

@@ -7,18 +7,21 @@
 """Tests for the generic configuration actions api."""
 import json
 from datetime import datetime, timezone
-from unittest.mock import patch
 
 from project import base_url, db
-from project.api.models import Configuration, Contact, GenericConfigurationAction, User
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
+from project.api.models import (
+    Configuration,
+    Contact,
+    GenericConfigurationAction,
+    PermissionGroup,
+    PermissionGroupMembership,
+    User,
+)
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_generic_actions_models import (
     generate_configuration_action_model,
 )
 from project.tests.permissions import create_a_test_configuration, create_a_test_contact
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def make_generic_configuration_action_data(object_type, cfg_permission_group=None):
@@ -57,6 +60,30 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
 
     url = base_url + "/generic-configuration-actions"
     object_type = "generic_configuration_action"
+
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                normal_contact,
+                self.normal_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
 
     def test_a_public_generic_configuration_action(self):
         """Ensure a public generic configuration action will be listed."""
@@ -98,43 +125,32 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
         """Ensure POST a new generic configuration action can be added to the database."""
         payload = make_generic_configuration_action_data(
             self.object_type,
-            cfg_permission_group=IDL_USER_ACCOUNT.membered_permission_groups[0],
+            cfg_permission_group=str(self.permission_group.id),
         )
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 201)
 
     def test_post_for_archived_configuration(self):
-        """Ensure POST a new generic configuration action can be added to the database."""
+        """Ensure that an action can't be added to an archived configuration."""
         payload = make_generic_configuration_action_data(
-            self.object_type,
-            cfg_permission_group=IDL_USER_ACCOUNT.membered_permission_groups[0],
+            self.object_type, cfg_permission_group=str(self.permission_group.id)
         )
         configuration = db.session.query(Configuration).order_by("created_at").first()
         configuration.archived = True
         db.session.add(configuration)
         db.session.commit()
 
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_post_generic_configuration_action_data_user_not_in_the_permission_group(
@@ -142,25 +158,20 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
     ):
         """Post to configuration,with permission Group different from the user group."""
         payload = make_generic_configuration_action_data(
-            self.object_type, cfg_permission_group=403
+            self.object_type, cfg_permission_group=str(self.other_group.id)
         )
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_action_with_a_permission_group(self):
         """Post to generic_configuration_action_data,with permission Group."""
         payload = generate_configuration_action_model(
-            cfg_permission_group=IDL_USER_ACCOUNT.membered_permission_groups[0]
+            cfg_permission_group=str(self.permission_group.id)
         )
         self.assertTrue(payload.id is not None)
         generic_configuration_action_updated = {
@@ -173,23 +184,18 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
             }
         }
         url = f"{self.url}/{payload.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(generic_configuration_action_updated),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                url,
+                data=json.dumps(generic_configuration_action_updated),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
     def test_patch_for_archived_configuration(self):
         """Ensure that we can't patch for archived configurations."""
         payload = generate_configuration_action_model(
-            cfg_permission_group=IDL_USER_ACCOUNT.membered_permission_groups[0]
+            cfg_permission_group=str(self.permission_group.id)
         )
         configuration = db.session.query(Configuration).order_by("created_at").first()
         configuration.archived = True
@@ -206,25 +212,20 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
             }
         }
         url = f"{self.url}/{payload.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(generic_configuration_action_updated),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                url,
+                data=json.dumps(generic_configuration_action_updated),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_generic_configuration_action_data_user_is_not_part_from_permission_group(
         self,
     ):
-        """Post to configuration,with permission Group."""
+        """Patch to configuration,without permission group."""
         generic_configuration_action = generate_configuration_action_model(
-            cfg_permission_group=403
+            cfg_permission_group=str(self.other_group.id)
         )
         self.assertTrue(generic_configuration_action.id is not None)
         generic_configuration_action_updated = {
@@ -237,75 +238,55 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
             }
         }
         url = f"{self.url}/{generic_configuration_action.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(generic_configuration_action_updated),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                url,
+                data=json.dumps(generic_configuration_action_updated),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_delete_generic_configuration_action_data(self):
         """Delete generic_configuration_action_data."""
         generic_configuration_action = generate_configuration_action_model(
-            cfg_permission_group=IDL_USER_ACCOUNT.administrated_permission_groups[0]
+            cfg_permission_group=str(self.permission_group.id)
         )
         url = f"{self.url}/{generic_configuration_action.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
     def test_delete_for_archived_configuration(self):
         """Ensure we can't delete for archived configurations."""
         generic_configuration_action = generate_configuration_action_model(
-            cfg_permission_group=IDL_USER_ACCOUNT.administrated_permission_groups[0]
+            cfg_permission_group=str(self.permission_group.id),
         )
         configuration = db.session.query(Configuration).order_by("created_at").first()
         configuration.archived = True
         db.session.add(configuration)
         db.session.commit()
         url = f"{self.url}/{generic_configuration_action.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_delete_generic_configuration_action_data_as_member(self):
         """Delete generic_configuration_action_data as member."""
         generic_configuration_action = generate_configuration_action_model(
-            cfg_permission_group=IDL_USER_ACCOUNT.membered_permission_groups[0]
+            cfg_permission_group=str(self.permission_group.id),
         )
         url = f"{self.url}/{generic_configuration_action.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
     def test_patch_to_non_editable_configuration(self):
@@ -314,12 +295,13 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
             label="config1",
             is_public=False,
             is_internal=True,
+            cfg_permission_group=str(self.permission_group.id),
         )
         configuration2 = Configuration(
             label="config2",
             is_public=False,
             is_internal=True,
-            cfg_permission_group="2",
+            cfg_permission_group=str(self.other_group.id),
         )
         contact = Contact(
             given_name="first",
@@ -333,11 +315,7 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
             begin_date=datetime(2022, 12, 1, 0, 0, 0, tzinfo=timezone.utc),
             contact=contact,
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([configuration1, configuration2, contact, user, action])
+        db.session.add_all([configuration1, configuration2, contact, action])
         db.session.commit()
 
         payload = {
@@ -358,18 +336,10 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[configuration1.cfg_permission_group],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{action.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{action.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

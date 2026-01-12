@@ -68,8 +68,6 @@ export type CanModifyContactGetter = (entity: Contact) => boolean
 export type CanArchiveEntityGetter = (entity: PermissionHandable) => boolean
 export type CanRestoreEntityGetter = (entity: PermissionHandable) => boolean
 export type CanHandleExportControlGetter = boolean
-export type MemberedPermissionGroupsGetter = PermissionGroup[]
-export type AdministradedPermissionGroupsGetter = PermissionGroup[]
 export type UserGroupsGetter = PermissionGroup[]
 export type PermissionGroupsGetter = PermissionGroup[]
 export type ContactIdGetter = string | null
@@ -196,8 +194,8 @@ const getters: GetterTree<PermissionsState, RootState> = {
     if (userIsCreatorOfPrivateEntity(entity, state.userInfo)) {
       return true
     }
-    // if the entity is internal or public, check if the user is admin of at least one of the permission groups of the entity
-    if (!entity.isPrivate && userHasAtLeastOneGroupCommonWithEntity(entity, getters.administradedPermissionGroups)) {
+    // if the entity is internal or public, check if the user is member of at least one of the permission groups of the entity
+    if (!entity.isPrivate && userHasAtLeastOneGroupCommonWithEntity(entity, getters.userGroups)) {
       return true
     }
     // in case that we missed a check, restrict access
@@ -220,8 +218,8 @@ const getters: GetterTree<PermissionsState, RootState> = {
     if (userIsCreatorOfPrivateEntity(entity, state.userInfo)) {
       return true
     }
-    // if the entity is internal or public, check if the user is admin of at least one of the permission groups of the entity
-    if (!entity.isPrivate && userHasAtLeastOneGroupCommonWithEntity(entity, getters.administradedPermissionGroups)) {
+    // if the entity is internal or public, check if the user is member of at least one of the permission groups of the entity
+    if (!entity.isPrivate && userHasAtLeastOneGroupCommonWithEntity(entity, getters.userGroups)) {
       return true
     }
     // in case that we missed a check, restrict access
@@ -239,26 +237,13 @@ const getters: GetterTree<PermissionsState, RootState> = {
     }
     return false
   },
-  memberedPermissionGroups: (state: PermissionsState): PermissionGroup[] => {
+  userGroups: (state: PermissionsState): PermissionGroup[] => {
     if (state.userInfo !== null && state.userInfo.member !== null) {
-      return state.permissionGroups.filter(group => state.userInfo!.isMemberOf(group))
-    }
-    return []
-  },
-  administradedPermissionGroups: (state: PermissionsState): PermissionGroup[] => {
-    if (state.userInfo !== null) {
-      return state.permissionGroups.filter(group => state.userInfo!.isAdminOf(group))
-    }
-    return []
-  },
-  userGroups: (state: PermissionsState, getters: any): PermissionGroup[] => {
-    if (state.userInfo) {
-      return [...new Set(
-        [...getters.memberedPermissionGroups, ...getters.administradedPermissionGroups]
-      )
-      ].sort(
-        (a: PermissionGroup, b: PermissionGroup) => a.name.localeCompare(b.name)
-      )
+      return state.permissionGroups
+        .filter(group => state.userInfo!.isMemberOf(group))
+        .sort(
+          (a: PermissionGroup, b: PermissionGroup) => a.name.localeCompare(b.name)
+        )
     }
     return []
   },
@@ -323,9 +308,9 @@ const actions: ActionTree<PermissionsState, RootState> = {
   clearUserInfo ({ commit }: { commit: Commit }) {
     commit('setUserInfo', null)
   },
-  async loadPermissionGroups ({ commit }: { commit: Commit }, params?: { skipBackendCache?: boolean}): Promise<void> {
+  async loadPermissionGroups ({ commit }: { commit: Commit }): Promise<void> {
     const useFrontendCache = false
-    const permissionGroups = await this.$api.permissionGroupApi.findAll(useFrontendCache, params?.skipBackendCache || false)
+    const permissionGroups = await this.$api.permissionGroupApi.findAll(useFrontendCache)
     commit('setPermissionGroups', permissionGroups)
   },
   async acceptTermsOfUse ({ commit }: { commit: Commit }): Promise<void> {

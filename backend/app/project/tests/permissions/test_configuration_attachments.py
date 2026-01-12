@@ -9,16 +9,19 @@
 """Tests for the permission handling for configuration attachment resources."""
 
 import json
-from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Configuration, ConfigurationAttachment, Contact, User
+from project.api.models import (
+    Configuration,
+    ConfigurationAttachment,
+    Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
+    User,
+)
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 from project.tests.permissions import create_a_test_configuration
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def prepare_configuration_attachment_payload(configuration):
@@ -41,6 +44,16 @@ class TestConfigurationAttachment(BaseTestCase):
     """Test ConfigurationAttachment."""
 
     url = base_url + "/configuration-attachments"
+
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+        db.session.add_all([normal_contact, self.normal_user])
+        db.session.commit()
 
     def test_get_public_configuration_attachments(self):
         """Ensure that we can get a list of public configuration_attachments."""
@@ -125,9 +138,14 @@ class TestConfigurationAttachment(BaseTestCase):
 
     def test_post_to_a_configuration_with_a_permission_group(self):
         """Post to configuration,with permission Group."""
-        configuration = create_a_test_configuration(
-            IDL_USER_ACCOUNT.membered_permission_groups[0]
+        permission_group = PermissionGroup(name="test", entitlement="test")
+        membership = PermissionGroupMembership(
+            permission_group=permission_group, user=self.normal_user
         )
+        db.session.add_all([permission_group, membership])
+        db.session.commit()
+
+        configuration = create_a_test_configuration(str(permission_group.id))
         self.assertTrue(configuration.id is not None)
         count_configuration_attachments = (
             db.session.query(ConfigurationAttachment)
@@ -139,18 +157,12 @@ class TestConfigurationAttachment(BaseTestCase):
 
         self.assertEqual(count_configuration_attachments, 0)
         payload = prepare_configuration_attachment_payload(configuration)
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 201)
         configuration_attachments = query_result_to_list(
             db.session.query(ConfigurationAttachment).filter_by(
@@ -169,30 +181,38 @@ class TestConfigurationAttachment(BaseTestCase):
 
     def test_post_to_archived_configuration(self):
         """Ensure that we can't post for an archived configuration."""
+        permission_group = PermissionGroup(name="test", entitlement="test")
+        membership = PermissionGroupMembership(
+            permission_group=permission_group, user=self.normal_user
+        )
+        db.session.add_all([permission_group, membership])
+        db.session.commit()
         configuration = create_a_test_configuration(
-            IDL_USER_ACCOUNT.membered_permission_groups[0]
+            str(permission_group.id),
         )
         configuration.archived = True
         db.session.add(configuration)
         db.session.commit()
         payload = prepare_configuration_attachment_payload(configuration)
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
 
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_post_to_a_configuration_with_an_other_permission_group(self):
         """Post to a configuration with a different permission Group from the user."""
-        configuration = create_a_test_configuration(403)
+        permission_group = PermissionGroup(name="test", entitlement="test")
+        other_group = PermissionGroup(name="other", entitlement="other")
+        membership = PermissionGroupMembership(
+            permission_group=permission_group, user=self.normal_user
+        )
+        db.session.add_all([permission_group, other_group, membership])
+        db.session.commit()
+        configuration = create_a_test_configuration(str(other_group.id))
         self.assertTrue(configuration.id is not None)
         count_configuration_attachments = (
             db.session.query(ConfigurationAttachment)
@@ -204,23 +224,25 @@ class TestConfigurationAttachment(BaseTestCase):
 
         self.assertEqual(count_configuration_attachments, 0)
         payload = prepare_configuration_attachment_payload(configuration)
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_to_a_configuration_with_a_permission_group(self):
         """Patch attachment of configuration with same group as user."""
+        permission_group = PermissionGroup(name="test", entitlement="test")
+        membership = PermissionGroupMembership(
+            permission_group=permission_group, user=self.normal_user
+        )
+        db.session.add_all([permission_group, membership])
+        db.session.commit()
+
         configuration = create_a_test_configuration(
-            IDL_USER_ACCOUNT.membered_permission_groups[0]
+            str(permission_group.id),
         )
         self.assertTrue(configuration.id is not None)
         count_configuration_attachments = (
@@ -251,19 +273,14 @@ class TestConfigurationAttachment(BaseTestCase):
                 },
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = self.url + "/" + str(attachment.id)
+        with self.run_requests_as(self.normal_user):
+            url = self.url + "/" + str(attachment.id)
 
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.patch(
+                url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(attachment.label, data["data"]["attributes"]["label"])
@@ -272,8 +289,14 @@ class TestConfigurationAttachment(BaseTestCase):
 
     def test_patch_to_archived_configuration(self):
         """Ensure that we can't patch if the configuration is archived."""
+        permission_group = PermissionGroup(name="test", entitlement="test")
+        membership = PermissionGroupMembership(
+            permission_group=permission_group, user=self.normal_user
+        )
+        db.session.add_all([permission_group, membership])
+        db.session.commit()
         configuration = create_a_test_configuration(
-            IDL_USER_ACCOUNT.membered_permission_groups[0]
+            str(permission_group.id),
         )
         attachment = ConfigurationAttachment(
             label=fake.pystr(),
@@ -295,25 +318,26 @@ class TestConfigurationAttachment(BaseTestCase):
                 },
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = self.url + "/" + str(attachment.id)
+        with self.run_requests_as(self.normal_user):
+            url = self.url + "/" + str(attachment.id)
 
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.patch(
+                url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_delete_to_a_configuration_with_a_permission_group(self):
         """Delete attachment of configuration with same group as user (user is admin)."""
+        permission_group = PermissionGroup(name="test", entitlement="test")
+        membership = PermissionGroupMembership(
+            permission_group=permission_group, user=self.normal_user
+        )
+        db.session.add_all([permission_group, membership])
+        db.session.commit()
         configuration = create_a_test_configuration(
-            IDL_USER_ACCOUNT.administrated_permission_groups[0]
+            str(permission_group.id),
         )
         self.assertTrue(configuration.id is not None)
         count_configuration_attachments = (
@@ -332,24 +356,26 @@ class TestConfigurationAttachment(BaseTestCase):
         )
         db.session.add(attachment)
         db.session.commit()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = self.url + "/" + str(attachment.id)
+        with self.run_requests_as(self.normal_user):
+            url = self.url + "/" + str(attachment.id)
 
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
     def test_delete_for_archived_configuration(self):
         """Ensure we can't delete for an archived configuration."""
+        permission_group = PermissionGroup(name="test", entitlement="test")
+        membership = PermissionGroupMembership(
+            permission_group=permission_group, user=self.normal_user
+        )
+        db.session.add_all([permission_group, membership])
+        db.session.commit()
+
         configuration = create_a_test_configuration(
-            IDL_USER_ACCOUNT.administrated_permission_groups[0]
+            str(permission_group.id),
         )
         attachment = ConfigurationAttachment(
             label=fake.pystr(),
@@ -359,24 +385,26 @@ class TestConfigurationAttachment(BaseTestCase):
         configuration.archived = True
         db.session.add_all([attachment, configuration])
         db.session.commit()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = self.url + "/" + str(attachment.id)
+        with self.run_requests_as(self.normal_user):
+            url = self.url + "/" + str(attachment.id)
 
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_delete_to_a_configuration_with_a_permission_group_as_a_member(self):
         """Delete attachment of configuration with same group as user (user is member)."""
+        permission_group = PermissionGroup(name="test", entitlement="test")
+        membership = PermissionGroupMembership(
+            permission_group=permission_group, user=self.normal_user
+        )
+        db.session.add_all([permission_group, membership])
+        db.session.commit()
+
         configuration = create_a_test_configuration(
-            IDL_USER_ACCOUNT.membered_permission_groups[0]
+            str(permission_group.id),
         )
         self.assertTrue(configuration.id is not None)
         count_configuration_attachments = (
@@ -395,18 +423,13 @@ class TestConfigurationAttachment(BaseTestCase):
         )
         db.session.add(attachment)
         db.session.commit()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = self.url + "/" + str(attachment.id)
+        with self.run_requests_as(self.normal_user):
+            url = self.url + "/" + str(attachment.id)
 
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
         configuration_reloaded = (
             db.session.query(Configuration)
@@ -419,16 +442,21 @@ class TestConfigurationAttachment(BaseTestCase):
 
     def test_patch_to_non_editable_configuration(self):
         """Ensure we can't update to a configuration we can't edit."""
+        permission_group1 = PermissionGroup(name="test", entitlement="test")
+        permission_group2 = PermissionGroup(name="test2", entitlement="test2")
+        db.session.add_all([permission_group1, permission_group2])
+        db.session.commit()
+
         configuration1 = create_a_test_configuration(
             public=False,
             internal=True,
         )
-        configuration1.cfg_permission_group = "1"
+        configuration1.cfg_permission_group = str(permission_group1.id)
         configuration2 = create_a_test_configuration(
             public=False,
             internal=True,
         )
-        configuration2.cfg_permission_group = "2"
+        configuration2.cfg_permission_group = str(permission_group2.id)
         attachment = ConfigurationAttachment(
             url="https://gfz.potsdam.de",
             label="gfz",
@@ -465,17 +493,9 @@ class TestConfigurationAttachment(BaseTestCase):
         }
 
         with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[configuration1.cfg_permission_group],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{attachment.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+            response = self.client.patch(
+                f"{self.url}/{attachment.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

@@ -10,7 +10,7 @@
 import json
 
 from project import base_url
-from project.api.models import DeviceAttachment
+from project.api.models import Contact, DeviceAttachment, User
 from project.api.models.base_model import db
 from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, fake
@@ -27,6 +27,16 @@ class TestGenericDeviceActionAttachment(BaseTestCase):
 
     url = base_url + "/generic-device-action-attachments"
     object_type = "generic_device_action_attachment"
+
+    def setUp(self):
+        """Set some data up for the tests."""
+        super().setUp()
+        contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(contact=contact, subject=contact.email)
+        db.session.add_all([contact, self.normal_user])
+        db.session.commit()
 
     def test_get_generic_device_action_attachment(self):
         """Ensure the GET /generic_device_action_attachments route reachable."""
@@ -90,11 +100,12 @@ class TestGenericDeviceActionAttachment(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
-            url=f"{self.url}?include=action,attachment",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().add_object(
+                url=f"{self.url}?include=action,attachment",
+                data_object=data,
+                object_type=self.object_type,
+            )
         # And ensure that we trigger the mqtt.
         mqtt.publish.assert_called_once()
         call_args = mqtt.publish.call_args[0]
@@ -134,11 +145,12 @@ class TestGenericDeviceActionAttachment(BaseTestCase):
                 },
             }
         }
-        _ = super().update_object(
-            url=f"{self.url}/{generic_device_action_attachment.id}?include=attachment",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().update_object(
+                url=f"{self.url}/{generic_device_action_attachment.id}?include=attachment",
+                data_object=data,
+                object_type=self.object_type,
+            )
         # And ensure that we trigger the mqtt.
         mqtt.publish.assert_called_once()
         call_args = mqtt.publish.call_args[0]

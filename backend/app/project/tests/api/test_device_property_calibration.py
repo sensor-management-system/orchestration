@@ -17,6 +17,7 @@ from project.api.models import (
     DeviceCalibrationAction,
     DeviceProperty,
     DevicePropertyCalibration,
+    User,
 )
 from project.api.models.base_model import db
 from project.extensions.instances import mqtt
@@ -31,6 +32,16 @@ class TestDevicePropertyCalibration(BaseTestCase):
 
     url = base_url + "/device-property-calibrations"
     object_type = "device_property_calibration"
+
+    def setUp(self):
+        """Set some data up for the tests."""
+        super().setUp()
+        contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(contact=contact, subject=contact.email)
+        db.session.add_all([contact, self.normal_user])
+        db.session.commit()
 
     def test_get_device_property_calibration(self):
         """Ensure the GET /device_property_calibration route reachable."""
@@ -117,11 +128,12 @@ class TestDevicePropertyCalibration(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
-            url=f"{self.url}?include=device_property,calibration_action",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().add_object(
+                url=f"{self.url}?include=device_property,calibration_action",
+                data_object=data,
+                object_type=self.object_type,
+            )
         # And ensure that we trigger the mqtt.
         mqtt.publish.assert_called_once()
         call_args = mqtt.publish.call_args[0]
@@ -178,11 +190,12 @@ class TestDevicePropertyCalibration(BaseTestCase):
                 },
             }
         }
-        _ = super().update_object(
-            url=f"{self.url}/{dpa.id}?include=calibration_action",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().update_object(
+                url=f"{self.url}/{dpa.id}?include=calibration_action",
+                data_object=data,
+                object_type=self.object_type,
+            )
         # And ensure that we trigger the mqtt.
         mqtt.publish.assert_called_once()
         call_args = mqtt.publish.call_args[0]

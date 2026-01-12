@@ -6,9 +6,13 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+"""Tests for the generic configuration actions."""
+
 import os
 
 from project import base_url
+from project.api.models import Contact, User
+from project.api.models.base_model import db
 from project.api.models.mixin import utc_now
 from project.tests.base import (
     BaseTestCase,
@@ -39,6 +43,18 @@ class TestGenericConfigurationActionServices(BaseTestCase):
         test_file_path, "drafts", "platforms_test_data.json"
     )
 
+    def setUp(self):
+        """Set up stuff for the tests."""
+        super().setUp()
+        contact = Contact(
+            given_name="super", family_name="user", email="super.user@localhost"
+        )
+        self.super_user = User(
+            subject=contact.email, contact=contact, is_superuser=True
+        )
+        db.session.add_all([contact, self.super_user])
+        db.session.commit()
+
     def test_get_generic_configuration_action(self):
         """Ensure the List /generic_configuration_action route behaves correctly."""
         response = self.client.get(self.url)
@@ -47,19 +63,18 @@ class TestGenericConfigurationActionServices(BaseTestCase):
         self.assertEqual(response.json["data"], [])
 
     def test_add_generic_configuration_action(self):
-        """
-        Ensure POST a new generic config
-        action can be added to the database.
-        """
+        """Ensure POST a new generic config action can be added to the database."""
         data = self.make_generic_configuration_action_data()
 
-        _ = super().add_object(
-            url=f"{self.url}?include=configuration,contact",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.super_user):
+            _ = super().add_object(
+                url=f"{self.url}?include=configuration,contact",
+                data_object=data,
+                object_type=self.object_type,
+            )
 
     def make_generic_configuration_action_data(self):
+        """Create some payload for the configuration data."""
         config = generate_configuration_model(
             is_public=True, is_private=False, is_internal=False
         )
@@ -75,9 +90,10 @@ class TestGenericConfigurationActionServices(BaseTestCase):
                 },
             }
         }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
-        )
+        with self.run_requests_as(self.super_user):
+            contact = super().add_object(
+                url=self.contact_url, data_object=contact_data, object_type="contact"
+            )
         data = {
             "data": {
                 "type": self.object_type,
@@ -106,11 +122,12 @@ class TestGenericConfigurationActionServices(BaseTestCase):
         old_generic_configuration_action_data = (
             self.make_generic_configuration_action_data()
         )
-        old_generic_configuration_action = super().add_object(
-            url=f"{self.url}?include=configuration,contact",
-            data_object=old_generic_configuration_action_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.super_user):
+            old_generic_configuration_action = super().add_object(
+                url=f"{self.url}?include=configuration,contact",
+                data_object=old_generic_configuration_action_data,
+                object_type=self.object_type,
+            )
         userinfo = generate_userinfo_data()
         contact_data = {
             "data": {
@@ -123,9 +140,10 @@ class TestGenericConfigurationActionServices(BaseTestCase):
                 },
             }
         }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
-        )
+        with self.run_requests_as(self.super_user):
+            contact = super().add_object(
+                url=self.contact_url, data_object=contact_data, object_type="contact"
+            )
         new_data = {
             "data": {
                 "type": self.object_type,
@@ -148,27 +166,28 @@ class TestGenericConfigurationActionServices(BaseTestCase):
         }
         old_id = old_generic_configuration_action["data"]["id"]
 
-        _ = super().update_object(
-            url=f"{self.url}/{old_id}?include=configuration,contact",
-            data_object=new_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.super_user):
+            _ = super().update_object(
+                url=f"{self.url}/{old_id}?include=configuration,contact",
+                data_object=new_data,
+                object_type=self.object_type,
+            )
 
     def test_delete_generic_configuration_action(self):
-        """Ensure a generic_configuration_action can be deleted"""
-
+        """Ensure a generic_configuration_action can be deleted."""
         generic_configuration_action_data = (
             self.make_generic_configuration_action_data()
         )
 
-        generic_configuration_action = super().add_object(
-            url=f"{self.url}?include=configuration,contact",
-            data_object=generic_configuration_action_data,
-            object_type=self.object_type,
-        )
-        _ = super().delete_object(
-            url=f"{self.url}/{generic_configuration_action['data']['id']}",
-        )
+        with self.run_requests_as(self.super_user):
+            generic_configuration_action = super().add_object(
+                url=f"{self.url}?include=configuration,contact",
+                data_object=generic_configuration_action_data,
+                object_type=self.object_type,
+            )
+            _ = super().delete_object(
+                url=f"{self.url}/{generic_configuration_action['data']['id']}",
+            )
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

@@ -7,26 +7,41 @@
 """Tests for the site contact roles."""
 
 import json
-from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Contact, Site, SiteContactRole, User
+from project.api.models import (
+    Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
+    Site,
+    SiteContactRole,
+    User,
+)
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, mqtt
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, Fixtures
 
 fixtures = Fixtures()
 
 
+@fixtures.register("group1", scope=lambda: db.session)
+def create_group1():
+    """Create a permission group."""
+    result = PermissionGroup(name="group1", entitlement="group1")
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
 @fixtures.register("public_site1_in_group1", scope=lambda: db.session)
-def create_public_site1_in_group1():
+@fixtures.use(["group1"])
+def create_public_site1_in_group1(group1):
     """Create a public site that uses group 1 for permission management."""
     result = Site(
         label="public site1",
         is_internal=False,
         is_public=True,
-        group_ids=["1"],
+        group_ids=[str(group1.id)],
     )
     db.session.add(result)
     db.session.commit()
@@ -66,6 +81,37 @@ def create_super_user(super_user_contact):
     result = User(
         contact=super_user_contact, subject=super_user_contact.email, is_superuser=True
     )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("contact1", scope=lambda: db.session)
+def create_contact1():
+    """Create a single contact so that it can be used within the tests."""
+    result = Contact(
+        given_name="first", family_name="contact", email="first.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("user1", scope=lambda: db.session)
+@fixtures.use(["contact1"])
+def create_user1(contact1):
+    """Create a normal user to use it in the tests."""
+    result = User(contact=contact1, subject=contact1.email)
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("membership_of_user1_in_group1", scope=lambda: db.session)
+@fixtures.use(["user1", "group1"])
+def create_membership_of_user1_in_group1(user1, group1):
+    """Create a permission group."""
+    result = PermissionGroupMembership(user=user1, permission_group=group1)
     db.session.add(result)
     db.session.commit()
     return result
@@ -245,9 +291,10 @@ class TestSiteContacts(BaseTestCase):
         )
         self.assertEqual(resp.status_code, 401)
 
-    def test_post_no_group_member(self):
+    @fixtures.use
+    def test_post_no_group_member(self, group1, user1):
         """Ensure that we can't post for site groups that we are no member in."""
-        self.public_site.group_ids = ["123"]
+        self.public_site.group_ids = [str(group1.id)]
         payload = {
             "data": {
                 "type": "site_contact_role",
@@ -269,24 +316,18 @@ class TestSiteContacts(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="abc",
-                    membered_permission_groups=[],
-                    administrated_permission_groups=[],
-                )
-                resp = self.client.post(
-                    self.url,
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+        with self.run_requests_as(user1):
+            resp = self.client.post(
+                self.url,
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 403)
 
-    def test_post_group_member(self):
+    @fixtures.use
+    def test_post_group_member(self, group1, user1, membership_of_user1_in_group1):
         """Ensure that we can post for site groups that we are member in."""
-        self.public_site.group_ids = ["123"]
+        self.public_site.group_ids = [str(group1.id)]
         payload = {
             "data": {
                 "type": "site_contact_role",
@@ -308,58 +349,12 @@ class TestSiteContacts(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="abc",
-                    membered_permission_groups=["123"],
-                    administrated_permission_groups=[],
-                )
-                resp = self.client.post(
-                    self.url,
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
-        self.assertEqual(resp.status_code, 201)
-
-    def test_post_group_administrator(self):
-        """Ensure that we can post for site groups that we are admin in."""
-        self.public_site.group_ids = ["123"]
-        payload = {
-            "data": {
-                "type": "site_contact_role",
-                "attributes": {
-                    "role_uri": "",
-                    "role_name": "PI",
-                },
-                "relationships": {
-                    "site": {
-                        "data": {
-                            "id": str(self.public_site.id),
-                            "type": "site",
-                        }
-                    },
-                    "contact": {
-                        "data": {"id": str(self.normal_contact.id), "type": "contact"}
-                    },
-                },
-            }
-        }
-
-        with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="abc",
-                    membered_permission_groups=[],
-                    administrated_permission_groups=["123"],
-                )
-                resp = self.client.post(
-                    self.url,
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+        with self.run_requests_as(user1):
+            resp = self.client.post(
+                self.url,
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 201)
 
     def test_post_super_user(self):
@@ -510,9 +505,10 @@ class TestSiteContacts(BaseTestCase):
         )
         self.assertEqual(resp.status_code, 401)
 
-    def test_patch_no_member(self):
+    @fixtures.use
+    def test_patch_no_member(self, group1, user1):
         """Ensure we don't allow patching contact roles without membership in group of site."""
-        self.public_site.group_ids = ["123"]
+        self.public_site.group_ids = [str(group1.id)]
         contact_role = SiteContactRole(
             contact=self.normal_contact,
             site=self.public_site,
@@ -531,24 +527,18 @@ class TestSiteContacts(BaseTestCase):
             },
         }
 
-        with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="abc",
-                    membered_permission_groups=[],
-                    administrated_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{contact_role.id}",
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+        with self.run_requests_as(user1):
+            resp = self.client.patch(
+                f"{self.url}/{contact_role.id}",
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 403)
 
-    def test_patch_group_member(self):
+    @fixtures.use
+    def test_patch_group_member(self, group1, user1, membership_of_user1_in_group1):
         """Ensure we allow patching contact roles for members in group of site."""
-        self.public_site.group_ids = ["123"]
+        self.public_site.group_ids = [str(group1.id)]
         contact_role = SiteContactRole(
             contact=self.normal_contact,
             site=self.public_site,
@@ -567,55 +557,12 @@ class TestSiteContacts(BaseTestCase):
             },
         }
 
-        with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="abc",
-                    membered_permission_groups=["123"],
-                    administrated_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{contact_role.id}",
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
-        self.assertEqual(resp.status_code, 200)
-
-    def test_patch_group_admin(self):
-        """Ensure we allow patching contact roles for admins in group of site."""
-        self.public_site.group_ids = ["123"]
-        contact_role = SiteContactRole(
-            contact=self.normal_contact,
-            site=self.public_site,
-            role_name="PI",
-        )
-        db.session.add_all([self.public_site, contact_role])
-        db.session.commit()
-
-        payload = {
-            "data": {
-                "type": "site_contact_role",
-                "id": str(contact_role.id),
-                "attributes": {
-                    "role_name": "Administrator",
-                },
-            },
-        }
-
-        with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="abc",
-                    membered_permission_groups=[],
-                    administrated_permission_groups=["123"],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{contact_role.id}",
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+        with self.run_requests_as(user1):
+            resp = self.client.patch(
+                f"{self.url}/{contact_role.id}",
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 200)
 
     def test_patch_super_user(self):
@@ -721,9 +668,10 @@ class TestSiteContacts(BaseTestCase):
         )
         self.assertEqual(resp.status_code, 401)
 
-    def test_delete_no_member(self):
+    @fixtures.use
+    def test_delete_no_member(self, group1, user1):
         """Ensure we don't allow deleting contact roles without membership in group of site."""
-        self.public_site.group_ids = ["123"]
+        self.public_site.group_ids = [str(group1.id)]
         contact_role = SiteContactRole(
             contact=self.normal_contact,
             site=self.public_site,
@@ -732,22 +680,16 @@ class TestSiteContacts(BaseTestCase):
         db.session.add_all([self.public_site, contact_role])
         db.session.commit()
 
-        with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="abc",
-                    membered_permission_groups=[],
-                    administrated_permission_groups=[],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{contact_role.id}",
-                )
+        with self.run_requests_as(user1):
+            resp = self.client.delete(
+                f"{self.url}/{contact_role.id}",
+            )
         self.assertEqual(resp.status_code, 403)
 
-    def test_delete_group_member(self):
-        """Ensure we don't allow deleting contact roles for members in group of site."""
-        self.public_site.group_ids = ["123"]
+    @fixtures.use
+    def test_delete_group_member(self, group1, user1, membership_of_user1_in_group1):
+        """Ensure we allow deleting contact roles for members in group of site."""
+        self.public_site.group_ids = [str(group1.id)]
         contact_role = SiteContactRole(
             contact=self.normal_contact,
             site=self.public_site,
@@ -756,41 +698,10 @@ class TestSiteContacts(BaseTestCase):
         db.session.add_all([self.public_site, contact_role])
         db.session.commit()
 
-        with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="abc",
-                    membered_permission_groups=["123"],
-                    administrated_permission_groups=[],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{contact_role.id}",
-                )
-        self.assertEqual(resp.status_code, 200)
-
-    def test_delete_group_admin(self):
-        """Ensure we don't allow deleting contact roles for admins in group of site."""
-        self.public_site.group_ids = ["123"]
-        contact_role = SiteContactRole(
-            contact=self.normal_contact,
-            site=self.public_site,
-            role_name="PI",
-        )
-        db.session.add_all([self.public_site, contact_role])
-        db.session.commit()
-
-        with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id="1234",
-                    username="abc",
-                    membered_permission_groups=[],
-                    administrated_permission_groups=["123"],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{contact_role.id}",
-                )
+        with self.run_requests_as(user1):
+            resp = self.client.delete(
+                f"{self.url}/{contact_role.id}",
+            )
         self.assertEqual(resp.status_code, 200)
 
     def test_delete_super_user(self):

@@ -9,7 +9,6 @@
 """Tests for the devices."""
 import datetime
 import json
-from unittest.mock import patch
 
 from project import base_url
 from project.api.models import (
@@ -17,12 +16,12 @@ from project.api.models import (
     Contact,
     Device,
     DeviceMountAction,
+    PermissionGroup,
+    PermissionGroupMembership,
     PlatformMountAction,
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.permissions import (
@@ -30,7 +29,6 @@ from project.tests.permissions import (
     create_a_test_device,
     create_a_test_platform,
 )
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def payload_data(
@@ -83,6 +81,30 @@ class TestMountDevicePermissions(BaseTestCase):
     url = base_url + "/device-mount-actions"
     unmount_url = base_url + "/device-unmount-actions"
     object_type = "device_mount_action"
+
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                normal_contact,
+                self.normal_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
 
     def test_mount_a_public_device(self):
         """Ensure mounting a public device works well."""
@@ -196,11 +218,12 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        _ = super().add_object(
-            url=f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            _ = super().add_object(
+                url=f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data_object=data,
+                object_type=self.object_type,
+            )
 
     def test_get_as_registered_user(self):
         """Ensure that a registered user can see public, internal."""
@@ -287,7 +310,7 @@ class TestMountDevicePermissions(BaseTestCase):
     def test_post_action_as_not_a_group_member(self):
         """Ensure mounting a device in a group fails if not done by member of group."""
         device = create_a_test_device(
-            group_ids=[222],
+            group_ids=[str(self.other_group.id)],
         )
         parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
@@ -298,23 +321,17 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_post_action_as_a_group_member(self):
         """Ensure mounting a device in a group succeeds if done by group member."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -335,23 +352,17 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-            self.assertEqual(response.status_code, 201)
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 201)
 
     def test_post_action_for_archived_device(self):
         """Ensure we can't mount an archived device."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -373,23 +384,17 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-            self.assertEqual(response.status_code, 403)
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 403)
 
     def test_post_action_for_archived_configuration(self):
         """Ensure we can't mount on an archived configuration."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -411,23 +416,17 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-            self.assertEqual(response.status_code, 403)
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 403)
 
     def test_post_action_for_archived_parent_platform(self):
         """Ensure we can't mount on an archived parent platform."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -449,23 +448,17 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-            self.assertEqual(response.status_code, 409)
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 409)
 
     def test_post_action_for_archived_parent_device(self):
         """Ensure we can't mount on an archived parent device."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -493,23 +486,17 @@ class TestMountDevicePermissions(BaseTestCase):
             device,
             parent_device=parent_device,
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_device,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-            self.assertEqual(response.status_code, 409)
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_device,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 409)
 
     def test_delete_action_as_a_group_member(self):
         """Ensure mounted device groups can be deleted."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -530,29 +517,21 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-                self.assertEqual(response.status_code, 201)
-                data = json.loads(response.data.decode())
-                url = f"{self.url}/{data['data']['id']}"
-                delete_response_user_is_a_member = self.client.delete(
-                    url, headers=access_headers
-                )
-                self.assertEqual(delete_response_user_is_a_member.status_code, 200)
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 201)
+            data = json.loads(response.data.decode())
+            url = f"{self.url}/{data['data']['id']}"
+            delete_response_user_is_a_member = self.client.delete(url)
+            self.assertEqual(delete_response_user_is_a_member.status_code, 200)
 
     def test_delete_for_archived_device(self):
         """Ensure we can't delete the device mount for an archived device."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -573,33 +552,27 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-                self.assertEqual(response.status_code, 201)
-                data = json.loads(response.data.decode())
-                url = f"{self.url}/{data['data']['id']}"
-                device.archived = True
-                db.session.add(device)
-                db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 201)
+            data = json.loads(response.data.decode())
+            url = f"{self.url}/{data['data']['id']}"
+            device.archived = True
+            db.session.add(device)
+            db.session.commit()
 
-                delete_response_user_is_a_member = self.client.delete(
-                    url, headers=access_headers
-                )
-                self.assertEqual(delete_response_user_is_a_member.status_code, 403)
+            delete_response_user_is_a_member = self.client.delete(
+                url,
+            )
+            self.assertEqual(delete_response_user_is_a_member.status_code, 403)
 
     def test_delete_for_archived_configuration(self):
         """Ensure we can't delete the device mount for an archived configuration."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -620,33 +593,27 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-                self.assertEqual(response.status_code, 201)
-                data = json.loads(response.data.decode())
-                url = f"{self.url}/{data['data']['id']}"
-                configuration.archived = True
-                db.session.add(configuration)
-                db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 201)
+            data = json.loads(response.data.decode())
+            url = f"{self.url}/{data['data']['id']}"
+            configuration.archived = True
+            db.session.add(configuration)
+            db.session.commit()
 
-                delete_response_user_is_a_member = self.client.delete(
-                    url, headers=access_headers
-                )
-                self.assertEqual(delete_response_user_is_a_member.status_code, 403)
+            delete_response_user_is_a_member = self.client.delete(
+                url,
+            )
+            self.assertEqual(delete_response_user_is_a_member.status_code, 403)
 
     def test_delete_for_archived_parent_platform(self):
         """Ensure we can't delete the device mount for an archived parent platform."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -667,33 +634,27 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-                self.assertEqual(response.status_code, 201)
-                data = json.loads(response.data.decode())
-                url = f"{self.url}/{data['data']['id']}"
-                parent_platform.archived = True
-                db.session.add(configuration)
-                db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 201)
+            data = json.loads(response.data.decode())
+            url = f"{self.url}/{data['data']['id']}"
+            parent_platform.archived = True
+            db.session.add(configuration)
+            db.session.commit()
 
-                delete_response_user_is_a_member = self.client.delete(
-                    url, headers=access_headers
-                )
-                self.assertEqual(delete_response_user_is_a_member.status_code, 409)
+            delete_response_user_is_a_member = self.client.delete(
+                url,
+            )
+            self.assertEqual(delete_response_user_is_a_member.status_code, 409)
 
     def test_mount_a_device_in_two_configuration_at_different_time(self):
         """Ensure mounting a device in > 1 configurations at the different time will succeed."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -743,31 +704,24 @@ class TestMountDevicePermissions(BaseTestCase):
             begin_date="2022-03-18 20:44:42",
         )
 
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                mount_response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(mount_data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-                self.assertEqual(mount_response.status_code, 201)
+        with self.run_requests_as(self.normal_user):
+            mount_response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(mount_data),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(mount_response.status_code, 201)
 
-                mount_response_2 = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(mount_data_2),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-                self.assertEqual(mount_response_2.status_code, 201)
+            mount_response_2 = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(mount_data_2),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(mount_response_2.status_code, 201)
 
     def test_mount_a_device_in_two_configuration_at_same_time(self):
         """Ensure mounting devices in > 1 configuration at the same time won't success."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -815,25 +769,18 @@ class TestMountDevicePermissions(BaseTestCase):
             parent_platform,
             begin_date="2022-04-05 00:21:34",
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
             self.assertEqual(response.status_code, 201)
             # This Should Fail as the Device is active in a configuration.
             response_2 = self.client.post(
                 f"{self.url}?include=device,begin_contact,parent_platform,configuration",
                 data=json.dumps(data_2),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
             self.assertEqual(response_2.status_code, 409)
 
@@ -844,7 +791,7 @@ class TestMountDevicePermissions(BaseTestCase):
         Ensure mounting a device between two mount actions if
         end_date M1 < Mount interval < begin_date of M2 will succeed.
         """
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -914,25 +861,18 @@ class TestMountDevicePermissions(BaseTestCase):
             begin_date="2022-06-05 00:21:34",
             end_date="2022-06-28 00:21:34",
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
             self.assertEqual(response.status_code, 201)
             # This should work as it there is no mount action after this one.
             response_2 = self.client.post(
                 f"{self.url}?include=device,begin_contact,parent_platform,configuration",
                 data=json.dumps(data_2),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
             self.assertEqual(response_2.status_code, 201)
             # This should also work as it starts and end before the next mount action.
@@ -940,7 +880,6 @@ class TestMountDevicePermissions(BaseTestCase):
                 f"{self.url}?include=device,begin_contact,parent_platform,configuration",
                 data=json.dumps(data_3),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
             self.assertEqual(response_3.status_code, 201)
 
@@ -951,7 +890,7 @@ class TestMountDevicePermissions(BaseTestCase):
         Ensure mounting a device between two mount actions if
         Mount interval overlap begin_date of M2 will Fail.
         """
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -1042,25 +981,18 @@ class TestMountDevicePermissions(BaseTestCase):
             begin_date="2022-04-20 00:21:34",
             end_date="2022-06-06 00:21:34",
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
             self.assertEqual(response.status_code, 201)
             # This should work as it there is no mount action after this one.
             response_2 = self.client.post(
                 f"{self.url}?include=device,begin_contact,parent_platform,configuration",
                 data=json.dumps(data_2),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
             self.assertEqual(response_2.status_code, 201)
             # This should not work as it there is no unmount date before the next mount action.
@@ -1068,7 +1000,6 @@ class TestMountDevicePermissions(BaseTestCase):
                 f"{self.url}?include=device,begin_contact,parent_platform,configuration",
                 data=json.dumps(data_3),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
             self.assertEqual(response_3.status_code, 409)
             # This should not work as there is a conflict with the end_date.
@@ -1076,7 +1007,6 @@ class TestMountDevicePermissions(BaseTestCase):
                 f"{self.url}?include=device,begin_contact,parent_platform,configuration",
                 data=json.dumps(data_4),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
             self.assertEqual(response_4.status_code, 409)
             # This should not work as there is a conflict with the begin_date.
@@ -1084,13 +1014,12 @@ class TestMountDevicePermissions(BaseTestCase):
                 f"{self.url}?include=device,begin_contact,parent_platform,configuration",
                 data=json.dumps(data_5),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
             self.assertEqual(response_5.status_code, 409)
 
     def test_patch_for_archived_device(self):
         """Ensure we can't patch the device mount for an archived device."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -1111,43 +1040,36 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-                self.assertEqual(response.status_code, 201)
-                data = json.loads(response.data.decode())
-                url = f"{self.url}/{data['data']['id']}"
-                device.archived = True
-                db.session.add(device)
-                db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 201)
+            data = json.loads(response.data.decode())
+            url = f"{self.url}/{data['data']['id']}"
+            device.archived = True
+            db.session.add(device)
+            db.session.commit()
 
-                payload = {
-                    "data": {
-                        "type": "device_mount_action",
-                        "id": str(data["data"]["id"]),
-                        "attributes": {"begin_description": "some new description"},
-                    }
+            payload = {
+                "data": {
+                    "type": "device_mount_action",
+                    "id": str(data["data"]["id"]),
+                    "attributes": {"begin_description": "some new description"},
                 }
-                patch_response_user_is_a_member = self.client.patch(
-                    url,
-                    data=json.dumps(payload),
-                    headers=access_headers,
-                    content_type="application/vnd.api+json",
-                )
-                self.assertEqual(patch_response_user_is_a_member.status_code, 403)
+            }
+            patch_response_user_is_a_member = self.client.patch(
+                url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(patch_response_user_is_a_member.status_code, 403)
 
     def test_patch_for_archived_configuration(self):
         """Ensure we can't patch the device mount for an archived configuration."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -1168,43 +1090,36 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-                self.assertEqual(response.status_code, 201)
-                data = json.loads(response.data.decode())
-                url = f"{self.url}/{data['data']['id']}"
-                configuration.archived = True
-                db.session.add(configuration)
-                db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 201)
+            data = json.loads(response.data.decode())
+            url = f"{self.url}/{data['data']['id']}"
+            configuration.archived = True
+            db.session.add(configuration)
+            db.session.commit()
 
-                payload = {
-                    "data": {
-                        "type": "device_mount_action",
-                        "id": str(data["data"]["id"]),
-                        "attributes": {"begin_description": "some new description"},
-                    }
+            payload = {
+                "data": {
+                    "type": "device_mount_action",
+                    "id": str(data["data"]["id"]),
+                    "attributes": {"begin_description": "some new description"},
                 }
-                patch_response_user_is_a_member = self.client.patch(
-                    url,
-                    data=json.dumps(payload),
-                    headers=access_headers,
-                    content_type="application/vnd.api+json",
-                )
-                self.assertEqual(patch_response_user_is_a_member.status_code, 403)
+            }
+            patch_response_user_is_a_member = self.client.patch(
+                url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(patch_response_user_is_a_member.status_code, 403)
 
     def test_patch_for_archived_parent_platform(self):
         """Ensure we can't patch the device mount for an archived parent platform."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -1225,43 +1140,36 @@ class TestMountDevicePermissions(BaseTestCase):
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-                self.assertEqual(response.status_code, 201)
-                data = json.loads(response.data.decode())
-                url = f"{self.url}/{data['data']['id']}"
-                parent_platform.archived = True
-                db.session.add(configuration)
-                db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 201)
+            data = json.loads(response.data.decode())
+            url = f"{self.url}/{data['data']['id']}"
+            parent_platform.archived = True
+            db.session.add(configuration)
+            db.session.commit()
 
-                payload = {
-                    "data": {
-                        "type": "device_mount_action",
-                        "id": str(data["data"]["id"]),
-                        "attributes": {"begin_description": "some new description"},
-                    }
+            payload = {
+                "data": {
+                    "type": "device_mount_action",
+                    "id": str(data["data"]["id"]),
+                    "attributes": {"begin_description": "some new description"},
                 }
-                patch_response_user_is_a_member = self.client.patch(
-                    url,
-                    data=json.dumps(payload),
-                    headers=access_headers,
-                    content_type="application/vnd.api+json",
-                )
-                self.assertEqual(patch_response_user_is_a_member.status_code, 409)
+            }
+            patch_response_user_is_a_member = self.client.patch(
+                url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(patch_response_user_is_a_member.status_code, 409)
 
     def test_patch_for_archived_parent_device(self):
         """Ensure we can't patch the device mount for an archived parent device."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
         )
@@ -1288,39 +1196,32 @@ class TestMountDevicePermissions(BaseTestCase):
             device,
             parent_device=parent_device,
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,begin_contact,parent_device,configuration",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-                self.assertEqual(response.status_code, 201)
-                data = json.loads(response.data.decode())
-                url = f"{self.url}/{data['data']['id']}"
-                parent_device.archived = True
-                db.session.add(configuration)
-                db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_device,configuration",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 201)
+            data = json.loads(response.data.decode())
+            url = f"{self.url}/{data['data']['id']}"
+            parent_device.archived = True
+            db.session.add(configuration)
+            db.session.commit()
 
-                payload = {
-                    "data": {
-                        "type": "device_mount_action",
-                        "id": str(data["data"]["id"]),
-                        "attributes": {"begin_description": "some new description"},
-                    }
+            payload = {
+                "data": {
+                    "type": "device_mount_action",
+                    "id": str(data["data"]["id"]),
+                    "attributes": {"begin_description": "some new description"},
                 }
-                patch_response_user_is_a_member = self.client.patch(
-                    url,
-                    data=json.dumps(payload),
-                    headers=access_headers,
-                    content_type="application/vnd.api+json",
-                )
-                self.assertEqual(patch_response_user_is_a_member.status_code, 409)
+            }
+            patch_response_user_is_a_member = self.client.patch(
+                url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(patch_response_user_is_a_member.status_code, 409)
 
     def test_patch_to_non_editable_configuration(self):
         """Ensure we can't update to a configuration we can't edit."""
@@ -1328,20 +1229,20 @@ class TestMountDevicePermissions(BaseTestCase):
             label="config1",
             is_public=False,
             is_internal=True,
-            cfg_permission_group="1",
+            cfg_permission_group=str(self.permission_group.id),
         )
         configuration2 = Configuration(
             label="config2",
             is_public=False,
             is_internal=True,
-            cfg_permission_group="2",
+            cfg_permission_group=str(self.other_group.id),
         )
         device = Device(
             short_name="dummy device",
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id)],
         )
         contact = Contact(
             given_name="first",
@@ -1356,13 +1257,7 @@ class TestMountDevicePermissions(BaseTestCase):
             ),
             begin_contact=contact,
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all(
-            [configuration1, configuration2, device, contact, user, mount]
-        )
+        db.session.add_all([configuration1, configuration2, device, contact, mount])
         db.session.commit()
 
         payload = {
@@ -1383,20 +1278,12 @@ class TestMountDevicePermissions(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[configuration1.cfg_permission_group],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{mount.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{mount.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_to_non_editable_device(self):
@@ -1405,21 +1292,21 @@ class TestMountDevicePermissions(BaseTestCase):
             label="config1",
             is_public=False,
             is_internal=True,
-            cfg_permission_group="1",
+            cfg_permission_group=str(self.permission_group.id),
         )
         device1 = Device(
             short_name="dummy device1",
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id)],
         )
         device2 = Device(
             short_name="dummy device2",
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["2"],
+            group_ids=[str(self.other_group.id)],
         )
         contact = Contact(
             given_name="first",
@@ -1434,11 +1321,7 @@ class TestMountDevicePermissions(BaseTestCase):
             ),
             begin_contact=contact,
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([configuration, device1, device2, contact, user, mount])
+        db.session.add_all([configuration, device1, device2, contact, mount])
         db.session.commit()
 
         payload = {
@@ -1459,18 +1342,10 @@ class TestMountDevicePermissions(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[configuration.cfg_permission_group],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{mount.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{mount.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

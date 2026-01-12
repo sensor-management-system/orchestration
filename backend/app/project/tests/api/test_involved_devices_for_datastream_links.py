@@ -11,7 +11,6 @@
 
 import datetime
 import json
-from unittest.mock import patch
 
 from project import base_url
 from project.api.models import (
@@ -22,27 +21,40 @@ from project.api.models import (
     DeviceMountAction,
     DeviceProperty,
     InvolvedDeviceForDatastreamLink,
+    PermissionGroup,
+    PermissionGroupMembership,
     TsmEndpoint,
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, mqtt
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, Fixtures
 
 fixtures = Fixtures()
 
 
-@fixtures.register("right_group")
+@fixtures.register("right_group", scope=lambda: db.session)
 def create_right_group():
     """Create a permission group for the devices and configurations."""
-    return "1"
+    result = PermissionGroup(
+        name="right_group",
+        entitlement="right:group",
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
-@fixtures.register("wrong_group")
+@fixtures.register("wrong_group", scope=lambda: db.session)
 def create_wrong_group():
     """Create another permission group for the devices and configurations."""
-    return "2"
+    result = PermissionGroup(
+        name="wrong_group",
+        entitlement="wrong:group",
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 @fixtures.register("super_user_contact", scope=lambda: db.session)
@@ -89,6 +101,16 @@ def create_user1(contact1):
     return result
 
 
+@fixtures.register("membership_of_user1_in_right_group", scope=lambda: db.session)
+@fixtures.use(["right_group", "user1"])
+def create_membership_of_user1_in_group1(right_group, user1):
+    """Create a normal user to use it in the tests."""
+    result = PermissionGroupMembership(permission_group=right_group, user=user1)
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
 @fixtures.register("public_smt_100", scope=lambda: db.session)
 @fixtures.use(["right_group"])
 def create_public_smt_100(right_group):
@@ -98,7 +120,7 @@ def create_public_smt_100(right_group):
         is_public=True,
         is_internal=False,
         is_private=False,
-        group_ids=[right_group],
+        group_ids=[str(right_group.id)],
     )
     db.session.add(result)
     db.session.commit()
@@ -124,7 +146,7 @@ def create_public_cr_1000(right_group):
         is_public=True,
         is_internal=False,
         is_private=False,
-        group_ids=[right_group],
+        group_ids=[str(right_group.id)],
     )
     db.session.add(result)
     db.session.commit()
@@ -139,7 +161,7 @@ def create_public_configuration(right_group):
         label="public configuration",
         is_public=True,
         is_internal=False,
-        cfg_permission_group=right_group,
+        cfg_permission_group=str(right_group.id),
     )
     db.session.add(result)
     db.session.commit()
@@ -611,11 +633,9 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
 
         self.assertEqual(response.status_code, 401)
 
-    @fixtures.use(
-        ["soil_moisture_datastream_link", "cr_1000_mount", "user1", "wrong_group"]
-    )
+    @fixtures.use
     def test_post_user_with_wrong_group(
-        self, soil_moisture_datastream_link, cr_1000_mount, user1, wrong_group
+        self, soil_moisture_datastream_link, cr_1000_mount, user1
     ):
         """Ensure we enforce that there is a user that needs to be member of the permission group."""
         payload = {
@@ -639,26 +659,22 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[wrong_group],
-                )
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 403)
 
-    @fixtures.use(
-        ["soil_moisture_datastream_link", "cr_1000_mount", "user1", "right_group"]
-    )
+    @fixtures.use
     def test_post_user_with_right_group(
-        self, soil_moisture_datastream_link, cr_1000_mount, user1, right_group
+        self,
+        soil_moisture_datastream_link,
+        cr_1000_mount,
+        user1,
+        right_group,
+        membership_of_user1_in_right_group,
     ):
         """Ensure we allow posting for a user that is be member of the permission group."""
         payload = {
@@ -682,18 +698,11 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[right_group],
-                )
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 201)
 
@@ -744,15 +753,7 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-    @fixtures.use(
-        [
-            "soil_moisture_datastream_link",
-            "cr_1000_mount",
-            "user1",
-            "wrong_group",
-            "right_group",
-        ]
-    )
+    @fixtures.use
     def test_post_user_with_involved_device_in_wrong_group_only(
         self,
         soil_moisture_datastream_link,
@@ -760,10 +761,11 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
         user1,
         wrong_group,
         right_group,
+        membership_of_user1_in_right_group,
     ):
         """Ensure we can add involved devices even we are not allowed to edit them."""
         public_cr_1000 = cr_1000_mount.device
-        public_cr_1000.group_ids = [wrong_group]
+        public_cr_1000.group_ids = [wrong_group.id]
         db.session.add(public_cr_1000)
         db.session.commit()
 
@@ -788,26 +790,22 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[right_group],
-                )
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 201)
 
-    @fixtures.use(
-        ["soil_moisture_datastream_link", "cr_1000_mount", "user1", "right_group"]
-    )
+    @fixtures.use
     def test_post_user_with_involved_device_not_mounted(
-        self, soil_moisture_datastream_link, cr_1000_mount, user1, right_group
+        self,
+        soil_moisture_datastream_link,
+        cr_1000_mount,
+        user1,
+        right_group,
+        membership_of_user1_in_right_group,
     ):
         """Ensure we don't allow to create entries for involved devices if not mounted in right configuration."""
         other_configuration = Configuration(
@@ -843,18 +841,11 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[right_group],
-                )
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 409)
 
@@ -902,29 +893,20 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             }
         }
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[wrong_group],
-                )
-                response = self.client.patch(
-                    f"{self.url}/{cr_1000_involvement_for_soil_moisture_datastream_link.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            response = self.client.patch(
+                f"{self.url}/{cr_1000_involvement_for_soil_moisture_datastream_link.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
-    @fixtures.use(
-        [
-            "cr_1000_involvement_for_soil_moisture_datastream_link",
-            "user1",
-            "right_group",
-        ]
-    )
+    @fixtures.use
     def test_patch_user_in_right_group(
-        self, cr_1000_involvement_for_soil_moisture_datastream_link, user1, right_group
+        self,
+        cr_1000_involvement_for_soil_moisture_datastream_link,
+        user1,
+        right_group,
+        membership_of_user1_in_right_group,
     ):
         """Ensure we allow to patch if our user is member of the group."""
         id = cr_1000_involvement_for_soil_moisture_datastream_link.id
@@ -943,18 +925,11 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             }
         }
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[right_group],
-                )
-                response = self.client.patch(
-                    f"{self.url}/{id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            response = self.client.patch(
+                f"{self.url}/{id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
         reloaded_involved_device = (
@@ -1049,16 +1024,7 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             )
         self.assertEqual(response.status_code, 404)
 
-    @fixtures.use(
-        [
-            "right_group",
-            "public_configuration",
-            "contact1",
-            "tsm_endpoint",
-            "user1",
-            "cr_1000_involvement_for_soil_moisture_datastream_link",
-        ]
-    )
+    @fixtures.use
     def test_patch_to_datastream_with_same_permissions(
         self,
         right_group,
@@ -1067,6 +1033,7 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
         tsm_endpoint,
         user1,
         cr_1000_involvement_for_soil_moisture_datastream_link,
+        membership_of_user1_in_right_group,
     ):
         """Ensure we can change the datastream as long as we are allowed to edit it."""
         other_smt_100 = Device(
@@ -1074,7 +1041,7 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             is_public=True,
             is_internal=False,
             is_private=False,
-            group_ids=[right_group],
+            group_ids=[str(right_group.id)],
         )
         other_soil_moisture = DeviceProperty(
             property_name="Soil moisture",
@@ -1123,18 +1090,11 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             }
         }
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[right_group],
-                )
-                response = self.client.patch(
-                    f"{self.url}/{id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            response = self.client.patch(
+                f"{self.url}/{id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
         reloaded_involved_device = (
@@ -1170,7 +1130,7 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             is_public=True,
             is_internal=False,
             is_private=False,
-            group_ids=[wrong_group],
+            group_ids=[wrong_group.id],
         )
         other_soil_moisture = DeviceProperty(
             property_name="Soil moisture",
@@ -1180,7 +1140,7 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             label="Other configuration",
             is_public=True,
             is_internal=False,
-            cfg_permission_group=wrong_group,
+            cfg_permission_group=wrong_group.id,
         )
         other_smt_100_mount = DeviceMountAction(
             device=other_smt_100,
@@ -1226,31 +1186,14 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             }
         }
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[right_group],
-                )
-                response = self.client.patch(
-                    f"{self.url}/{id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            response = self.client.patch(
+                f"{self.url}/{id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
-    @fixtures.use(
-        [
-            "right_group",
-            "wrong_group",
-            "public_configuration",
-            "contact1",
-            "tsm_endpoint",
-            "user1",
-            "cr_1000_involvement_for_soil_moisture_datastream_link",
-        ]
-    )
+    @fixtures.use
     def test_patch_to_device_with_other_permissions(
         self,
         right_group,
@@ -1267,7 +1210,7 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             is_public=True,
             is_internal=False,
             is_private=False,
-            group_ids=[wrong_group],
+            group_ids=[wrong_group.id],
         )
         other_soil_moisture = DeviceProperty(
             property_name="Soil moisture",
@@ -1316,18 +1259,11 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             }
         }
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[right_group],
-                )
-                response = self.client.patch(
-                    f"{self.url}/{id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            response = self.client.patch(
+                f"{self.url}/{id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
         reloaded_involved_device = (
@@ -1338,20 +1274,14 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             new_device_id,
         )
 
-    @fixtures.use(
-        [
-            "right_group",
-            "contact1",
-            "user1",
-            "cr_1000_involvement_for_soil_moisture_datastream_link",
-        ]
-    )
+    @fixtures.use
     def test_patch_to_device_in_other_configuration(
         self,
         right_group,
         contact1,
         user1,
         cr_1000_involvement_for_soil_moisture_datastream_link,
+        membership_of_user1_in_right_group,
     ):
         """Ensure we can't change to a device in a another configuration."""
         other_cr_1000 = Device(
@@ -1359,13 +1289,13 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             is_public=True,
             is_internal=False,
             is_private=False,
-            group_ids=[right_group],
+            group_ids=[right_group.id],
         )
         other_configuration = Configuration(
             label="Other configuration",
             is_public=True,
             is_internal=False,
-            cfg_permission_group=right_group,
+            cfg_permission_group=right_group.id,
         )
         other_cr_1000_mount = DeviceMountAction(
             device=other_cr_1000,
@@ -1401,18 +1331,11 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             }
         }
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[right_group],
-                )
-                response = self.client.patch(
-                    f"{self.url}/{id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            response = self.client.patch(
+                f"{self.url}/{id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 409)
 
     @fixtures.use(["cr_1000_involvement_for_soil_moisture_datastream_link"])
@@ -1437,40 +1360,24 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
     ):
         """Ensure that we need a user in the group to delete the involved device."""
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[wrong_group],
-                )
-                response = self.client.delete(
-                    f"{self.url}/{cr_1000_involvement_for_soil_moisture_datastream_link.id}",
-                )
+            response = self.client.delete(
+                f"{self.url}/{cr_1000_involvement_for_soil_moisture_datastream_link.id}",
+            )
         self.assertEqual(response.status_code, 403)
 
-    @fixtures.use(
-        [
-            "cr_1000_involvement_for_soil_moisture_datastream_link",
-            "user1",
-            "right_group",
-        ]
-    )
+    @fixtures.use
     def test_delete_user_right_group(
-        self, cr_1000_involvement_for_soil_moisture_datastream_link, user1, right_group
+        self,
+        cr_1000_involvement_for_soil_moisture_datastream_link,
+        user1,
+        right_group,
+        membership_of_user1_in_right_group,
     ):
         """Ensure that we need delete if the user is in the right group."""
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[right_group],
-                )
-                response = self.client.delete(
-                    f"{self.url}/{cr_1000_involvement_for_soil_moisture_datastream_link.id}",
-                )
+            response = self.client.delete(
+                f"{self.url}/{cr_1000_involvement_for_soil_moisture_datastream_link.id}",
+            )
         self.assertEqual(response.status_code, 200)
 
         reloaded = (
@@ -1521,31 +1428,22 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             )
         self.assertEqual(response.status_code, 404)
 
-    @fixtures.use(
-        [
-            "cr_1000_involvement_for_soil_moisture_datastream_link",
-            "user1",
-            "right_group",
-        ]
-    )
+    @fixtures.use
     def test_delete_datastream_link_with_existing_involved_devices(
-        self, cr_1000_involvement_for_soil_moisture_datastream_link, user1, right_group
+        self,
+        cr_1000_involvement_for_soil_moisture_datastream_link,
+        user1,
+        right_group,
+        membership_of_user1_in_right_group,
     ):
         """Ensure that we can delete the datastream link with existing involved devices."""
         datastream_id = (
             cr_1000_involvement_for_soil_moisture_datastream_link.datastream_link_id
         )
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[right_group],
-                )
-                response = self.client.delete(
-                    f"{base_url}/datastream-links/{datastream_id}",
-                )
+            response = self.client.delete(
+                f"{base_url}/datastream-links/{datastream_id}",
+            )
         self.assertEqual(response.status_code, 200)
 
         count_of_remaining_involved_device_for_datastream_link = (

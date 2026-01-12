@@ -24,8 +24,8 @@ export class PermissionGroupApi {
     this.serializer = new PermissionGroupSerializer()
   }
 
-  async findAll (useFrontendCache: boolean = false, skipBackendCache: boolean = false): Promise<PermissionGroup[]> {
-    const response = await this.axiosApi.get(this.basePath, { params: { skip_cache: skipBackendCache } })
+  async findAll (useFrontendCache: boolean = false): Promise<PermissionGroup[]> {
+    const response = await this.axiosApi.get(this.basePath)
     if (useFrontendCache && this.cachedItems.length) {
       return this.cachedItems
     }

@@ -9,17 +9,72 @@
 """Test classes & functions for the userinfo endpoint."""
 import datetime
 import json
-from unittest import skipIf
-from unittest.mock import patch
-
-from flask import current_app
 
 from project import base_url
-from project.api.models import Contact, User
+from project.api.models import Contact, PermissionGroup, PermissionGroupMembership, User
 from project.api.models.base_model import db
-from project.extensions.instances import idl
-from project.tests.base import BaseTestCase, create_token
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
+from project.tests.base import BaseTestCase, Fixtures
+
+fixtures = Fixtures()
+
+
+@fixtures.register("group1", scope=lambda: db.session)
+def create_group1():
+    """Create a permission group."""
+    result = PermissionGroup(name="group1", entitlement="group1")
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("group2", scope=lambda: db.session)
+def create_group2():
+    """Create another permission group."""
+    result = PermissionGroup(name="group2", entitlement="group2")
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("contact1", scope=lambda: db.session)
+def create_contact1():
+    """Create a single contact so that it can be used within the tests."""
+    result = Contact(
+        given_name="first", family_name="contact", email="first.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("user1", scope=lambda: db.session)
+@fixtures.use(["contact1"])
+def create_user1(contact1):
+    """Create a normal user to use it in the tests."""
+    result = User(contact=contact1, subject=contact1.email)
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("membership_of_user1_in_group1", scope=lambda: db.session)
+@fixtures.use(["user1", "group1"])
+def create_membership_of_user1_in_group1(user1, group1):
+    """Create a permission group."""
+    result = PermissionGroupMembership(user=user1, permission_group=group1)
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("membership_of_user1_in_group2", scope=lambda: db.session)
+@fixtures.use(["user1", "group2"])
+def create_membership_of_user1_in_group2(user1, group2):
+    """Create a permission group."""
+    result = PermissionGroupMembership(user=user1, permission_group=group2)
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 class TestUserinfo(BaseTestCase):
@@ -32,73 +87,58 @@ class TestUserinfo(BaseTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 401)
 
-    @skipIf(
-        not current_app.config["IDL_URL"],
-        "will not work without idl url configuration.",
-    )
-    def test_get_with_jwt_user_not_assigned_to_any_permission_group(self):
+    @fixtures.use
+    def test_get_with_user_not_assigned_to_any_permission_group(self, user1):
         """Ensure response with an empty list if user not assigned to any permission group."""
-        access_headers = create_token()
-        response = self.client.get(self.url, headers=access_headers)
+        with self.run_requests_as(user1):
+            response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         data = response.json["data"]
-        self.assertEqual(data["attributes"]["admin"], [])
         self.assertEqual(data["attributes"]["member"], [])
 
-    def test_get_with_jwt_user_is_assigned_to_permission_groups(self):
+    @fixtures.use
+    def test_get_with_user_is_assigned_to_permission_groups(
+        self,
+        user1,
+        group1,
+        group2,
+        membership_of_user1_in_group1,
+        membership_of_user1_in_group2,
+    ):
         """Ensure response with an empty list if user not assigned to any permission group."""
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.get(
-                    f"{self.url}?include=device,contact,parent_platform,configuration",
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+        with self.run_requests_as(user1):
+            response = self.client.get(
+                f"{self.url}?include=device,contact,parent_platform,configuration",
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
         data = response.json["data"]
-        self.assertEqual(data["attributes"]["admin"], ["1"])
-        self.assertEqual(data["attributes"]["member"], ["2", "3"])
+        self.assertEqual(data["attributes"]["member"], [str(group1.id), str(group2.id)])
 
-    def test_post_not_allowed(self):
+    @fixtures.use
+    def test_post_not_allowed(self, user1):
         """Ensure post request not allowed."""
-        access_headers = create_token()
         data = {}
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+        with self.run_requests_as(user1):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 405)
         data = response.json
         self.assertEqual(data["errors"][0]["source"], "endpoint is readonly")
 
-    def test_get_includes_apikey(self):
+    @fixtures.use
+    def test_get_includes_apikey(self, user1):
         """Test that we include the apikey in the payload."""
-        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
-        user = User(subject="dummy", contact=contact, apikey="1234")
-        db.session.add_all([contact, user])
+        user1.apikey = "1234"
+        db.session.add_all([user1])
         db.session.commit()
-        with self.run_requests_as(user):
-            with patch.object(
-                idl, "get_all_permission_groups_for_a_user"
-            ) as test_get_all_permission_groups_for_a_user:
-                test_get_all_permission_groups_for_a_user.return_value = (
-                    IDL_USER_ACCOUNT
-                )
-                with self.client:
-                    response = self.client.get(
-                        self.url,
-                    )
+        with self.run_requests_as(user1):
+            response = self.client.get(
+                self.url,
+            )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["apikey"], "1234")
         # And we check that we use the export control setting.
@@ -106,135 +146,82 @@ class TestUserinfo(BaseTestCase):
             response.json["data"]["attributes"]["is_export_control"], False
         )
 
-    def test_get_includes_export_control(self):
+    @fixtures.use
+    def test_get_includes_export_control(self, user1):
         """Test that we include the export control in the payload."""
-        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
-        user = User(subject="dummy", contact=contact, is_export_control=True)
-        db.session.add_all([contact, user])
+        user1.is_export_control = True
+
+        db.session.add_all([user1])
         db.session.commit()
-        with self.run_requests_as(user):
-            with patch.object(
-                idl, "get_all_permission_groups_for_a_user"
-            ) as test_get_all_permission_groups_for_a_user:
-                test_get_all_permission_groups_for_a_user.return_value = (
-                    IDL_USER_ACCOUNT
-                )
-                with self.client:
-                    response = self.client.get(
-                        self.url,
-                    )
+
+        with self.run_requests_as(user1):
+            response = self.client.get(
+                self.url,
+            )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["is_export_control"], True)
 
-    def test_get_includes_contact_id(self):
+    @fixtures.use
+    def test_get_includes_contact_id(self, user1):
         """Test that we include the contact id in the payload."""
-        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
-        user = User(subject="dummy", contact=contact)
-        db.session.add_all([contact, user])
-        db.session.commit()
-        with self.run_requests_as(user):
-            with patch.object(
-                idl, "get_all_permission_groups_for_a_user"
-            ) as test_get_all_permission_groups_for_a_user:
-                test_get_all_permission_groups_for_a_user.return_value = (
-                    IDL_USER_ACCOUNT
-                )
-                with self.client:
-                    response = self.client.get(
-                        self.url,
-                    )
+        with self.run_requests_as(user1):
+            response = self.client.get(
+                self.url,
+            )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.json["data"]["relationships"]["contact"]["data"]["id"],
-            str(contact.id),
+            str(user1.contact.id),
         )
 
-    def test_get_id_is_string(self):
-        """Test that we the id is of type string."""
-        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
-        user = User(subject="dummy", contact=contact)
-        db.session.add_all([contact, user])
-        db.session.commit()
-        with self.run_requests_as(user):
-            with patch.object(
-                idl, "get_all_permission_groups_for_a_user"
-            ) as test_get_all_permission_groups_for_a_user:
-                test_get_all_permission_groups_for_a_user.return_value = (
-                    IDL_USER_ACCOUNT
-                )
-                with self.client:
-                    response = self.client.get(
-                        self.url,
-                    )
+    @fixtures.use
+    def test_get_id_is_string(self, user1):
+        """Test that the id is of type string."""
+        with self.run_requests_as(user1):
+            response = self.client.get(
+                self.url,
+            )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json["data"]["id"], str(user.id))
+        self.assertEqual(response.json["data"]["id"], str(user1.id))
 
-    def test_get_includes_subject(self):
+    @fixtures.use
+    def test_get_includes_subject(self, user1):
         """Ensure we also give out the subject in the payload."""
-        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
-        user = User(subject="dummy", contact=contact)
-        db.session.add_all([contact, user])
-        db.session.commit()
-        with self.run_requests_as(user):
-            with patch.object(
-                idl, "get_all_permission_groups_for_a_user"
-            ) as test_get_all_permission_groups_for_a_user:
-                test_get_all_permission_groups_for_a_user.return_value = (
-                    IDL_USER_ACCOUNT
-                )
-                with self.client:
-                    response = self.client.get(
-                        self.url,
-                    )
+        with self.run_requests_as(user1):
+            response = self.client.get(
+                self.url,
+            )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["subject"], "dummy")
 
-    def test_get_includes_terms_of_use_agreement_date(self):
+    @fixtures.use
+    def test_get_includes_terms_of_use_agreement_date(self, user1):
         """Ensure that we give out the agreement date in the payload."""
-        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
-        user = User(
-            subject="dummy",
-            contact=contact,
-            terms_of_use_agreement_date=datetime.datetime(
-                2023, 2, 28, 12, 0, 0, tzinfo=datetime.timezone.utc
-            ),
+        user1.terms_of_use_agreement_date = datetime.datetime(
+            2023, 2, 28, 12, 0, 0, tzinfo=datetime.timezone.utc
         )
-        db.session.add_all([contact, user])
+        db.session.add_all([user1])
         db.session.commit()
-        with self.run_requests_as(user):
-            with patch.object(
-                idl, "get_all_permission_groups_for_a_user"
-            ) as test_get_all_permission_groups_for_a_user:
-                test_get_all_permission_groups_for_a_user.return_value = (
-                    IDL_USER_ACCOUNT
-                )
-                with self.client:
-                    response = self.client.get(
-                        self.url,
-                    )
+        with self.run_requests_as(user1):
+            response = self.client.get(
+                self.url,
+            )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.json["data"]["attributes"]["terms_of_use_agreement_date"],
             "2023-02-28T12:00:00+00:00",
         )
 
-    def test_get_includes_terms_of_use_agreement_date_not_set(self):
+    @fixtures.use
+    def test_get_includes_terms_of_use_agreement_date_not_set(self, user1):
         """Ensure that we give out the null agreement date (not set yet)."""
-        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
-        user = User(subject="dummy", contact=contact, terms_of_use_agreement_date=None)
-        db.session.add_all([contact, user])
+        user1.terms_of_use_agreement_date = None
+        db.session.add_all([user1])
         db.session.commit()
-        with self.run_requests_as(user):
-            with patch.object(
-                idl, "get_all_permission_groups_for_a_user"
-            ) as test_get_all_permission_groups_for_a_user:
-                test_get_all_permission_groups_for_a_user.return_value = (
-                    IDL_USER_ACCOUNT
-                )
-                with self.client:
-                    response = self.client.get(
-                        self.url,
-                    )
+        with self.run_requests_as(user1):
+            response = self.client.get(
+                self.url,
+            )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.json["data"]["attributes"]["terms_of_use_agreement_date"], None

@@ -11,15 +11,44 @@
 import json
 
 from project import base_url, db
-from project.api.models import Contact, Platform, PlatformSoftwareUpdateAction
+from project.api.models import Contact, Platform, PlatformSoftwareUpdateAction, User
 from project.extensions.instances import mqtt
-from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
+from project.tests.base import (
+    BaseTestCase,
+    Fixtures,
+    create_token,
+    fake,
+    generate_userinfo_data,
+)
 from project.tests.models.test_software_update_actions_attachment_model import (
     add_platform_software_update_action_attachment_model,
 )
 from project.tests.models.test_software_update_actions_model import (
     add_platform_software_update_action_model,
 )
+
+fixtures = Fixtures()
+
+
+@fixtures.register("contact1", scope=lambda: db.session)
+def create_contact1():
+    """Create a single contact so that it can be used within the tests."""
+    result = Contact(
+        given_name="first", family_name="contact", email="first.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("user1", scope=lambda: db.session)
+@fixtures.use(["contact1"])
+def create_user1(contact1):
+    """Create a normal user to use it in the tests."""
+    result = User(contact=contact1, subject=contact1.email)
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 class TestPlatformSoftwareUpdateAction(BaseTestCase):
@@ -46,7 +75,8 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
             response.json["data"][0]["id"], str(platform_software_update_action.id)
         )
 
-    def test_post_platform_software_update_action(self):
+    @fixtures.use
+    def test_post_platform_software_update_action(self, user1):
         """Create PlatformSoftwareUpdateAction."""
         userinfo = generate_userinfo_data()
         platform = Platform(
@@ -81,11 +111,12 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
-            url=f"{self.url}?include=platform,contact",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().add_object(
+                url=f"{self.url}?include=platform,contact",
+                data_object=data,
+                object_type=self.object_type,
+            )
         # Reload
         platform = db.session.query(Platform).filter_by(id=platform.id).first()
         self.assertEqual(platform.update_description, "create;software update action")
@@ -103,7 +134,8 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         )
         self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
-    def test_update_platform_software_update_action(self):
+    @fixtures.use
+    def test_update_platform_software_update_action(self, user1):
         """Update PlatformSoftwareUpdateAction."""
         platform_software_update_action = add_platform_software_update_action_model()
         platform_software_update_action_updated = {
@@ -115,11 +147,12 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
                 },
             }
         }
-        _ = super().update_object(
-            url=f"{self.url}/{platform_software_update_action.id}",
-            data_object=platform_software_update_action_updated,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().update_object(
+                url=f"{self.url}/{platform_software_update_action.id}",
+                data_object=platform_software_update_action_updated,
+                object_type=self.object_type,
+            )
         # Reload
         platform = (
             db.session.query(Platform)

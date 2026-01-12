@@ -9,16 +9,19 @@
 """Tests for the device property endpoints."""
 
 import json
-from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Contact, Device, DeviceProperty, User
+from project.api.models import (
+    Contact,
+    Device,
+    DeviceProperty,
+    PermissionGroup,
+    PermissionGroupMembership,
+    User,
+)
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 from project.tests.permissions.test_customfields import create_a_test_device
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def device_properties_model(public=True, private=False, internal=False, group_ids=None):
@@ -67,6 +70,30 @@ class TestDevicePropertyServices(BaseTestCase):
 
     url = base_url + "/device-properties"
 
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                normal_contact,
+                self.normal_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
+
     def test_get_public_device_property_api(self):
         """Ensure that we can get a list of public device properties."""
         _ = device_properties_model()
@@ -103,7 +130,7 @@ class TestDevicePropertyServices(BaseTestCase):
 
     def test_post_device_property_api(self):
         """Ensure that we can add a device property."""
-        device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device = create_a_test_device([str(self.permission_group.id)])
         self.assertTrue(device.id is not None)
 
         count_device_properties = (
@@ -128,17 +155,12 @@ class TestDevicePropertyServices(BaseTestCase):
                 },
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 201)
         device_properties = query_result_to_list(
             db.session.query(DeviceProperty).filter_by(
@@ -158,7 +180,7 @@ class TestDevicePropertyServices(BaseTestCase):
 
     def test_post_device_property_for_archived_device(self):
         """Ensure that we can' add for an archived device."""
-        device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device = create_a_test_device([str(self.permission_group.id)])
         device.archived = True
         db.session.add(device)
         db.session.commit()
@@ -177,23 +199,18 @@ class TestDevicePropertyServices(BaseTestCase):
                 },
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_device_property_api(self):
         """Ensure that we can update a device property."""
-        device1 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
-        device2 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device1 = create_a_test_device([str(self.permission_group.id)])
+        device2 = create_a_test_device([str(self.permission_group.id)])
 
         device_property1 = DeviceProperty(
             label="property 1",
@@ -216,18 +233,13 @@ class TestDevicePropertyServices(BaseTestCase):
                 },
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url_patch = base_url + "/device-properties/" + str(device_property1.id)
-                response = self.client.patch(
-                    url_patch,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            url_patch = base_url + "/device-properties/" + str(device_property1.id)
+            response = self.client.patch(
+                url_patch,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 200)
 
@@ -239,8 +251,8 @@ class TestDevicePropertyServices(BaseTestCase):
 
     def test_patch_device_property_for_archived_source_device(self):
         """Ensure we can't update a device property for an archived device."""
-        device1 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
-        device2 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device1 = create_a_test_device([str(self.permission_group.id)])
+        device2 = create_a_test_device([str(self.permission_group.id)])
 
         device_property1 = DeviceProperty(
             label="property 1",
@@ -264,25 +276,20 @@ class TestDevicePropertyServices(BaseTestCase):
                 },
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url_patch = base_url + "/device-properties/" + str(device_property1.id)
-                response = self.client.patch(
-                    url_patch,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            url_patch = base_url + "/device-properties/" + str(device_property1.id)
+            response = self.client.patch(
+                url_patch,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 403)
 
     def test_patch_device_property_for_archived_target_device(self):
         """Ensure we can't update a device property for an archived target device."""
-        device1 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
-        device2 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device1 = create_a_test_device([str(self.permission_group.id)])
+        device2 = create_a_test_device([str(self.permission_group.id)])
 
         device_property1 = DeviceProperty(
             label="property 1",
@@ -306,18 +313,13 @@ class TestDevicePropertyServices(BaseTestCase):
                 },
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url_patch = base_url + "/device-properties/" + str(device_property1.id)
-                response = self.client.patch(
-                    url_patch,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            url_patch = base_url + "/device-properties/" + str(device_property1.id)
+            response = self.client.patch(
+                url_patch,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 403)
 
@@ -329,7 +331,7 @@ class TestDevicePropertyServices(BaseTestCase):
             is_public=False,
             is_private=False,
             is_internal=True,
-            group_ids=IDL_USER_ACCOUNT.administrated_permission_groups,
+            group_ids=[str(self.permission_group.id)],
         )
         device_property = DeviceProperty(
             label="device property1",
@@ -338,18 +340,13 @@ class TestDevicePropertyServices(BaseTestCase):
         )
         db.session.add_all([device, device_property])
         db.session.commit()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    self.url + "/" + str(device_property.id),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                self.url + "/" + str(device_property.id),
+                content_type="application/vnd.api+json",
+            )
 
-            self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         device_reloaded = db.session.query(Device).filter_by(id=device.id).first()
         msg = "delete;measured quantity"
         self.assertEqual(msg, device_reloaded.update_description)
@@ -361,7 +358,7 @@ class TestDevicePropertyServices(BaseTestCase):
             is_public=False,
             is_private=False,
             is_internal=True,
-            group_ids=IDL_USER_ACCOUNT.administrated_permission_groups,
+            group_ids=[str(self.permission_group.id)],
             archived=True,
         )
         device_property = DeviceProperty(
@@ -371,17 +368,11 @@ class TestDevicePropertyServices(BaseTestCase):
         )
         db.session.add_all([device, device_property])
         db.session.commit()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    self.url + "/" + str(device_property.id),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
-
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                self.url + "/" + str(device_property.id),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_to_non_editable_device(self):
@@ -391,14 +382,14 @@ class TestDevicePropertyServices(BaseTestCase):
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id)],
         )
         device2 = Device(
             short_name="device2",
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["2"],
+            group_ids=[str(self.other_group.id)],
         )
         contact = Contact(
             given_name="first",
@@ -410,11 +401,7 @@ class TestDevicePropertyServices(BaseTestCase):
             property_name="Temp",
             property_uri="something",
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([device1, device2, contact, user, dv_property])
+        db.session.add_all([device1, device2, contact, dv_property])
         db.session.commit()
 
         payload = {
@@ -435,18 +422,10 @@ class TestDevicePropertyServices(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[*device1.group_ids],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{dv_property.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{dv_property.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

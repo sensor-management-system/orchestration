@@ -11,7 +11,7 @@
 import json
 
 from project import base_url
-from project.api.models import Contact, Device, DeviceSoftwareUpdateAction
+from project.api.models import Contact, Device, DeviceSoftwareUpdateAction, User
 from project.api.models.base_model import db
 from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
@@ -25,6 +25,16 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
 
     url = base_url + "/device-software-update-actions"
     object_type = "device_software_update_action"
+
+    def setUp(self):
+        """Set some data up for the tests."""
+        super().setUp()
+        contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(contact=contact, subject=contact.email)
+        db.session.add_all([contact, self.normal_user])
+        db.session.commit()
 
     def test_get_device_software_update_action(self):
         """Ensure the GET /device_software_update_action route reachable."""
@@ -76,11 +86,12 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
                 },
             }
         }
-        result = super().add_object(
-            url=f"{self.url}?include=device,contact",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            result = super().add_object(
+                url=f"{self.url}?include=device,contact",
+                data_object=data,
+                object_type=self.object_type,
+            )
         device_id = result["data"]["relationships"]["device"]["data"]["id"]
         device = db.session.query(Device).filter_by(id=device_id).first()
         self.assertEqual(device.update_description, "create;software update action")
@@ -108,11 +119,12 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
                 },
             }
         }
-        result = super().update_object(
-            url=f"{self.url}/{device_software_update_action.id}",
-            data_object=device_software_update_action_updated,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            result = super().update_object(
+                url=f"{self.url}/{device_software_update_action.id}",
+                data_object=device_software_update_action_updated,
+                object_type=self.object_type,
+            )
         device_id = result["data"]["relationships"]["device"]["data"]["id"]
         device = db.session.query(Device).filter_by(id=device_id).first()
         self.assertEqual(device.update_description, "update;software update action")
