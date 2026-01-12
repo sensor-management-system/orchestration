@@ -92,6 +92,27 @@ def create_super_user(super_user_contact):
     return result
 
 
+@fixtures.register("contact1", scope=lambda: db.session)
+def create_contact1():
+    """Create a single contact so that it can be used within the tests."""
+    result = Contact(
+        given_name="first", family_name="contact", email="first.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("user1", scope=lambda: db.session)
+@fixtures.use(["contact1"])
+def create_user1(contact1):
+    """Create a normal user to use it in the tests."""
+    result = User(contact=contact1, subject=contact1.email)
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
 class TestConfigurationStaticLocationActionServices(BaseTestCase):
     """Tests for the ConfigurationStaticLocationAction endpoint."""
 
@@ -120,7 +141,8 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             data["data"][0]["attributes"]["begin_description"],
         )
 
-    def test_add_configuration_static_begin_location_action(self):
+    @fixtures.use
+    def test_add_configuration_static_begin_location_action(self, user1):
         """
         Ensure that we can create a new static location.
 
@@ -131,11 +153,12 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             "test configuration_static_location_begin_action"
         )
 
-        result = super().add_object(
-            url=self.url,
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            result = super().add_object(
+                url=self.url,
+                data_object=data,
+                object_type=self.object_type,
+            )
 
         configuration_id = result["data"]["relationships"]["configuration"]["data"][
             "id"
@@ -148,14 +171,17 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         )
         # But we can't add another one with the very same settings, as
         # the exact configuration has already the location for the time slot
-        self.try_add_object_with_status_code(
-            url=self.url,
-            data_object=data,
-            expected_status_code=409,  # 409 => ConflictError
-        )
+        with self.run_requests_as(user1):
+            self.try_add_object_with_status_code(
+                url=self.url,
+                data_object=data,
+                expected_status_code=409,  # 409 => ConflictError
+            )
 
+    @fixtures.use
     def test_post_configuration_static_begin_location_action_for_archived_configuration(
         self,
+        user1,
     ):
         """Ensure we can't add a location to an archived configuration."""
         data, _ = self.prepare_request_data(
@@ -171,9 +197,10 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         db.session.add(configuration)
         db.session.commit()
 
-        _ = super().try_add_object_with_status_code(
-            url=self.url, data_object=data, expected_status_code=403
-        )
+        with self.run_requests_as(user1):
+            _ = super().try_add_object_with_status_code(
+                url=self.url, data_object=data, expected_status_code=403
+            )
 
     def prepare_request_data(self, description):
         """Return a payload to create a static location action later."""
@@ -214,7 +241,8 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         }
         return data, config
 
-    def test_update_configuration_static_begin_location_action(self):
+    @fixtures.use
+    def test_update_configuration_static_begin_location_action(self, user1):
         """Ensure a configuration_static_begin_location_action can be updated."""
         static_location_begin_action = add_static_location_begin_action_model()
         userinfo = generate_userinfo_data()
@@ -229,9 +257,10 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
                 },
             }
         }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
-        )
+        with self.run_requests_as(user1):
+            contact = super().add_object(
+                url=self.contact_url, data_object=contact_data, object_type="contact"
+            )
         new_data = {
             "data": {
                 "type": self.object_type,
@@ -248,11 +277,12 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             }
         }
 
-        result = super().update_object(
-            url=f"{self.url}/{static_location_begin_action.id}",
-            data_object=new_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            result = super().update_object(
+                url=f"{self.url}/{static_location_begin_action.id}",
+                data_object=new_data,
+                object_type=self.object_type,
+            )
         configuration_id = result["data"]["relationships"]["configuration"]["data"][
             "id"
         ]
@@ -263,7 +293,8 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             configuration.update_description, "update;static location action"
         )
 
-    def test_update_for_archived_configuration(self):
+    @fixtures.use
+    def test_update_for_archived_configuration(self, user1):
         """Ensure a configuration_static_begin_location_action can be updated."""
         static_location_begin_action = add_static_location_begin_action_model()
 
@@ -279,9 +310,10 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
                 },
             }
         }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
-        )
+        with self.run_requests_as(user1):
+            contact = super().add_object(
+                url=self.contact_url, data_object=contact_data, object_type="contact"
+            )
         new_data = {
             "data": {
                 "type": self.object_type,
@@ -301,14 +333,16 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         db.session.add(static_location_begin_action.configuration)
         db.session.commit()
 
-        _ = super().try_update_object_with_status_code(
-            url=f"{self.url}/{static_location_begin_action.id}",
-            data_object=new_data,
-            expected_status_code=403,
-        )
+        with self.run_requests_as(user1):
+            _ = super().try_update_object_with_status_code(
+                url=f"{self.url}/{static_location_begin_action.id}",
+                data_object=new_data,
+                expected_status_code=403,
+            )
 
+    @fixtures.use
     def test_update_configuration_static_begin_location_action_set_end_contact_to_none(
-        self,
+        self, user1
     ):
         """Ensure that we can reset the end_contact if necessary."""
         static_location_begin_action = add_static_location_begin_action_model()
@@ -324,9 +358,10 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
                 },
             }
         }
-        contact_result = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
-        )
+        with self.run_requests_as(user1):
+            contact_result = super().add_object(
+                url=self.contact_url, data_object=contact_data, object_type="contact"
+            )
         contact = (
             db.session.query(Contact).filter_by(id=contact_result["data"]["id"]).one()
         )
@@ -352,14 +387,16 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             }
         }
 
-        _ = super().update_object(
-            url=f"{self.url}/{static_location_begin_action.id}",
-            data_object=new_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().update_object(
+                url=f"{self.url}/{static_location_begin_action.id}",
+                data_object=new_data,
+                object_type=self.object_type,
+            )
 
+    @fixtures.use
     def test_update_configuration_static_location_fail_due_to_overlapping_times_for_locations(
-        self,
+        self, user1
     ):
         """Ensure that patching fails if there is already a location for the time."""
         static_location_begin_action1 = add_static_location_begin_action_model()
@@ -397,20 +434,23 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             }
         }
 
-        _ = super().try_update_object_with_status_code(
-            url=f"{self.url}/{static_location_begin_action1.id}",
-            data_object=updated_data,
-            expected_status_code=409,
-        )
+        with self.run_requests_as(user1):
+            _ = super().try_update_object_with_status_code(
+                url=f"{self.url}/{static_location_begin_action1.id}",
+                data_object=updated_data,
+                expected_status_code=409,
+            )
 
-    def test_delete_configuration_static_begin_location_action(self):
+    @fixtures.use
+    def test_delete_configuration_static_begin_location_action(self, user1):
         """Ensure a configuration_static_begin_location_action can be deleted."""
         static_location_begin_action = add_static_location_begin_action_model()
         configuration_id = static_location_begin_action.configuration_id
 
-        _ = super().delete_object(
-            url=f"{self.url}/{static_location_begin_action.id}",
-        )
+        with self.run_requests_as(user1):
+            _ = super().delete_object(
+                url=f"{self.url}/{static_location_begin_action.id}",
+            )
         configuration = (
             db.session.query(Configuration).filter_by(id=configuration_id).first()
         )
@@ -436,22 +476,25 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             )
         self.assertEqual(response.status_code, 403)
 
-    def test_filtered_by_configuration(self):
+    @fixtures.use
+    def test_filtered_by_configuration(self, user1):
         """Ensure that filter by a specific configuration works well."""
         data1, config1 = self.prepare_request_data("test static_location_begin_action1")
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data1,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data1,
+                object_type=self.object_type,
+            )
         data2, config2 = self.prepare_request_data("test static_location_begin_action2")
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data2,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data2,
+                object_type=self.object_type,
+            )
 
         with self.client:
             response = self.client.get(
@@ -474,22 +517,25 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             "test static_location_begin_action1",
         )
 
-    def test_filtered_by_configuration_id(self):
+    @fixtures.use
+    def test_filtered_by_configuration_id(self, user1):
         """Ensure that filter by filter[configuration_id]."""
         data1, config1 = self.prepare_request_data("test static_location_begin_action1")
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data1,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data1,
+                object_type=self.object_type,
+            )
         data2, config2 = self.prepare_request_data("test static_location_begin_action2")
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data2,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data2,
+                object_type=self.object_type,
+            )
 
         # Test only for the first one
         with self.client:
@@ -507,7 +553,8 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             "test static_location_begin_action1",
         )
 
-    def test_filtered_by_site(self):
+    @fixtures.use
+    def test_filtered_by_site(self, user1):
         """Ensure that filter by a specific site works well."""
         site1 = Site(label="test site 1")
         data1, config1 = self.prepare_request_data("test static_location_begin_action1")
@@ -515,22 +562,24 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         db.session.add_all([config1, site1])
         db.session.commit()
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data1,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data1,
+                object_type=self.object_type,
+            )
         site2 = Site(label="test site 2")
         data2, config2 = self.prepare_request_data("test static_location_begin_action2")
         config2.site = site2
         db.session.add_all([config2, site2])
         db.session.commit()
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data2,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data2,
+                object_type=self.object_type,
+            )
 
         with self.client:
             response = self.client.get(

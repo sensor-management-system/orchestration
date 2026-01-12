@@ -478,13 +478,11 @@ class BaseTestCase(TestCase, ExpectMixin):
 
     def add_object(self, url, data_object, object_type):
         """Ensure a new object can be added to the database."""
-        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 url,
                 data=json.dumps(data_object),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 201)
@@ -520,14 +518,11 @@ class BaseTestCase(TestCase, ExpectMixin):
 
     def update_object(self, url, data_object, object_type):
         """Ensure an old object can be updated."""
-        access_headers = create_token()
-        with self.client:
-            response = self.client.patch(
-                url,
-                data=json.dumps(data_object),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
+        response = self.client.patch(
+            url,
+            data=json.dumps(data_object),
+            content_type="application/vnd.api+json",
+        )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertIn(object_type, data["data"]["type"])

@@ -20,11 +20,9 @@ export interface IUserInfo {
   isExportControl: boolean
   contactId: string | null
   member: PermissionGroupId[]
-  admin: PermissionGroupId[]
   apikey: string | null
   termsOfUseAgreementDate: DateTime | null
   isMemberOf(group: PermissionGroup): boolean
-  isAdminOf(group: PermissionGroup): boolean
 }
 
 const isGroupIdMatching = (groupId: PermissionGroupId, group: PermissionGroup) => group.id === groupId
@@ -36,7 +34,6 @@ export class UserInfo implements IUserInfo {
   private _isExportControl: boolean = false
   private _contactId: string | null = null
   private _member: PermissionGroupId[] = []
-  private _admin: PermissionGroupId[] = []
   private _apikey: string | null = null
   private _termsOfUseAgreementDate: DateTime | null = null
 
@@ -92,18 +89,6 @@ export class UserInfo implements IUserInfo {
     return this.member.find(someGroup => isGroupIdMatching(someGroup, group)) !== undefined
   }
 
-  get admin (): PermissionGroupId[] {
-    return this._admin
-  }
-
-  set admin (admin: PermissionGroupId[]) {
-    this._admin = admin
-  }
-
-  isAdminOf (group: PermissionGroup): boolean {
-    return this.admin.find(someGroup => isGroupIdMatching(someGroup, group)) !== undefined
-  }
-
   get apikey (): string | null {
     return this._apikey
   }
@@ -147,9 +132,6 @@ export class UserInfo implements IUserInfo {
     if (someObject.member?.length) {
       userinfo.member = someObject.member.map(i => i)
     }
-    if (someObject.admin?.length) {
-      userinfo.admin = someObject.admin.map(i => i)
-    }
     if (someObject.apikey) {
       userinfo.apikey = someObject.apikey
     }
@@ -162,17 +144,15 @@ export class UserInfo implements IUserInfo {
 
 /**
  * A class that wraps the `UserInfo` class by forbidding setting properties and
- * enriching member and admin groups with full PermissionGroup instances
+ * enriching member groups with full PermissionGroup instances
  */
 export class DetailedUserInfo {
   private _userInfo: UserInfo
   private _member: PermissionGroup[] = []
-  private _admin: PermissionGroup[] = []
 
   constructor (userInfo: UserInfo = new UserInfo(), permissionGroups: PermissionGroup[] = []) {
     this._userInfo = userInfo
     this._member = permissionGroups.filter(group => this._userInfo.isMemberOf(group))
-    this._admin = permissionGroups.filter(group => this._userInfo.isAdminOf(group))
   }
 
   get id (): string | null {
@@ -195,18 +175,9 @@ export class DetailedUserInfo {
     return this._userInfo.isMemberOf(group)
   }
 
-  get admin (): PermissionGroup[] {
-    return this._admin
-  }
-
-  isAdminOf (group: PermissionGroup): boolean {
-    return this._userInfo.isAdminOf(group)
-  }
-
   get groups (): PermissionGroup[] {
     return [
-      ...this.member,
-      ...this.admin.filter(adminGroup => !this.member.find(memberGroup => memberGroup.equals(adminGroup)))
+      ...this.member
     ]
   }
 }

@@ -21,7 +21,6 @@ describe('UserInfoSerializer', () => {
             is_superuser: false,
             is_export_control: true,
             member: ['123', '456'],
-            admin: ['789'],
             terms_of_use_agreement_date: null
           },
           id: '1',
@@ -47,7 +46,6 @@ describe('UserInfoSerializer', () => {
         isSuperUser: false,
         isExportControl: true,
         member: ['123', '456'],
-        admin: ['789'],
         contactId: '1234',
         termsOfUseAgreementDate: null
       })
@@ -66,7 +64,6 @@ describe('UserInfoSerializer', () => {
             is_superuser: false,
             is_export_control: false,
             member: ['123', '456'],
-            admin: ['789'],
             terms_of_use_agreement_date: '2023-02-28T16:15:14+00:00'
           },
           id: '1',
@@ -92,7 +89,6 @@ describe('UserInfoSerializer', () => {
         isSuperUser: false,
         isExportControl: false,
         member: ['123', '456'],
-        admin: ['789'],
         contactId: '1234',
         termsOfUseAgreementDate: DateTime.utc(2023, 2, 28, 16, 15, 14)
       })

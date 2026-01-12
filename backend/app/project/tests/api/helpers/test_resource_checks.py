@@ -16,6 +16,7 @@ from project.api.models import (
     Device,
     DeviceMountAction,
     DeviceProperty,
+    User,
 )
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
@@ -53,7 +54,8 @@ class TestDevicePropertyValidator(BaseTestCase):
             family_name=userinfo["family_name"],
             email=userinfo["email"],
         )
-        db.session.add_all([device, property, contact, config])
+        user = User(contact=contact, subject=contact.email)
+        db.session.add_all([device, property, contact, config, user])
         db.session.commit()
         data = {
             "data": {
@@ -92,11 +94,12 @@ class TestDevicePropertyValidator(BaseTestCase):
         db.session.add(device_mount_action)
         db.session.commit()
 
-        result = super().add_object(
-            url=self.url,
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user):
+            result = super().add_object(
+                url=self.url,
+                data_object=data,
+                object_type=self.object_type,
+            )
         configuration_id = result["data"]["relationships"]["configuration"]["data"][
             "id"
         ]
@@ -106,13 +109,11 @@ class TestDevicePropertyValidator(BaseTestCase):
         self.assertEqual(
             configuration.update_description, "create;dynamic location action"
         )
-        access_headers = create_token()
         # Check if we can delete the device property
-        with self.client:
+        with self.run_requests_as(user):
             response = self.client.delete(
                 base_url + "/device-properties/" + str(property.id),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 409)
 

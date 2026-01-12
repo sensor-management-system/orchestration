@@ -7,7 +7,6 @@
 """Tests for the configuration image endpoints."""
 
 import json
-from unittest.mock import patch
 
 from project import base_url
 from project.api.models import (
@@ -15,11 +14,12 @@ from project.api.models import (
     ConfigurationAttachment,
     ConfigurationImage,
     Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, mqtt
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, Fixtures
 
 fixtures = Fixtures()
@@ -90,14 +90,24 @@ def create_super_user(super_user_contact):
     return result
 
 
+@fixtures.register("group1", scope=lambda: db.session)
+def create_group1():
+    """Create a group 1 for permission management."""
+    result = PermissionGroup(name="group1", entitlement="group1")
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
 @fixtures.register("public_configuration1_in_group1", scope=lambda: db.session)
-def create_public_configuration1_in_group1():
+@fixtures.use(["group1"])
+def create_public_configuration1_in_group1(group1):
     """Create a public configuration that uses group 1 for permission management."""
     result = Configuration(
         label="public configuration1",
         is_internal=False,
         is_public=True,
-        cfg_permission_group="1",
+        cfg_permission_group=str(group1.id),
     )
     db.session.add(result)
     db.session.commit()
@@ -105,13 +115,14 @@ def create_public_configuration1_in_group1():
 
 
 @fixtures.register("public_configuration2_in_group1", scope=lambda: db.session)
-def create_public_configuration2_in_group1():
+@fixtures.use(["group1"])
+def create_public_configuration2_in_group1(group1):
     """Create another public configuration that uses group 1 for permission management."""
     result = Configuration(
         label="public configuration2",
         is_internal=False,
         is_public=True,
-        cfg_permission_group="1",
+        cfg_permission_group=str(group1.id),
     )
     db.session.add(result)
     db.session.commit()
@@ -119,13 +130,14 @@ def create_public_configuration2_in_group1():
 
 
 @fixtures.register("internal_configuration1_in_group1", scope=lambda: db.session)
-def create_internal_configuration1_in_group1():
+@fixtures.use(["group1"])
+def create_internal_configuration1_in_group1(group1):
     """Create a internal configuration that uses group 1 for permission management."""
     result = Configuration(
         label="internal configuration1",
         is_internal=True,
         is_public=False,
-        cfg_permission_group="1",
+        cfg_permission_group=str(group1.id),
     )
     db.session.add(result)
     db.session.commit()
@@ -254,6 +266,16 @@ def create_image1_of_attachment1_of_internal_configuration1_in_group1(
         attachment=attachment1_of_internal_configuration1_in_group1,
         order_index=100,
     )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("membership_of_user1_in_group1", scope=lambda: db.session)
+@fixtures.use(["user1", "group1"])
+def create_membership_of_user1_in_group1(user1, group1):
+    """Create the membership of the user1 in the group1."""
+    result = PermissionGroupMembership(user=user1, permission_group=group1)
     db.session.add(result)
     db.session.commit()
     return result
@@ -530,8 +552,19 @@ class TestConfigurationImageServices(BaseTestCase):
         self.expect(resp.status_code).to_equal(401)
         self.expect(mqtt.publish.called).to_equal(False)
 
-    @fixtures.use(["user1", "attachment1_of_public_configuration1_in_group1"])
-    def test_post_member(self, user1, attachment1_of_public_configuration1_in_group1):
+    @fixtures.use(
+        [
+            "user1",
+            "attachment1_of_public_configuration1_in_group1",
+            "membership_of_user1_in_group1",
+        ]
+    )
+    def test_post_member(
+        self,
+        user1,
+        attachment1_of_public_configuration1_in_group1,
+        membership_of_user1_in_group1,
+    ):
         """Ensure we can post of we are a member of one of the groups."""
         payload = {
             "data": {
@@ -560,20 +593,11 @@ class TestConfigurationImageServices(BaseTestCase):
             }
         }
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[
-                        attachment1_of_public_configuration1_in_group1.configuration.cfg_permission_group
-                    ],
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(201)
         self.expect(resp.json["data"]["attributes"]["order_index"]).to_equal(10)
         self.expect(
@@ -599,52 +623,6 @@ class TestConfigurationImageServices(BaseTestCase):
         notification_data = json.loads(call_args[1])["data"]
         self.expect(notification_data["type"]).to_equal("configuration_image")
         self.expect(notification_data["attributes"]["order_index"]).to_equal(10)
-
-    @fixtures.use(["user1", "attachment1_of_public_configuration1_in_group1"])
-    def test_post_admin(self, user1, attachment1_of_public_configuration1_in_group1):
-        """Ensure we can post of we are an admin of one of the groups."""
-        payload = {
-            "data": {
-                "type": "configuration_image",
-                "attributes": {
-                    "order_index": 10,
-                },
-                "relationships": {
-                    "configuration": {
-                        "data": {
-                            "id": str(
-                                attachment1_of_public_configuration1_in_group1.configuration_id
-                            ),
-                            "type": "configuration",
-                        },
-                    },
-                    "attachment": {
-                        "data": {
-                            "id": str(
-                                attachment1_of_public_configuration1_in_group1.id
-                            ),
-                            "type": "configuration_attachment",
-                        },
-                    },
-                },
-            }
-        }
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[
-                        attachment1_of_public_configuration1_in_group1.configuration.cfg_permission_group
-                    ],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
-        self.expect(resp.status_code).to_equal(201)
 
     @fixtures.use(["user1", "attachment1_of_public_configuration1_in_group1"])
     def test_post_not_in_group(
@@ -678,18 +656,11 @@ class TestConfigurationImageServices(BaseTestCase):
             }
         }
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(["super_user", "attachment1_of_public_configuration1_in_group1"])
@@ -1031,9 +1002,18 @@ class TestConfigurationImageServices(BaseTestCase):
         )
         self.expect(resp.status_code).to_equal(401)
 
-    @fixtures.use(["user1", "image1_of_attachment1_of_public_configuration1_in_group1"])
+    @fixtures.use(
+        [
+            "user1",
+            "image1_of_attachment1_of_public_configuration1_in_group1",
+            "membership_of_user1_in_group1",
+        ]
+    )
     def test_patch_for_public_configuration_member(
-        self, user1, image1_of_attachment1_of_public_configuration1_in_group1
+        self,
+        user1,
+        image1_of_attachment1_of_public_configuration1_in_group1,
+        membership_of_user1_in_group1,
     ):
         """Ensure we can patch if we are a member of one of the groups."""
         payload = {
@@ -1047,20 +1027,11 @@ class TestConfigurationImageServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[
-                        image1_of_attachment1_of_public_configuration1_in_group1.configuration.cfg_permission_group
-                    ],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{image1_of_attachment1_of_public_configuration1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.patch(
+                f"{self.url}/{image1_of_attachment1_of_public_configuration1_in_group1.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(200)
         self.expect(resp.json["data"]["attributes"]["order_index"]).to_equal(20)
 
@@ -1089,38 +1060,6 @@ class TestConfigurationImageServices(BaseTestCase):
         self.expect(notification_data["attributes"]["order_index"]).to_equal(20)
 
     @fixtures.use(["user1", "image1_of_attachment1_of_public_configuration1_in_group1"])
-    def test_patch_for_public_configuration_admin(
-        self, user1, image1_of_attachment1_of_public_configuration1_in_group1
-    ):
-        """Ensure we can patch if we are an admin of one of the groups."""
-        payload = {
-            "data": {
-                "type": "configuration_image",
-                "id": str(image1_of_attachment1_of_public_configuration1_in_group1.id),
-                "attributes": {
-                    "order_index": 20,
-                },
-            }
-        }
-
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[
-                        image1_of_attachment1_of_public_configuration1_in_group1.configuration.cfg_permission_group
-                    ],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{image1_of_attachment1_of_public_configuration1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
-        self.expect(resp.status_code).to_equal(200)
-
-    @fixtures.use(["user1", "image1_of_attachment1_of_public_configuration1_in_group1"])
     def test_patch_for_public_configuration_no_member(
         self, user1, image1_of_attachment1_of_public_configuration1_in_group1
     ):
@@ -1136,18 +1075,11 @@ class TestConfigurationImageServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{image1_of_attachment1_of_public_configuration1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.patch(
+                f"{self.url}/{image1_of_attachment1_of_public_configuration1_in_group1.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(
@@ -1379,24 +1311,24 @@ class TestConfigurationImageServices(BaseTestCase):
         )
         self.expect(resp.status_code).to_equal(401)
 
-    @fixtures.use(["user1", "image1_of_attachment1_of_public_configuration1_in_group1"])
+    @fixtures.use(
+        [
+            "user1",
+            "image1_of_attachment1_of_public_configuration1_in_group1",
+            "membership_of_user1_in_group1",
+        ]
+    )
     def test_delete_for_public_configuration_member(
-        self, user1, image1_of_attachment1_of_public_configuration1_in_group1
+        self,
+        user1,
+        image1_of_attachment1_of_public_configuration1_in_group1,
+        membership_of_user1_in_group1,
     ):
         """Ensure that we can delete if we are member of a group."""
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[
-                        image1_of_attachment1_of_public_configuration1_in_group1.configuration.cfg_permission_group
-                    ],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{image1_of_attachment1_of_public_configuration1_in_group1.id}",
-                )
+            resp = self.client.delete(
+                f"{self.url}/{image1_of_attachment1_of_public_configuration1_in_group1.id}",
+            )
         self.expect(resp.status_code).to_equal(200)
         reloaded_configuration = (
             db.session.query(Configuration)
@@ -1427,41 +1359,14 @@ class TestConfigurationImageServices(BaseTestCase):
         )
 
     @fixtures.use(["user1", "image1_of_attachment1_of_public_configuration1_in_group1"])
-    def test_delete_for_public_configuration_admin(
-        self, user1, image1_of_attachment1_of_public_configuration1_in_group1
-    ):
-        """Ensure that we can delete if we are admin of a group."""
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[
-                        image1_of_attachment1_of_public_configuration1_in_group1.configuration.cfg_permission_group
-                    ],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{image1_of_attachment1_of_public_configuration1_in_group1.id}",
-                )
-        self.expect(resp.status_code).to_equal(200)
-
-    @fixtures.use(["user1", "image1_of_attachment1_of_public_configuration1_in_group1"])
     def test_delete_for_public_configuration_no_member(
         self, user1, image1_of_attachment1_of_public_configuration1_in_group1
     ):
         """Ensure that we can't delete if we are not member of a group."""
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{image1_of_attachment1_of_public_configuration1_in_group1.id}",
-                )
+            resp = self.client.delete(
+                f"{self.url}/{image1_of_attachment1_of_public_configuration1_in_group1.id}",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(

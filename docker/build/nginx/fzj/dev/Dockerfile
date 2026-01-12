@@ -13,7 +13,6 @@ ENV BASE_URL /
 ENV SMS_BACKEND_URL /backend/api/v1
 ENV SMS_FRONTEND_URL https://sms-dev.ibg3container.ibg.kfa-juelich.de/
 ENV CV_BACKEND_URL https://sms-cv.helmholtz.cloud/sms/cv/api/v1
-ENV IDL_SYNC_URL /idl/api/hifis/sync-groups
 
 ENV INSTITUTE fzj
 

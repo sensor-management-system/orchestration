@@ -9,18 +9,21 @@
 """Tests for the generic device actions api."""
 import json
 from datetime import datetime, timezone
-from unittest.mock import patch
 
 from project import base_url, db
-from project.api.models import Contact, Device, GenericDeviceAction, User
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
+from project.api.models import (
+    Contact,
+    Device,
+    GenericDeviceAction,
+    PermissionGroup,
+    PermissionGroupMembership,
+    User,
+)
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_generic_actions_models import (
     generate_device_action_model,
 )
 from project.tests.permissions import create_a_test_contact, create_a_test_device
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def make_generic_device_action_data(object_type, group_ids=None):
@@ -60,6 +63,30 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
     url = base_url + "/generic-device-actions"
     object_type = "generic_device_action"
 
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                normal_contact,
+                self.normal_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
+
     def test_a_public_generic_device_action(self):
         """Ensure a public generic device action will be listed."""
         generic_device_action = generate_device_action_model()
@@ -97,64 +124,51 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
     def test_add_generic_device_action_with_a_permission_group(self):
         """Ensure POST a new generic device action can be added to the database."""
         payload = make_generic_device_action_data(
-            self.object_type, group_ids=IDL_USER_ACCOUNT.membered_permission_groups
+            self.object_type, group_ids=[str(self.permission_group.id)]
         )
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 201)
 
     def test_post_for_archived_device(self):
-        """Ensure POST a new generic device action can be added to the database."""
+        """Ensure POST a new generic device action cant be added if device is archived."""
         payload = make_generic_device_action_data(
-            self.object_type, group_ids=IDL_USER_ACCOUNT.membered_permission_groups
+            self.object_type, group_ids=[str(self.permission_group.id)]
         )
         device = db.session.query(Device).order_by("created_at").first()
         device.archived = True
         db.session.add(device)
         db.session.commit()
 
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_post_generic_device_action_data_user_not_in_the_permission_group(self):
         """Post to device,with permission Group different from the user group."""
-        payload = make_generic_device_action_data(self.object_type, group_ids=[403])
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        payload = make_generic_device_action_data(
+            self.object_type, group_ids=[str(self.other_group.id)]
+        )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_action_with_a_permission_group(self):
-        """Post to generic_device_action_data,with permission Group."""
+        """Patch for generic_device_action_data,with permission Group."""
         payload = generate_device_action_model(
-            group_ids=IDL_USER_ACCOUNT.membered_permission_groups
+            group_ids=[str(self.permission_group.id)]
         )
         self.assertTrue(payload.id is not None)
         generic_device_action_updated = {
@@ -167,23 +181,18 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
             }
         }
         url = f"{self.url}/{payload.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(generic_device_action_updated),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                url,
+                data=json.dumps(generic_device_action_updated),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
     def test_patch_for_archived_device(self):
         """Ensure that we can't patch for archived devices."""
         payload = generate_device_action_model(
-            group_ids=IDL_USER_ACCOUNT.membered_permission_groups
+            group_ids=[str(self.permission_group.id)],
         )
         device = db.session.query(Device).order_by("created_at").first()
         device.archived = True
@@ -200,24 +209,21 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
             }
         }
         url = f"{self.url}/{payload.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(generic_device_action_updated),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                url,
+                data=json.dumps(generic_device_action_updated),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_generic_device_action_data_user_is_not_part_from_permission_group(
         self,
     ):
         """Post to device,with permission Group."""
-        generic_device_action = generate_device_action_model(group_ids=[403])
+        generic_device_action = generate_device_action_model(
+            group_ids=[str(self.other_group.id)]
+        )
         self.assertTrue(generic_device_action.id is not None)
         generic_device_action_updated = {
             "data": {
@@ -229,75 +235,55 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
             }
         }
         url = f"{self.url}/{generic_device_action.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(generic_device_action_updated),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                url,
+                data=json.dumps(generic_device_action_updated),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_delete_generic_device_action_data(self):
         """Delete generic_device_action_data."""
         generic_device_action = generate_device_action_model(
-            group_ids=IDL_USER_ACCOUNT.administrated_permission_groups
+            group_ids=[str(self.permission_group.id)]
         )
         url = f"{self.url}/{generic_device_action.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
     def test_delete_for_archived_device(self):
         """Ensure we can't delete for archived devices."""
         generic_device_action = generate_device_action_model(
-            group_ids=IDL_USER_ACCOUNT.administrated_permission_groups
+            group_ids=[str(self.permission_group.id)]
         )
         device = db.session.query(Device).order_by("created_at").first()
         device.archived = True
         db.session.add(device)
         db.session.commit()
         url = f"{self.url}/{generic_device_action.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_delete_generic_device_action_data_as_member(self):
         """Delete generic_device_action_data as member."""
         generic_device_action = generate_device_action_model(
-            group_ids=IDL_USER_ACCOUNT.membered_permission_groups
+            group_ids=[str(self.permission_group.id)]
         )
         url = f"{self.url}/{generic_device_action.id}"
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
     def test_patch_to_non_editable_device(self):
@@ -307,14 +293,14 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id)],
         )
         device2 = Device(
             short_name="device2",
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["2"],
+            group_ids=[str(self.other_group.id)],
         )
         contact = Contact(
             given_name="first",
@@ -328,11 +314,7 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
             action_type_name="Something",
             action_type_uri="something",
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([device1, device2, contact, user, action])
+        db.session.add_all([device1, device2, contact, action])
         db.session.commit()
 
         payload = {
@@ -353,18 +335,10 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[*device1.group_ids],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{action.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{action.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

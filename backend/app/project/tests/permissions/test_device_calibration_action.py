@@ -10,18 +10,21 @@
 
 import datetime
 import json
-from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Contact, Device, DeviceCalibrationAction, User
+from project.api.models import (
+    Contact,
+    Device,
+    DeviceCalibrationAction,
+    PermissionGroup,
+    PermissionGroupMembership,
+    User,
+)
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_device_calibration_action_model import (
     add_device_calibration_action,
 )
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def add_device_and_contact(group_ids):
@@ -74,6 +77,29 @@ class TestDeviceCalibrationAction(BaseTestCase):
     url = base_url + "/device-calibration-actions"
     object_type = "device_calibration_action"
 
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                normal_contact,
+                self.normal_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
+
     def test_get_public_device_calibration_action(self):
         """Test retrieve a collection of DeviceCalibrationAction objects."""
         device_calibration_action = add_device_calibration_action()
@@ -103,27 +129,21 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
     def test_post_device_calibration_action_with_a_group(self):
         """Create DeviceCalibrationAction."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         data = prepare_calibration_payload(
             self.object_type, group_id_test_user_is_member_in_2
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,contact",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,contact",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 201)
 
     def test_post_device_calibration_action_for_archived_device(self):
         """Create DeviceCalibrationAction."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         data = prepare_calibration_payload(
             self.object_type, group_id_test_user_is_member_in_2
         )
@@ -131,23 +151,18 @@ class TestDeviceCalibrationAction(BaseTestCase):
         device.archived = True
         db.session.add(device)
         db.session.commit()
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.post(
-                    f"{self.url}?include=device,contact",
-                    data=json.dumps(data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                f"{self.url}?include=device,contact",
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_update_device_calibration_action(self):
         """Update DeviceCalibration."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device, contact = add_device_and_contact(group_id_test_user_is_member_in_2)
         device_calibration_action = DeviceCalibrationAction(
             description=fake.pystr(),
@@ -169,19 +184,14 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 },
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = f"{self.url}/{device_calibration_action.id}"
+        with self.run_requests_as(self.normal_user):
+            url = f"{self.url}/{device_calibration_action.id}"
 
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(device_calibration_action_updated),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.patch(
+                url,
+                data=json.dumps(device_calibration_action_updated),
+                content_type="application/vnd.api+json",
+            )
 
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
@@ -193,7 +203,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
     def test_update_device_calibration_action_for_archived_device(self):
         """Ensure we can't update a device calibration action for archived devices."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device, contact = add_device_and_contact(group_id_test_user_is_member_in_2)
         device.archived = True
         device_calibration_action = DeviceCalibrationAction(
@@ -216,27 +226,20 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 },
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = f"{self.url}/{device_calibration_action.id}"
+        with self.run_requests_as(self.normal_user):
+            url = f"{self.url}/{device_calibration_action.id}"
 
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(device_calibration_action_updated),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.patch(
+                url,
+                data=json.dumps(device_calibration_action_updated),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 403)
 
     def test_delete_device_calibration_action(self):
-        """Delete DeviceCalibrationAction should succeed as a admin."""
-        group_id_test_user_is_member_in_2 = (
-            IDL_USER_ACCOUNT.administrated_permission_groups
-        )
+        """Delete DeviceCalibrationAction should succeed as a member."""
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device, contact = add_device_and_contact(group_id_test_user_is_member_in_2)
         device_calibration_action = DeviceCalibrationAction(
             description=fake.pystr(),
@@ -249,24 +252,16 @@ class TestDeviceCalibrationAction(BaseTestCase):
         )
         db.session.add(device_calibration_action)
         db.session.commit()
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    f"{self.url}/{device_calibration_action.id}",
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-            self.assertEqual(response.status_code, 200)
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                f"{self.url}/{device_calibration_action.id}",
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_delete_device_calibration_action_for_archived_devices(self):
         """Ensure that we can't update calibrations for archived devices."""
-        group_id_test_user_is_member_in_2 = (
-            IDL_USER_ACCOUNT.administrated_permission_groups
-        )
+        group_id_test_user_is_member_in_2 = [str(self.permission_group.id)]
         device, contact = add_device_and_contact(group_id_test_user_is_member_in_2)
         device.archived = True
         device_calibration_action = DeviceCalibrationAction(
@@ -280,46 +275,12 @@ class TestDeviceCalibrationAction(BaseTestCase):
         )
         db.session.add_all([device_calibration_action, device])
         db.session.commit()
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    f"{self.url}/{device_calibration_action.id}",
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-            self.assertEqual(response.status_code, 403)
-
-    def test_delete_device_calibration_action_as_member(self):
-        """Delete DeviceCalibrationAction."""
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
-        device, contact = add_device_and_contact(group_id_test_user_is_member_in_2)
-        device_calibration_action = DeviceCalibrationAction(
-            description=fake.pystr(),
-            formula=fake.pystr(),
-            value=fake.pyfloat(),
-            current_calibration_date=fake.date(),
-            next_calibration_date=fake.date(),
-            device=device,
-            contact=contact,
-        )
-        db.session.add(device_calibration_action)
-        db.session.commit()
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    f"{self.url}/{device_calibration_action.id}",
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
-            self.assertEqual(response.status_code, 200)
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                f"{self.url}/{device_calibration_action.id}",
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 403)
 
     def test_patch_to_non_editable_device(self):
         """Ensure we can't update to a device we can't edit."""
@@ -328,14 +289,14 @@ class TestDeviceCalibrationAction(BaseTestCase):
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id)],
         )
         device2 = Device(
             short_name="device2",
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["2"],
+            group_ids=[str(self.other_group.id)],
         )
         contact = Contact(
             given_name="first",
@@ -349,11 +310,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 2022, 12, 24, 0, 0, 0, tzinfo=datetime.timezone.utc
             ),
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([device1, device2, contact, user, action])
+        db.session.add_all([device1, device2, contact, action])
         db.session.commit()
 
         payload = {
@@ -374,18 +331,10 @@ class TestDeviceCalibrationAction(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[*device1.group_ids],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{action.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{action.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

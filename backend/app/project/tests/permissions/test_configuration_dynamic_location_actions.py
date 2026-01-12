@@ -7,18 +7,17 @@
 """Test classes for the dynamic locations."""
 import datetime
 import json
-from unittest.mock import patch
 
 from project import base_url
 from project.api.models import (
     Configuration,
     ConfigurationDynamicLocationBeginAction,
     Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
 from project.tests.base import BaseTestCase
 
 
@@ -26,6 +25,29 @@ class TestConfigurationDynamicLocation(BaseTestCase):
     """Test class for the dynamic locations."""
 
     url = base_url + "/dynamic-location-actions"
+
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                normal_contact,
+                self.normal_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
 
     def test_patch_to_non_editable_configuration(self):
         """Ensure we can't update to a configuration we can't edit."""
@@ -38,7 +60,7 @@ class TestConfigurationDynamicLocation(BaseTestCase):
             label="config2",
             is_public=False,
             is_internal=True,
-            cfg_permission_group="2",
+            cfg_permission_group=str(self.other_group.id),
         )
         contact = Contact(
             given_name="first",
@@ -52,11 +74,7 @@ class TestConfigurationDynamicLocation(BaseTestCase):
             ),
             begin_contact=contact,
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([configuration1, configuration2, contact, user, location])
+        db.session.add_all([configuration1, configuration2, contact, location])
         db.session.commit()
 
         payload = {
@@ -77,18 +95,10 @@ class TestConfigurationDynamicLocation(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[configuration1.cfg_permission_group],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{location.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{location.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

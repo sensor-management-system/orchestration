@@ -32,7 +32,6 @@ from .api.permissions.permission_manager import permission_manager
 from .config import env
 from .extensions.instances import (
     auth,
-    idl,
     mqtt,
     page_parameter_middleware,
     pidinst,
@@ -99,7 +98,6 @@ def create_app():
 
     well_known_url_config_loader.init_app(app)
     auth.init_app(app)
-    idl.init_app(app)
     pidinst.init_app(app)
     remove_slash_redirect_middlware.init_app(app)
     page_parameter_middleware.init_app(app)

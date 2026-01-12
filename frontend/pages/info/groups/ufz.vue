@@ -48,14 +48,7 @@ SPDX-License-Identifier: EUPL-1.2
           </a> in the Credentials tab.
         </p>
         <p>
-          For the group management here we use a set of conventions to
-          find the roles for the members of the sub-project.
-          The conventions follow the structure
-          <code>{{ convention }}</code> suggested by HIFIS.
-        </p>
-        <p>
-          For example, if we create a sub-group <code>ufz-sms-admin</code> in the <code>UFZ-Timeseries-Management</code> virtual organization
-          then we use the members there as administrators for the <code>UFZ-Timeseries-Management</code> group.
+          You can use any group that you create there in the SMS.
         </p>
       </v-card-text>
       <v-card flat>
@@ -73,7 +66,6 @@ SPDX-License-Identifier: EUPL-1.2
           </p>
           <p>
             This will make the <code>TERENO</code> group available in the Sensor Management System.
-            <code>User A</code> will have the <code>member</code> role and <code>User B</code> the <code>admin</code> role accordingly.
           </p>
         </v-card-text>
       </v-card>
@@ -82,7 +74,7 @@ SPDX-License-Identifier: EUPL-1.2
       <v-card-title>Roles</v-card-title>
       <v-card-text>
         <p class="mb-0">
-          We have five roles with their permissions in the groups:
+          We have four roles with their permissions in the groups:
         </p>
       </v-card-text>
     </v-card>
@@ -140,32 +132,7 @@ SPDX-License-Identifier: EUPL-1.2
         </v-card-text>
       </v-card>
       <v-card flat>
-        <v-card-subtitle>Group member <code>{{ voPlaceHolder }}:ufz-sms-member</code></v-card-subtitle>
-        <v-card-text>
-          <v-row>
-            <v-col>
-              <permission-info :value="true" label="view" />
-            </v-col>
-            <v-col>
-              <permission-info :value="true" label="create" />
-            </v-col>
-            <v-col>
-              <permission-info :value="true" label="edit" />
-            </v-col>
-            <v-col>
-              <permission-info :value="false" label="archive" />
-            </v-col>
-            <v-col>
-              <permission-info :value="false" label="restore" />
-            </v-col>
-            <v-col>
-              <permission-info :value="false" label="delete" />
-            </v-col>
-          </v-row>
-        </v-card-text>
-      </v-card>
-      <v-card flat>
-        <v-card-subtitle>Group admin<code>{{ voPlaceHolder }}:ufz-sms-admin</code></v-card-subtitle>
+        <v-card-subtitle>Group member</v-card-subtitle>
         <v-card-text>
           <v-row>
             <v-col>
@@ -260,7 +227,7 @@ import PermissionInfo from '@/components/PermissionInfo.vue'
     PermissionInfo
   }
 })
-export default class GfzGroupInfoPage extends Vue {
+export default class UfzGroupInfoPage extends Vue {
   created () {
     this.$store.dispatch('appbar/setDefaults')
     this.$store.commit('appbar/setTitle', 'Group information')
@@ -268,14 +235,6 @@ export default class GfzGroupInfoPage extends Vue {
 
   beforeDestroy () {
     this.$store.dispatch('appbar/setDefaults')
-  }
-
-  get convention (): string {
-    return '<vo-name>:<providername>-<servicename>-<rolename>'
-  }
-
-  get voPlaceHolder (): string {
-    return '<vo-name>'
   }
 
   get exampletreeview (): any {
@@ -291,24 +250,13 @@ export default class GfzGroupInfoPage extends Vue {
             icon: 'mdi-account-group',
             children: [
               {
-                id: 3,
-                name: 'ufz-sms-admin',
-                icon: 'mdi-account-group',
-                children: [{
-                  id: 4,
-                  name: 'User A',
-                  icon: 'mdi-account'
-                }]
-              },
-              {
-                id: 5,
-                name: 'ufz-sms-member',
-                icon: 'mdi-account-group',
-                children: [{
-                  id: 6,
-                  name: 'User B',
-                  icon: 'mdi-account'
-                }]
+                id: 4,
+                name: 'User A',
+                icon: 'mdi-account'
+              }, {
+                id: 6,
+                name: 'User B',
+                icon: 'mdi-account'
               }
             ]
           }

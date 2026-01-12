@@ -7,53 +7,20 @@
 """Tests for the api & permissions for the sites."""
 
 import json
-from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Configuration, Contact, Site, SiteContactRole, User
+from project.api.models import (
+    Configuration,
+    Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
+    Site,
+    SiteContactRole,
+    User,
+)
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, mqtt
-from project.tests.base import BaseTestCase, Fixtures
-
-fixtures = Fixtures()
-
-
-@fixtures.register("public_site1_in_group1", scope=lambda: db.session)
-def create_public_site1_in_group1():
-    """Create a public site that uses group 1 for permission management."""
-    result = Site(
-        label="public site1",
-        is_internal=False,
-        is_public=True,
-        group_ids=["1"],
-    )
-    db.session.add(result)
-    db.session.commit()
-    return result
-
-
-@fixtures.register("super_user_contact", scope=lambda: db.session)
-def create_super_user_contact():
-    """Create a contact that can be used to make a super user."""
-    result = Contact(
-        given_name="super", family_name="contact", email="super.contact@localhost"
-    )
-    db.session.add(result)
-    db.session.commit()
-    return result
-
-
-@fixtures.register("super_user", scope=lambda: db.session)
-@fixtures.use(["super_user_contact"])
-def create_super_user(super_user_contact):
-    """Create super user to use it in the tests."""
-    result = User(
-        contact=super_user_contact, subject=super_user_contact.email, is_superuser=True
-    )
-    db.session.add(result)
-    db.session.commit()
-    return result
+from project.extensions.instances import mqtt
+from project.tests.base import BaseTestCase
 
 
 class TestSiteApi(BaseTestCase):
@@ -94,6 +61,12 @@ class TestSiteApi(BaseTestCase):
             updated_by=self.normal_user,
         )
 
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+
         db.session.add_all(
             [
                 self.internal_site,
@@ -102,6 +75,9 @@ class TestSiteApi(BaseTestCase):
                 self.normal_user,
                 self.super_contact,
                 self.super_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
             ]
         )
         db.session.commit()
@@ -439,41 +415,9 @@ class TestSiteApi(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json["data"]["attributes"]["description"], description)
 
-    def test_patch_group_admin(self):
-        """Ensure we allow group admins to patch sites."""
-        self.public_site.group_ids = ["123"]
-        db.session.add(self.public_site)
-        db.session.commit()
-        description = "Some more useful description"
-        payload = {
-            "data": {
-                "id": self.public_site.id,
-                "type": "site",
-                "attributes": {"description": description},
-            }
-        }
-
-        with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id=1,
-                    username="mock",
-                    administrated_permission_groups=["123"],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.sites_url}/{self.public_site.id}",
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
-            self.assertEqual(resp.status_code, 200)
-            self.assertEqual(
-                resp.json["data"]["attributes"]["description"], description
-            )
-
     def test_patch_group_member(self):
         """Ensure we allow group members to patch sites."""
-        self.public_site.group_ids = ["123"]
+        self.public_site.group_ids = [str(self.permission_group.id)]
         db.session.add(self.public_site)
         db.session.commit()
         description = "Some more useful description"
@@ -486,24 +430,17 @@ class TestSiteApi(BaseTestCase):
         }
 
         with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id=1,
-                    username="mock",
-                    administrated_permission_groups=[],
-                    membered_permission_groups=["123"],
-                )
-                resp = self.client.patch(
-                    f"{self.sites_url}/{self.public_site.id}",
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+            resp = self.client.patch(
+                f"{self.sites_url}/{self.public_site.id}",
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json["data"]["attributes"]["description"], description)
 
     def test_patch_no_group_member(self):
         """Ensure we don't allow non group members to patch sites."""
-        self.public_site.group_ids = ["123"]
+        self.public_site.group_ids = [str(self.other_group.id)]
         db.session.add(self.public_site)
         db.session.commit()
         description = "Some more useful description"
@@ -516,18 +453,11 @@ class TestSiteApi(BaseTestCase):
         }
 
         with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
-                idl_mock.return_value = UserAccount(
-                    id=1,
-                    username="mock",
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.sites_url}/{self.public_site.id}",
-                    json=payload,
-                    headers={"Content-Type": "application/vnd.api+json"},
-                )
+            resp = self.client.patch(
+                f"{self.sites_url}/{self.public_site.id}",
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
         self.assertEqual(resp.status_code, 403)
 
     def test_patch_updated_by_id_is_set(self):

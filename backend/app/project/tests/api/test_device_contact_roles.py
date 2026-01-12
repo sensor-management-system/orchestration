@@ -14,7 +14,14 @@ from unittest.mock import patch
 from flask import current_app
 
 from project import base_url
-from project.api.models import Contact, Device, DeviceContactRole, User
+from project.api.models import (
+    Contact,
+    Device,
+    DeviceContactRole,
+    PermissionGroup,
+    PermissionGroupMembership,
+    User,
+)
 from project.api.models.base_model import db
 from project.extensions.instances import mqtt, pidinst
 from project.tests.base import BaseTestCase, Fixtures, fake, generate_userinfo_data
@@ -22,14 +29,24 @@ from project.tests.base import BaseTestCase, Fixtures, fake, generate_userinfo_d
 fixtures = Fixtures()
 
 
+@fixtures.register("group1", scope=lambda: db.session)
+def create_group1():
+    """Create a permission group."""
+    result = PermissionGroup(name="group1", entitlement="group1")
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
 @fixtures.register("public_device1_in_group1", scope=lambda: db.session)
-def create_public_device1_in_group1():
+@fixtures.use(["group1"])
+def create_public_device1_in_group1(group1):
     """Create a public device that uses group 1 for permission management."""
     result = Device(
         short_name="public device1",
         is_internal=False,
         is_public=True,
-        group_ids=["1"],
+        group_ids=[str(group1.id)],
     )
     db.session.add(result)
     db.session.commit()
@@ -57,6 +74,26 @@ def create_device_contact(public_device1_in_group1, super_user_contact):
         role_uri="http://localhost/cv/roles/1",
         role_name="Owner",
     )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("user1", scope=lambda: db.session)
+@fixtures.use(["device_contact"])
+def create_user1(device_contact):
+    """Create normal user to use it in the tests."""
+    result = User(contact=device_contact, subject=device_contact.email)
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("membership_of_user1_in_group1", scope=lambda: db.session)
+@fixtures.use(["user1", "group1"])
+def create_membership_of_user1_in_group1(user1, group1):
+    """Create a permission group."""
+    result = PermissionGroupMembership(user=user1, permission_group=group1)
     db.session.add(result)
     db.session.commit()
     return result
@@ -134,7 +171,8 @@ class TestDeviceContactRolesServices(BaseTestCase):
             device_contact_role.role_name, data["data"][0]["attributes"]["role_name"]
         )
 
-    def test_post_a_device_contact_role(self):
+    @fixtures.use
+    def test_post_a_device_contact_role(self, user1):
         """Ensure post a device_contact_role behaves correctly."""
         contact = add_a_contact()
         device = add_a_device()
@@ -155,9 +193,10 @@ class TestDeviceContactRolesServices(BaseTestCase):
             }
         }
         url = f"{self.url}?include=device,contact"
-        result = super().add_object(
-            url=url, data_object=data, object_type=self.object_type
-        )
+        with self.run_requests_as(user1):
+            result = super().add_object(
+                url=url, data_object=data, object_type=self.object_type
+            )
         device_id = result["data"]["relationships"]["device"]["data"]["id"]
         device = db.session.query(Device).filter_by(id=device_id).first()
         self.assertEqual(device.update_description, "create;contact")
@@ -171,7 +210,8 @@ class TestDeviceContactRolesServices(BaseTestCase):
         self.expect(notification_data["attributes"]["role_name"]).to_equal(role_name)
         self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
-    def test_update_a_contact_role(self):
+    @fixtures.use
+    def test_update_a_contact_role(self, user1):
         """Ensure update device_contact_role behaves correctly."""
         device_contact_role = add_device_contact_role()
         contact_updated = {
@@ -183,11 +223,12 @@ class TestDeviceContactRolesServices(BaseTestCase):
                 },
             }
         }
-        result = super().update_object(
-            url=f"{self.url}/{device_contact_role.id}",
-            data_object=contact_updated,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            result = super().update_object(
+                url=f"{self.url}/{device_contact_role.id}",
+                data_object=contact_updated,
+                object_type=self.object_type,
+            )
         device_id = result["data"]["relationships"]["device"]["data"]["id"]
         device = db.session.query(Device).filter_by(id=device_id).first()
         self.assertEqual(device.update_description, "update;contact")
@@ -239,7 +280,8 @@ class TestDeviceContactRolesServices(BaseTestCase):
         )
         self.assertIsNone(reloaded)
 
-    def test_update_external_metadata_after_post_of_contact_role(self):
+    @fixtures.use
+    def test_update_external_metadata_after_post_of_contact_role(self, user1):
         """Ensure we ask the system to update external metadata after posting the contact role."""
         contact = add_a_contact()
         device = add_a_device()
@@ -269,11 +311,15 @@ class TestDeviceContactRolesServices(BaseTestCase):
             pidinst, "update_external_metadata"
         ) as update_external_metadata:
             update_external_metadata.return_value = None
-            super().add_object(url=url, data_object=data, object_type=self.object_type)
+            with self.run_requests_as(user1):
+                super().add_object(
+                    url=url, data_object=data, object_type=self.object_type
+                )
             update_external_metadata.assert_called_once()
             self.assertEqual(update_external_metadata.call_args.args[0].id, device.id)
 
-    def test_update_external_metadata_after_patch_of_contact_role(self):
+    @fixtures.use
+    def test_update_external_metadata_after_patch_of_contact_role(self, user1):
         """Ensure we ask the system to update external metadata after patching the contact role."""
         device_contact_role = add_device_contact_role()
         contact_updated = {
@@ -296,11 +342,12 @@ class TestDeviceContactRolesServices(BaseTestCase):
             pidinst, "update_external_metadata"
         ) as update_external_metadata:
             update_external_metadata.return_value = None
-            super().update_object(
-                url=f"{self.url}/{device_contact_role.id}",
-                data_object=contact_updated,
-                object_type=self.object_type,
-            )
+            with self.run_requests_as(user1):
+                super().update_object(
+                    url=f"{self.url}/{device_contact_role.id}",
+                    data_object=contact_updated,
+                    object_type=self.object_type,
+                )
             update_external_metadata.assert_called_once()
             self.assertEqual(update_external_metadata.call_args.args[0].id, device.id)
 

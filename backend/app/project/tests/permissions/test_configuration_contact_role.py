@@ -9,14 +9,17 @@
 """Tests for the configuration contact roles with permission management."""
 
 import json
-from unittest.mock import patch
 
 from project import base_url, db
-from project.api.models import Configuration, ConfigurationContactRole, Contact, User
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
+from project.api.models import (
+    Configuration,
+    ConfigurationContactRole,
+    Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
+    User,
+)
 from project.tests.base import BaseTestCase, create_token, generate_userinfo_data
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def generate_configuration(
@@ -77,6 +80,38 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
 
     url = base_url + "/configuration-contact-roles"
     object_type = "configuration_contact_role"
+
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+        contact = Contact(
+            given_name="super", family_name="user", email="super.user@localhost"
+        )
+        self.super_user = User(
+            subject=contact.email, contact=contact, is_superuser=True
+        )
+
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                contact,
+                normal_contact,
+                self.normal_user,
+                self.super_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
 
     def test_getlist_public_configuration_contact_role(self):
         """Ensure that a contact role for a public configuration will be listed."""
@@ -202,92 +237,50 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
 
     def test_delete_public_configuration_contact_role_member_in_group(self):
         """Ensure that contact role for public configuration can be deleted by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(group_id="2")
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        configuration_contact_role = generate_configuration_contact_role(
+            group_id=str(self.permission_group.id)
+        )
+        with self.run_requests_as(self.normal_user):
             response = self.client.delete(
-                self.url + f"/{configuration_contact_role.id}", headers=access_headers
+                self.url + f"/{configuration_contact_role.id}"
             )
         self.assertEqual(response.status_code, 200)
 
     def test_delete_archived_configuration(self):
         """Ensure we can't delete for an archived configuration."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(group_id="2")
+        configuration_contact_role = generate_configuration_contact_role(
+            group_id=str(self.permission_group.id)
+        )
         configuration_contact_role.configuration.archived = True
         db.session.add(configuration_contact_role.configuration)
         db.session.commit()
 
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.delete(
-                self.url + f"/{configuration_contact_role.id}", headers=access_headers
+                self.url + f"/{configuration_contact_role.id}",
             )
         self.assertEqual(response.status_code, 403)
 
-    def test_delete_public_configuration_contact_role_admin_in_group(self):
-        """Ensure that contact role for public configuration can be deleted by admin of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(group_id="1")
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.delete(
-                self.url + f"/{configuration_contact_role.id}", headers=access_headers
-            )
-        self.assertEqual(response.status_code, 200)
-
     def test_delete_public_configuration_contact_role_not_in_group(self):
-        """Ensure contact role for public configuration can't be deleted by non members/admins."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(group_id="4")
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        """Ensure contact role for public configuration can't be deleted by non members."""
+        configuration_contact_role = generate_configuration_contact_role(
+            group_id=str(self.other_group.id)
+        )
+
+        with self.run_requests_as(self.normal_user):
             response = self.client.delete(
-                self.url + f"/{configuration_contact_role.id}", headers=access_headers
+                self.url + f"/{configuration_contact_role.id}"
             )
         self.assertEqual(response.status_code, 403)
 
     def test_delete_public_configuration_contact_role_superuser(self):
         """Ensure that contact role for public configuration can still be deleted by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(group_id="4")
-        contact = configuration_contact_role.contact
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
+        configuration_contact_role = generate_configuration_contact_role(
+            group_id=str(self.other_group.id)
         )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
-        )
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.super_user):
             response = self.client.delete(
-                self.url + f"/{configuration_contact_role.id}", headers=access_headers
+                self.url + f"/{configuration_contact_role.id}"
             )
         self.assertEqual(response.status_code, 200)
 
@@ -312,82 +305,40 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
 
     def test_delete_internal_configuration_contact_role_member_in_group(self):
         """Ensure that a contact role for internal configuration can be deleted by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
         configuration_contact_role = generate_configuration_contact_role(
-            internal=True, public=False, group_id="2"
+            internal=True,
+            public=False,
+            group_id=str(self.permission_group.id),
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.delete(
-                self.url + f"/{configuration_contact_role.id}", headers=access_headers
-            )
-        self.assertEqual(response.status_code, 200)
-
-    def test_delete_internal_configuration_contact_role_admin_in_group(self):
-        """Ensure contact role for internal configuration can be deleted by admins of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(
-            internal=True, public=False, group_id="1"
-        )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.delete(
-                self.url + f"/{configuration_contact_role.id}", headers=access_headers
+                self.url + f"/{configuration_contact_role.id}",
             )
         self.assertEqual(response.status_code, 200)
 
     def test_delete_internal_configuration_contact_role_not_in_group(self):
-        """Ensure non members/admins can't delete contact role for internal configuration."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
+        """Ensure non members can't delete contact role for internal configuration."""
         configuration_contact_role = generate_configuration_contact_role(
-            internal=True, public=False, group_id="4"
+            internal=True,
+            public=False,
+            group_id=str(self.other_group.id),
         )
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.delete(
-                self.url + f"/{configuration_contact_role.id}", headers=access_headers
+                self.url + f"/{configuration_contact_role.id}"
             )
         self.assertEqual(response.status_code, 403)
 
     def test_delete_internal_configuration_contact_role_superuser(self):
         """Ensure contact role for internal configuration can still be deleted by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
         configuration_contact_role = generate_configuration_contact_role(
-            internal=True, public=False, group_id="4"
+            internal=True,
+            public=False,
+            group_id=str(self.other_group.id),
         )
-        contact = configuration_contact_role.contact
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
-        )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
-        )
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.super_user):
             response = self.client.delete(
-                self.url + f"/{configuration_contact_role.id}", headers=access_headers
+                self.url + f"/{configuration_contact_role.id}"
             )
         self.assertEqual(response.status_code, 200)
 
@@ -430,9 +381,9 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
 
     def test_patch_public_configuration_contact_role_member_in_group(self):
         """Ensure that contact role for public configuration can be patched by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(group_id="2")
-        access_headers = create_token()
+        configuration_contact_role = generate_configuration_contact_role(
+            group_id=str(self.permission_group.id)
+        )
         payload = {
             "data": {
                 "type": self.object_type,
@@ -440,28 +391,24 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.patch(
                 self.url + f"/{configuration_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
 
     def test_patch_for_archived_configuration(self):
         """Ensure we can't patch if the configuration is archived already."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(group_id="2")
+        configuration_contact_role = generate_configuration_contact_role(
+            group_id=str(self.permission_group.id)
+        )
         configuration_contact_role.configuration.archived = True
         db.session.add(configuration_contact_role.configuration)
         db.session.commit()
 
-        access_headers = create_token()
         payload = {
             "data": {
                 "type": self.object_type,
@@ -469,49 +416,19 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.patch(
                 self.url + f"/{configuration_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
-    def test_patch_public_configuration_contact_role_admin_in_group(self):
-        """Ensure that contact role for public configuration can be patched by admin of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(group_id="1")
-        access_headers = create_token()
-        payload = {
-            "data": {
-                "type": self.object_type,
-                "id": str(configuration_contact_role.id),
-                "attributes": {"role_name": "new role"},
-            }
-        }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.patch(
-                self.url + f"/{configuration_contact_role.id}",
-                data=json.dumps(payload),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
-
     def test_patch_public_configuration_contact_role_not_in_group(self):
-        """Ensure contact role for public configuration can't be patched by non members/admins."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(group_id="4")
-        access_headers = create_token()
+        """Ensure contact role for public configuration can't be patched by non members."""
+        configuration_contact_role = generate_configuration_contact_role(
+            group_id=str(self.other_group.id)
+        )
         payload = {
             "data": {
                 "type": self.object_type,
@@ -519,38 +436,18 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.patch(
                 self.url + f"/{configuration_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_public_configuration_contact_role_superuser(self):
         """Ensure that contact role for public configuration can still be patched by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(group_id="4")
-        contact = configuration_contact_role.contact
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
-        )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
+        configuration_contact_role = generate_configuration_contact_role(
+            group_id=str(self.other_group.id)
         )
         payload = {
             "data": {
@@ -559,15 +456,11 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.super_user):
             response = self.client.patch(
                 self.url + f"/{configuration_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
@@ -615,9 +508,10 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
 
     def test_patch_internal_configuration_contact_role_member_in_group(self):
         """Ensure that a contact role for internal configuration can be patched by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
         configuration_contact_role = generate_configuration_contact_role(
-            internal=True, public=False, group_id="2"
+            internal=True,
+            public=False,
+            group_id=str(self.permission_group.id),
         )
         payload = {
             "data": {
@@ -626,55 +520,22 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.patch(
                 self.url + f"/{configuration_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
-
-    def test_patch_internal_configuration_contact_role_admin_in_group(self):
-        """Ensure contact role for internal configuration can be patched by admins of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        configuration_contact_role = generate_configuration_contact_role(
-            internal=True, public=False, group_id="1"
-        )
-        access_headers = create_token()
-        payload = {
-            "data": {
-                "type": self.object_type,
-                "id": str(configuration_contact_role.id),
-                "attributes": {"role_name": "new role"},
-            }
-        }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.patch(
-                self.url + f"/{configuration_contact_role.id}",
-                data=json.dumps(payload),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
 
     def test_patch_internal_configuration_contact_role_not_in_group(self):
-        """Ensure non members/admins can't patch contact role for internal configuration."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
+        """Ensure non members can't patch contact role for internal configuration."""
         configuration_contact_role = generate_configuration_contact_role(
-            internal=True, public=False, group_id="4"
+            internal=True,
+            public=False,
+            group_id=str(self.other_group.id),
         )
-        access_headers = create_token()
         payload = {
             "data": {
                 "type": self.object_type,
@@ -682,40 +543,18 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.patch(
                 self.url + f"/{configuration_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_internal_configuration_contact_role_superuser(self):
         """Ensure contact role for internal configuration can still be patched by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
         configuration_contact_role = generate_configuration_contact_role(
-            internal=True, public=False, group_id="4"
-        )
-        contact = configuration_contact_role.contact
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
-        )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
+            internal=True, public=False, group_id=str(self.other_group.id)
         )
         payload = {
             "data": {
@@ -724,15 +563,11 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 "attributes": {"role_name": "new role"},
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.super_user):
             response = self.client.patch(
                 self.url + f"/{configuration_contact_role.id}",
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
@@ -811,8 +646,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
 
     def test_post_public_configuration_contact_role_member_in_group(self):
         """Ensure that contact role for public configuration can be posted by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration = generate_configuration(group_id="2")
+        configuration = generate_configuration(group_id=str(self.permission_group.id))
         contact = generate_contact()
         payload = {
             "data": {
@@ -837,24 +671,18 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
 
     def test_post_for_archived_configuration(self):
         """Ensure we can't add contacts for archived configurations."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration = generate_configuration(group_id="2")
+        configuration = generate_configuration(group_id=str(self.permission_group.id))
         configuration.archived = True
         db.session.add(configuration)
         db.session.commit()
@@ -882,66 +710,17 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
-    def test_post_public_configuration_contact_role_admin_in_group(self):
-        """Ensure that contact role for public configuration can be posted by admin of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        configuration = generate_configuration(group_id="1")
-        contact = generate_contact()
-        payload = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "role_name": "dummy name",
-                    "role_uri": "dummy uri",
-                },
-                "relationships": {
-                    "configuration": {
-                        "data": {
-                            "id": str(configuration.id),
-                            "type": "configuration",
-                        },
-                    },
-                    "contact": {
-                        "data": {
-                            "id": str(contact.id),
-                            "type": "contact",
-                        }
-                    },
-                },
-            }
-        }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.post(
-                self.url,
-                data=json.dumps(payload),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
-
     def test_post_public_configuration_contact_role_not_in_group(self):
-        """Ensure contact role for public configuration can't be posted by non members/admins."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration = generate_configuration(group_id="4")
+        """Ensure contact role for public configuration can't be posted by non members."""
+        configuration = generate_configuration(group_id=str(self.other_group.id))
         contact = generate_contact()
         payload = {
             "data": {
@@ -966,24 +745,17 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
     def test_post_public_configuration_contact_role_superuser(self):
         """Ensure that contact role for public configuration can still be posted by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
-        configuration = generate_configuration(group_id="4")
+        configuration = generate_configuration(group_id=str(self.other_group.id))
         contact = generate_contact()
         payload = {
             "data": {
@@ -1008,30 +780,11 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
-        )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
-        )
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.super_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
@@ -1109,9 +862,10 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
 
     def test_post_internal_configuration_contact_role_member_in_group(self):
         """Ensure that a contact role for internal configuration can be posted by members."""
-        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
         configuration = generate_configuration(
-            internal=True, public=False, group_id="2"
+            internal=True,
+            public=False,
+            group_id=str(self.permission_group.id),
         )
         contact = generate_contact()
         payload = {
@@ -1137,70 +891,21 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
-
-    def test_post_internal_configuration_contact_role_admin_in_group(self):
-        """Ensure contact role for internal configuration can be posted by admins of group."""
-        self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
-        configuration = generate_configuration(
-            internal=True, public=False, group_id="1"
-        )
-        contact = generate_contact()
-        payload = {
-            "data": {
-                "type": self.object_type,
-                "attributes": {
-                    "role_name": "dummy name",
-                    "role_uri": "dummy uri",
-                },
-                "relationships": {
-                    "configuration": {
-                        "data": {
-                            "id": str(configuration.id),
-                            "type": "configuration",
-                        },
-                    },
-                    "contact": {
-                        "data": {
-                            "id": str(contact.id),
-                            "type": "contact",
-                        }
-                    },
-                },
-            }
-        }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            response = self.client.post(
-                self.url,
-                data=json.dumps(payload),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
 
     def test_post_internal_configuration_contact_role_not_in_group(self):
-        """Ensure contact role for internal configuration can't be posted by non members/admins."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
+        """Ensure contact role for internal configuration can't be posted by non members."""
         configuration = generate_configuration(
-            internal=True, public=False, group_id="4"
+            internal=True,
+            public=False,
+            group_id=str(self.other_group.id),
         )
         contact = generate_contact()
         payload = {
@@ -1226,25 +931,18 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 403)
 
     def test_post_internal_configuration_contact_role_superuser(self):
         """Ensure contact role for internal configuration can still be posted by superusers."""
-        self.assertFalse("4" in IDL_USER_ACCOUNT.administrated_permission_groups)
-        self.assertFalse("4" in IDL_USER_ACCOUNT.membered_permission_groups)
         configuration = generate_configuration(
-            internal=True, public=False, group_id="4"
+            internal=True, public=False, group_id=str(self.other_group.id)
         )
         contact = generate_contact()
         payload = {
@@ -1270,30 +968,11 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 },
             }
         }
-        other_contact = Contact(
-            email="x" + contact.email,
-            given_name="x" + contact.given_name,
-            family_name="x" + contact.family_name,
-        )
-        admin_user = User(
-            contact=other_contact, subject=other_contact.email, is_superuser=True
-        )
-        db.session.add_all([other_contact, admin_user])
-        db.session.commit()
-        access_headers = create_token(
-            {
-                "sub": admin_user.subject,
-            }
-        )
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.super_user):
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
-                headers=access_headers,
             )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
@@ -1309,7 +988,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             label="config2",
             is_public=False,
             is_internal=True,
-            cfg_permission_group="2",
+            cfg_permission_group=str(self.other_group.id),
         )
         contact = Contact(
             given_name="first",
@@ -1349,18 +1028,10 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[configuration1.cfg_permission_group],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{contact_role.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{contact_role.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

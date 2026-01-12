@@ -9,7 +9,6 @@
 import datetime
 import json
 import time
-from unittest.mock import patch
 
 from project import base_url
 from project.api.models import (
@@ -19,12 +18,12 @@ from project.api.models import (
     Device,
     DeviceMountAction,
     DeviceProperty,
+    PermissionGroup,
+    PermissionGroupMembership,
     TsmEndpoint,
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.permissions import create_a_test_configuration
 
@@ -33,6 +32,38 @@ class TestDatastreamLinks(BaseTestCase):
     """Test DatastreamLink."""
 
     url = base_url + "/datastream-links"
+
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+        contact = Contact(
+            given_name="super", family_name="user", email="super.user@localhost"
+        )
+        self.super_user = User(
+            subject=contact.email, contact=contact, is_superuser=True
+        )
+
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                contact,
+                normal_contact,
+                self.normal_user,
+                self.super_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
 
     def test_get_public_datastream_links(self):
         """Ensure that we can get a list of public datastream links."""
@@ -297,7 +328,7 @@ class TestDatastreamLinks(BaseTestCase):
         configuration = create_a_test_configuration(
             public=True,
             internal=False,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.permission_group.id),
         )
         device = Device(
             short_name=fake.linux_processor(),
@@ -310,10 +341,6 @@ class TestDatastreamLinks(BaseTestCase):
             given_name="begin",
             family_name="contact",
             email="begin@contact.org",
-        )
-        user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
         )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
@@ -337,7 +364,6 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount,
                 device_property,
                 tsm_endpoint,
-                user,
             ]
         )
         db.session.commit()
@@ -372,20 +398,12 @@ class TestDatastreamLinks(BaseTestCase):
                 },
             }
         }
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[configuration.cfg_permission_group],
-                )
-                with self.client:
-                    response = self.client.post(
-                        self.url,
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 201)
 
     def test_create_datastream_link_normal_user_no_matching_group(self):
@@ -393,7 +411,7 @@ class TestDatastreamLinks(BaseTestCase):
         configuration = create_a_test_configuration(
             public=True,
             internal=False,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.other_group.id),
         )
         device = Device(
             short_name=fake.linux_processor(),
@@ -406,10 +424,6 @@ class TestDatastreamLinks(BaseTestCase):
             given_name="begin",
             family_name="contact",
             email="begin@contact.org",
-        )
-        user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
         )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
@@ -433,7 +447,6 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount,
                 device_property,
                 tsm_endpoint,
-                user,
             ]
         )
         db.session.commit()
@@ -468,20 +481,12 @@ class TestDatastreamLinks(BaseTestCase):
                 },
             }
         }
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                with self.client:
-                    response = self.client.post(
-                        self.url,
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_create_datastream_link_archived_configuration(self):
@@ -489,7 +494,7 @@ class TestDatastreamLinks(BaseTestCase):
         configuration = create_a_test_configuration(
             public=True,
             internal=False,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.permission_group.id),
         )
         configuration.archived = True
         device = Device(
@@ -504,10 +509,6 @@ class TestDatastreamLinks(BaseTestCase):
             family_name="contact",
             email="begin@contact.org",
         )
-        user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
-        )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
         device_mount = DeviceMountAction(
@@ -530,7 +531,6 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount,
                 device_property,
                 tsm_endpoint,
-                user,
             ]
         )
         db.session.commit()
@@ -565,20 +565,12 @@ class TestDatastreamLinks(BaseTestCase):
                 },
             }
         }
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[configuration.cfg_permission_group],
-                )
-                with self.client:
-                    response = self.client.post(
-                        self.url,
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_create_datastream_link_super_user(self):
@@ -586,7 +578,7 @@ class TestDatastreamLinks(BaseTestCase):
         configuration = create_a_test_configuration(
             public=True,
             internal=False,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.other_group.id),
         )
         device = Device(
             short_name=fake.linux_processor(),
@@ -600,11 +592,6 @@ class TestDatastreamLinks(BaseTestCase):
             family_name="contact",
             email="begin@contact.org",
         )
-        user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
-            is_superuser=True,
-        )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
         device_mount = DeviceMountAction(
@@ -627,7 +614,6 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount,
                 device_property,
                 tsm_endpoint,
-                user,
             ]
         )
         db.session.commit()
@@ -662,13 +648,12 @@ class TestDatastreamLinks(BaseTestCase):
                 },
             }
         }
-        with self.run_requests_as(user):
-            with self.client:
-                response = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+        with self.run_requests_as(self.super_user):
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 201)
 
     def test_get_internal_datastream_link_details(self):
@@ -819,7 +804,7 @@ class TestDatastreamLinks(BaseTestCase):
         configuration1 = create_a_test_configuration(
             public=False,
             internal=True,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.other_group.id),
         )
         userinfo = generate_userinfo_data()
         device = Device(
@@ -833,10 +818,6 @@ class TestDatastreamLinks(BaseTestCase):
             given_name=userinfo["given_name"],
             family_name=userinfo["family_name"],
             email=userinfo["email"],
-        )
-        user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
         )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
@@ -883,20 +864,12 @@ class TestDatastreamLinks(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{datastream_link1.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{datastream_link1.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_normal_user_in_group(self):
@@ -904,7 +877,7 @@ class TestDatastreamLinks(BaseTestCase):
         configuration1 = create_a_test_configuration(
             public=False,
             internal=True,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.permission_group.id),
         )
         userinfo = generate_userinfo_data()
         device = Device(
@@ -918,10 +891,6 @@ class TestDatastreamLinks(BaseTestCase):
             given_name=userinfo["given_name"],
             family_name=userinfo["family_name"],
             email=userinfo["email"],
-        )
-        user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
         )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
@@ -968,20 +937,12 @@ class TestDatastreamLinks(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[configuration1.cfg_permission_group],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{datastream_link1.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{datastream_link1.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
     def test_patch_super_user(self):
@@ -989,7 +950,7 @@ class TestDatastreamLinks(BaseTestCase):
         configuration1 = create_a_test_configuration(
             public=False,
             internal=True,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.other_group.id),
         )
         userinfo = generate_userinfo_data()
         device = Device(
@@ -1007,12 +968,6 @@ class TestDatastreamLinks(BaseTestCase):
         other_contact = Contact(
             given_name="other", family_name="contact", email="other@contact.xyz"
         )
-        user = User(subject=other_contact.email, contact=other_contact)
-        super_user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
-            is_superuser=True,
-        )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
         device_mount1 = DeviceMountAction(
@@ -1035,7 +990,7 @@ class TestDatastreamLinks(BaseTestCase):
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
-            created_by=user,
+            created_by=self.normal_user,
         )
         db.session.add_all(
             [
@@ -1046,8 +1001,6 @@ class TestDatastreamLinks(BaseTestCase):
                 device_property,
                 datastream_link1,
                 tsm_endpoint,
-                user,
-                super_user,
             ]
         )
         db.session.commit()
@@ -1065,13 +1018,12 @@ class TestDatastreamLinks(BaseTestCase):
         # To check the updated_at field
         time.sleep(1)
 
-        with self.run_requests_as(super_user):
-            with self.client:
-                response = self.client.patch(
-                    f"{self.url}/{datastream_link1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+        with self.run_requests_as(self.super_user):
+            response = self.client.patch(
+                f"{self.url}/{datastream_link1.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
 
         reloaded_datastream_link = db.session.query(DatastreamLink).get(
@@ -1085,7 +1037,7 @@ class TestDatastreamLinks(BaseTestCase):
             reloaded_datastream_link.updated_at, reloaded_datastream_link.created_at
         )
 
-        self.assertEqual(reloaded_datastream_link.updated_by, super_user)
+        self.assertEqual(reloaded_datastream_link.updated_by, self.super_user)
         self.assertNotEqual(
             reloaded_datastream_link.updated_by, reloaded_datastream_link.created_by
         )
@@ -1114,11 +1066,6 @@ class TestDatastreamLinks(BaseTestCase):
             given_name=userinfo["given_name"],
             family_name=userinfo["family_name"],
             email=userinfo["email"],
-        )
-        user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
-            is_superuser=True,
         )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
@@ -1166,7 +1113,7 @@ class TestDatastreamLinks(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
+        with self.run_requests_as(self.super_user):
             with self.client:
                 response = self.client.patch(
                     f"{self.url}/{datastream_link1.id}",
@@ -1240,7 +1187,7 @@ class TestDatastreamLinks(BaseTestCase):
         configuration1 = create_a_test_configuration(
             public=False,
             internal=True,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.other_group.id),
         )
         userinfo = generate_userinfo_data()
         device = Device(
@@ -1254,10 +1201,6 @@ class TestDatastreamLinks(BaseTestCase):
             given_name=userinfo["given_name"],
             family_name=userinfo["family_name"],
             email=userinfo["email"],
-        )
-        user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
         )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
@@ -1294,18 +1237,10 @@ class TestDatastreamLinks(BaseTestCase):
         )
         db.session.commit()
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                with self.client:
-                    response = self.client.delete(
-                        f"{self.url}/{datastream_link1.id}",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                f"{self.url}/{datastream_link1.id}",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_delete_normal_user_in_group(self):
@@ -1313,7 +1248,7 @@ class TestDatastreamLinks(BaseTestCase):
         configuration1 = create_a_test_configuration(
             public=False,
             internal=True,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.permission_group.id),
         )
         userinfo = generate_userinfo_data()
         device = Device(
@@ -1327,10 +1262,6 @@ class TestDatastreamLinks(BaseTestCase):
             given_name=userinfo["given_name"],
             family_name=userinfo["family_name"],
             email=userinfo["email"],
-        )
-        user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
         )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
@@ -1367,18 +1298,10 @@ class TestDatastreamLinks(BaseTestCase):
         )
         db.session.commit()
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[configuration1.cfg_permission_group],
-                )
-                with self.client:
-                    response = self.client.delete(
-                        f"{self.url}/{datastream_link1.id}",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                f"{self.url}/{datastream_link1.id}",
+            )
         self.assertEqual(response.status_code, 200)
 
     def test_delete_super_user(self):
@@ -1386,7 +1309,7 @@ class TestDatastreamLinks(BaseTestCase):
         configuration1 = create_a_test_configuration(
             public=False,
             internal=True,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.other_group.id),
         )
         userinfo = generate_userinfo_data()
         device = Device(
@@ -1404,12 +1327,6 @@ class TestDatastreamLinks(BaseTestCase):
         other_contact = Contact(
             given_name="other", family_name="contact", email="other@contact.xyz"
         )
-        user = User(subject=other_contact.email, contact=other_contact)
-        super_user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
-            is_superuser=True,
-        )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
         device_mount1 = DeviceMountAction(
@@ -1432,7 +1349,7 @@ class TestDatastreamLinks(BaseTestCase):
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
-            created_by=user,
+            created_by=self.normal_user,
         )
         db.session.add_all(
             [
@@ -1443,17 +1360,14 @@ class TestDatastreamLinks(BaseTestCase):
                 device_property,
                 datastream_link1,
                 tsm_endpoint,
-                user,
-                super_user,
             ]
         )
         db.session.commit()
 
-        with self.run_requests_as(super_user):
-            with self.client:
-                response = self.client.delete(
-                    f"{self.url}/{datastream_link1.id}",
-                )
+        with self.run_requests_as(self.super_user):
+            response = self.client.delete(
+                f"{self.url}/{datastream_link1.id}",
+            )
         self.assertEqual(response.status_code, 200)
 
         reloaded_configuration = db.session.query(Configuration).get(configuration1.id)
@@ -1480,11 +1394,6 @@ class TestDatastreamLinks(BaseTestCase):
             given_name=userinfo["given_name"],
             family_name=userinfo["family_name"],
             email=userinfo["email"],
-        )
-        user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
-            is_superuser=True,
         )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
@@ -1522,11 +1431,10 @@ class TestDatastreamLinks(BaseTestCase):
         )
         db.session.commit()
 
-        with self.run_requests_as(user):
-            with self.client:
-                response = self.client.delete(
-                    f"{self.url}/{datastream_link1.id}",
-                )
+        with self.run_requests_as(self.super_user):
+            response = self.client.delete(
+                f"{self.url}/{datastream_link1.id}",
+            )
         self.assertEqual(response.status_code, 403)
 
     def test_patch_to_non_editable_device(self):
@@ -1542,7 +1450,7 @@ class TestDatastreamLinks(BaseTestCase):
             is_private=False,
             is_internal=False,
         )
-        device1.group_ids = ["1"]
+        device1.group_ids = [str(self.permission_group.id)]
         device2 = Device(
             short_name=fake.linux_processor(),
             manufacturer_name=fake.company(),
@@ -1550,15 +1458,11 @@ class TestDatastreamLinks(BaseTestCase):
             is_private=False,
             is_internal=False,
         )
-        device2.group_ids = ["2"]
+        device2.group_ids = [str(self.other_group.id)]
         begin_contact = Contact(
             given_name="first",
             family_name="contact",
             email="first.contact@localhost",
-        )
-        user = User(
-            subject=begin_contact.email,
-            contact=begin_contact,
         )
         begin_date = fake.future_datetime()
         end_date = begin_date + datetime.timedelta(days=2)
@@ -1601,7 +1505,6 @@ class TestDatastreamLinks(BaseTestCase):
                 device1,
                 device2,
                 begin_contact,
-                user,
                 device_mount1,
                 device_mount2,
                 device_property1,
@@ -1636,18 +1539,10 @@ class TestDatastreamLinks(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[*device1.group_ids],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{datastream_link.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{datastream_link.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

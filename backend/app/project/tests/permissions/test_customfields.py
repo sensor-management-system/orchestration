@@ -10,16 +10,19 @@
 """Tests for the custom field endpoints."""
 
 import json
-from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Contact, CustomField, Device, User
+from project.api.models import (
+    Contact,
+    CustomField,
+    Device,
+    PermissionGroup,
+    PermissionGroupMembership,
+    User,
+)
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 from project.tests.permissions import create_a_test_device
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def prepare_custom_field_payload(device):
@@ -43,6 +46,29 @@ class TestCustomFieldServices(BaseTestCase):
     """Test customfields."""
 
     url = base_url + "/customfields"
+
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                normal_contact,
+                self.normal_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
 
     def test_get_public_customfields(self):
         """Ensure that we can get a list of public customfields."""
@@ -150,7 +176,7 @@ class TestCustomFieldServices(BaseTestCase):
 
     def test_post_to_a_device_with_a_permission_group(self):
         """Post to device,with permission Group."""
-        device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device = create_a_test_device([str(self.permission_group.id)])
         self.assertTrue(device.id is not None)
         count_customfields = (
             db.session.query(CustomField)
@@ -162,19 +188,14 @@ class TestCustomFieldServices(BaseTestCase):
 
         self.assertEqual(count_customfields, 0)
         payload = prepare_custom_field_payload(device)
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url_post = base_url + "/customfields"
+        with self.run_requests_as(self.normal_user):
+            url_post = base_url + "/customfields"
 
-                response = self.client.post(
-                    url_post,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.post(
+                url_post,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 201)
         customfields = query_result_to_list(
@@ -195,30 +216,25 @@ class TestCustomFieldServices(BaseTestCase):
 
     def test_post_for_archived_device(self):
         """Ensure we can't post for an archived device."""
-        device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device = create_a_test_device([str(self.permission_group.id)])
         device.archived = True
         db.session.add(device)
         db.session.commit()
         payload = prepare_custom_field_payload(device)
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url_post = base_url + "/customfields"
+        with self.run_requests_as(self.normal_user):
+            url_post = base_url + "/customfields"
 
-                response = self.client.post(
-                    url_post,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.post(
+                url_post,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 403)
 
     def test_post_to_a_device_with_an_other_permission_group(self):
         """Post to a device with a different permission Group from the user."""
-        device = create_a_test_device([66])
+        device = create_a_test_device([str(self.other_group.id)])
         self.assertTrue(device.id is not None)
         count_customfields = (
             db.session.query(CustomField)
@@ -230,25 +246,20 @@ class TestCustomFieldServices(BaseTestCase):
 
         self.assertEqual(count_customfields, 0)
         payload = prepare_custom_field_payload(device)
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url_post = base_url + "/customfields"
+        with self.run_requests_as(self.normal_user):
+            url_post = base_url + "/customfields"
 
-                response = self.client.post(
-                    url_post,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.post(
+                url_post,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 403)
 
     def test_patch_to_a_device_with_a_permission_group(self):
         """Patch Custom field attached to device with same group as user."""
-        device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device = create_a_test_device([str(self.permission_group.id)])
         self.assertTrue(device.id is not None)
         count_customfields = (
             db.session.query(CustomField)
@@ -276,19 +287,14 @@ class TestCustomFieldServices(BaseTestCase):
                 },
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = base_url + "/customfields/" + str(customfield.id)
+        with self.run_requests_as(self.normal_user):
+            url = base_url + "/customfields/" + str(customfield.id)
 
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.patch(
+                url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
@@ -298,7 +304,7 @@ class TestCustomFieldServices(BaseTestCase):
 
     def test_patch_for_archived_device(self):
         """Ensure we can't patch for an archived device."""
-        device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device = create_a_test_device([str(self.permission_group.id)])
         customfield = CustomField(
             key="GFZ",
             value="https://www.gfz-potsdam.de",
@@ -317,25 +323,20 @@ class TestCustomFieldServices(BaseTestCase):
                 },
             }
         }
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = base_url + "/customfields/" + str(customfield.id)
+        with self.run_requests_as(self.normal_user):
+            url = base_url + "/customfields/" + str(customfield.id)
 
-                response = self.client.patch(
-                    url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.patch(
+                url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 403)
 
     def test_delete_to_a_device_with_a_permission_group(self):
-        """Delete customfield for device with same group as user (admin)."""
-        device = create_a_test_device(IDL_USER_ACCOUNT.administrated_permission_groups)
+        """Delete customfield for device as group member."""
+        device = create_a_test_device([str(self.permission_group.id)])
         self.assertTrue(device.id is not None)
         count_customfields = (
             db.session.query(CustomField)
@@ -353,25 +354,20 @@ class TestCustomFieldServices(BaseTestCase):
         )
         db.session.add(customfield)
         db.session.commit()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = base_url + "/customfields/" + str(customfield.id)
+        with self.run_requests_as(self.normal_user):
+            url = base_url + "/customfields/" + str(customfield.id)
 
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 200)
         reloaded_device = db.session.query(Device).filter_by(id=device.id).first()
         self.assertEqual(reloaded_device.update_description, "delete;custom field")
 
     def test_delete_for_archived_device(self):
         """Ensure we can't delete for an archived device."""
-        device = create_a_test_device(IDL_USER_ACCOUNT.administrated_permission_groups)
+        device = create_a_test_device([str(self.permission_group.id)])
         customfield = CustomField(
             key="GFZ",
             value="https://www.gfz-potsdam.de",
@@ -380,53 +376,14 @@ class TestCustomFieldServices(BaseTestCase):
         device.archived = True
         db.session.add_all([customfield, device])
         db.session.commit()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = base_url + "/customfields/" + str(customfield.id)
+        with self.run_requests_as(self.normal_user):
+            url = base_url + "/customfields/" + str(customfield.id)
 
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
-        self.assertEqual(response.status_code, 403)
-
-    def test_delete_to_a_device_with_a_permission_group_as_a_member(self):
-        """Delete customfield for device with same group as user (member)."""
-        device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
-        self.assertTrue(device.id is not None)
-        count_customfields = (
-            db.session.query(CustomField)
-            .filter_by(
-                device_id=device.id,
+            response = self.client.delete(
+                url,
+                content_type="application/vnd.api+json",
             )
-            .count()
-        )
-
-        self.assertEqual(count_customfields, 0)
-        customfield = CustomField(
-            key="GFZ",
-            value="https://www.gfz-potsdam.de",
-            device=device,
-        )
-        db.session.add(customfield)
-        db.session.commit()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                url = base_url + "/customfields/" + str(customfield.id)
-
-                response = self.client.delete(
-                    url,
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
 
     def test_patch_to_non_editable_device(self):
         """Ensure we can't update to a device we can't edit."""
@@ -435,30 +392,21 @@ class TestCustomFieldServices(BaseTestCase):
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id)],
         )
         device2 = Device(
             short_name="device2",
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["2"],
-        )
-        contact = Contact(
-            given_name="first",
-            family_name="contact",
-            email="first.contact@localhost",
+            group_ids=[str(self.other_group.id)],
         )
         custom_field = CustomField(
             key="k",
             value="v",
             device=device1,
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([device1, device2, contact, user, custom_field])
+        db.session.add_all([device1, device2, custom_field])
         db.session.commit()
 
         payload = {
@@ -479,18 +427,10 @@ class TestCustomFieldServices(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[*device1.group_ids],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{custom_field.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{custom_field.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

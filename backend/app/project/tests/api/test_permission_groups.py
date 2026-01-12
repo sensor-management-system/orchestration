@@ -8,11 +8,10 @@
 
 """Tests for getting the permission groups."""
 
-from unittest import skipIf
-
-from flask import current_app
 
 from project import base_url
+from project.api.models import PermissionGroup
+from project.api.models.base_model import db
 from project.tests.base import BaseTestCase
 
 
@@ -21,18 +20,14 @@ class TestPermissionGroup(BaseTestCase):
 
     url = base_url + "/permission-groups"
 
-    @skipIf(
-        not current_app.config["IDL_URL"],
-        "will not work without idl url configuration.",
-    )
     def test_get(self):
         """Ensure it works with a valid jwt."""
+        permission_group1 = PermissionGroup(name="group1", entitlement="g1")
+        permission_group2 = PermissionGroup(name="group2", entitlement="g2")
+        db.session.add_all([permission_group1, permission_group2])
+        db.session.commit()
+
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         data = response.json["data"]
-        # This will contain data if it can connect to an
-        # instance of the idl with some data.
-        # So this is a real request here.
-        # If the IDL is unavailable, or just empty
-        # it will fail here.
-        self.assertNotEqual(len(data), 0)
+        self.assertEqual(len(data), 2)

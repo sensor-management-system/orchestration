@@ -17,15 +17,24 @@ paths = {
     "/user-info": {
         "get": {
             "tags": ["User"],
+            "responses": {"200": {"$ref": "#/components/responses/Userinfo"}},
             "parameters": [
                 {
-                    "name": "skip_cache",
-                    "in": "query",
-                    "required": False,
-                    "schema": {"type": "boolean", "default": False},
-                }
+                    "in": "header",
+                    "name": "Cache-Control",
+                    "schema": {
+                        "type": "string",
+                        "enum": ["no-cache"],
+                    },
+                    "description": " ".join(
+                        [
+                            "Allows to skip the backend cache.",
+                            "Helpful for  authorization via OpenIDConnect token after",
+                            "a login with possibly changed group memberships.",
+                        ]
+                    ),
+                },
             ],
-            "responses": {"200": {"$ref": "#/components/responses/Userinfo"}},
             "description": "User info for the current user.",
             "operationId": "get_user_info",
         }
@@ -47,10 +56,6 @@ components = {
                                     "attributes": {
                                         "type": "object",
                                         "properties": {
-                                            "admin": {
-                                                "type": "array",
-                                                "items": {"type": "string"},
-                                            },
                                             "member": {
                                                 "type": "array",
                                                 "items": {"type": "string"},
@@ -87,7 +92,6 @@ components = {
                                     "type": "user",
                                     "id": "1234",
                                     "attributes": {
-                                        "admin": ["12345", "6789"],
                                         "member": ["12345", "998"],
                                         "active": True,
                                         "is_superuser": False,

@@ -12,10 +12,17 @@ from unittest.mock import patch
 from flask import url_for
 
 from project import base_url
-from project.api.models import Configuration, Contact, Device, Platform, Site, User
+from project.api.models import (
+    Configuration,
+    Contact,
+    Device,
+    PermissionGroup,
+    Platform,
+    Site,
+    User,
+)
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, mqtt, pidinst
+from project.extensions.instances import mqtt, pidinst
 from project.tests.base import BaseTestCase
 
 
@@ -42,6 +49,12 @@ class SetupMixin:
         db.session.add_all([contact, self.super_user])
         db.session.commit()
 
+    def setup_group123(self):
+        """Set a group up, so that we can work with it."""
+        self.group123 = PermissionGroup(name="group123", entitlement="group1234")
+        db.session.add(self.group123)
+        db.session.commit()
+
     def setup_public_device_in_group_123(self):
         """Set a public device up."""
         self.public_device = Device(
@@ -49,7 +62,7 @@ class SetupMixin:
             is_public=True,
             is_internal=False,
             is_private=False,
-            group_ids=["123"],
+            group_ids=[str(self.group123.id)],
         )
         db.session.add(self.public_device)
         db.session.commit()
@@ -61,7 +74,7 @@ class SetupMixin:
             is_public=True,
             is_internal=False,
             is_private=False,
-            group_ids=["123"],
+            group_ids=[str(self.group123.id)],
         )
         db.session.add(self.public_platform)
         db.session.commit()
@@ -72,7 +85,7 @@ class SetupMixin:
             label="public_configuration_in_group_123",
             is_public=True,
             is_internal=False,
-            cfg_permission_group="123",
+            cfg_permission_group=str(self.group123.id),
         )
         db.session.add(self.public_configuration)
         db.session.commit()
@@ -83,7 +96,7 @@ class SetupMixin:
             label="public_site_in_group_123",
             is_public=True,
             is_internal=False,
-            group_ids=["123"],
+            group_ids=[str(self.group123.id)],
         )
         db.session.add(self.public_site)
         db.session.commit()
@@ -176,28 +189,23 @@ class TestPids(BaseTestCase, SetupMixin):
     def test_post_not_editable(self):
         """Ensure we check the permissions to edit the entities."""
         self.setup_normal_user()
+        self.setup_group123()
         self.setup_public_device_in_group_123()
         payload = {
             "instrument_instance": {"type": "device", "id": self.public_device.id}
         }
         with self.run_requests_as(self.normal_user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=1,
-                    username="mock",
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.post(
-                    self.pid_url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.post(
+                self.pid_url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(resp.status_code, 403)
 
     def test_post_existing_pid(self):
         """Ensure we can't add pids for devices that have already one."""
         self.setup_super_user()
+        self.setup_group123()
         self.setup_public_device_in_group_123()
         self.public_device.persistent_identifier = "42/1234567890"
         db.session.add(self.public_device)
@@ -217,6 +225,7 @@ class TestPids(BaseTestCase, SetupMixin):
     def test_post_pid_for_device(self):
         """Ensure we get a pid for a device."""
         self.setup_super_user()
+        self.setup_group123()
         self.setup_public_device_in_group_123()
 
         payload = {
@@ -258,6 +267,7 @@ class TestPids(BaseTestCase, SetupMixin):
     def test_post_pid_for_private_device(self):
         """Ensure we don't get a pid for a private device."""
         self.setup_super_user()
+        self.setup_group123()
         self.setup_public_device_in_group_123()
         private_device = self.public_device
 
@@ -280,6 +290,7 @@ class TestPids(BaseTestCase, SetupMixin):
     def test_post_pid_for_platform(self):
         """Ensure we get a pid for a platform."""
         self.setup_super_user()
+        self.setup_group123()
         self.setup_public_platform_in_group_123()
 
         payload = {
@@ -321,6 +332,7 @@ class TestPids(BaseTestCase, SetupMixin):
     def test_post_pid_for_private_platform(self):
         """Ensure we don't get a pid for a private platform."""
         self.setup_super_user()
+        self.setup_group123()
         self.setup_public_platform_in_group_123()
         private_platform = self.public_platform
 
@@ -345,6 +357,7 @@ class TestPids(BaseTestCase, SetupMixin):
     def test_post_pid_for_configuration(self):
         """Ensure we get a pid for a configuration."""
         self.setup_super_user()
+        self.setup_group123()
         self.setup_public_configuration_in_group_123()
 
         payload = {
@@ -394,6 +407,7 @@ class TestPids(BaseTestCase, SetupMixin):
     def test_post_pid_for_site(self):
         """Ensure we get a pid for a site."""
         self.setup_super_user()
+        self.setup_group123()
         self.setup_public_site_in_group_123()
 
         payload = {"instrument_instance": {"type": "site", "id": self.public_site.id}}

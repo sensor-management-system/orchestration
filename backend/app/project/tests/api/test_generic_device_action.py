@@ -10,20 +10,24 @@
 
 import json
 import os
-from unittest.mock import patch
 
 from project import base_url, db
-from project.api.models import Contact, Device, GenericDeviceAction
+from project.api.models import (
+    Contact,
+    Device,
+    GenericDeviceAction,
+    PermissionGroup,
+    PermissionGroupMembership,
+    User,
+)
 from project.api.models.mixin import utc_now
-from project.extensions.instances import idl, mqtt
+from project.extensions.instances import mqtt
 from project.tests.base import (
     BaseTestCase,
-    create_token,
     fake,
     generate_userinfo_data,
     test_file_path,
 )
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 class TestGenericDeviceAction(BaseTestCase):
@@ -44,6 +48,22 @@ class TestGenericDeviceAction(BaseTestCase):
         test_file_path, "drafts", "platforms_test_data.json"
     )
 
+    def setUp(self):
+        """Set some data up for the tests."""
+        super().setUp()
+        contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(contact=contact, subject=contact.email)
+        self.permission_group = PermissionGroup(name="group1", entitlement="group1")
+        self.membership = PermissionGroupMembership(
+            user=self.normal_user, permission_group=self.permission_group
+        )
+        db.session.add_all(
+            [contact, self.normal_user, self.permission_group, self.membership]
+        )
+        db.session.commit()
+
     def test_get_generic_device_action(self):
         """Ensure the GET /generic_device_action route behaves correctly."""
         response = self.client.get(self.url)
@@ -54,10 +74,7 @@ class TestGenericDeviceAction(BaseTestCase):
     def test_add_generic_device_action(self):
         """Ensure POST a new generic device action can be added to the database."""
         data = self.make_generic_device_action_data()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             result = super().add_object(
                 url=f"{self.url}?include=device,contact",
                 data_object=data,
@@ -84,7 +101,7 @@ class TestGenericDeviceAction(BaseTestCase):
 
         This also creates some associated objects in the database.
         """
-        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        group_id_test_user_is_member_in_2 = [self.permission_group.id]
 
         device = Device(
             short_name=fake.pystr(),
@@ -127,10 +144,7 @@ class TestGenericDeviceAction(BaseTestCase):
     def test_update_generic_device_action(self):
         """Ensure a generic_device_action can be updated."""
         generic_device_action_data = self.make_generic_device_action_data()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             generic_device_action = super().add_object(
                 url=f"{self.url}?include=device,contact",
                 data_object=generic_device_action_data,
@@ -188,23 +202,17 @@ class TestGenericDeviceAction(BaseTestCase):
     def test_delete_generic_device_action(self):
         """Ensure a generic_device_action can be deleted."""
         data = self.make_generic_device_action_data()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups:
-            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+        with self.run_requests_as(self.normal_user):
             obj = super().add_object(
                 url=f"{self.url}?include=device,contact",
                 data_object=data,
                 object_type=self.object_type,
             )
             device_id = obj["data"]["relationships"]["device"]["data"]["id"]
-            access_headers = create_token()
-            with self.client:
-                response = self.client.delete(
-                    f"{self.url}/{obj['data']['id']}",
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+            response = self.client.delete(
+                f"{self.url}/{obj['data']['id']}",
+                content_type="application/vnd.api+json",
+            )
             self.assertEqual(response.status_code, 200)
             device = db.session.query(Device).filter_by(id=device_id).first()
             self.assertEqual(device.update_description, "delete;action")

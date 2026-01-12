@@ -14,7 +14,14 @@ from unittest.mock import patch
 from flask import current_app
 
 from project import base_url
-from project.api.models import Contact, Platform, PlatformContactRole, User
+from project.api.models import (
+    Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
+    Platform,
+    PlatformContactRole,
+    User,
+)
 from project.api.models.base_model import db
 from project.extensions.instances import mqtt, pidinst
 from project.tests.base import BaseTestCase, Fixtures, fake, generate_userinfo_data
@@ -22,14 +29,24 @@ from project.tests.base import BaseTestCase, Fixtures, fake, generate_userinfo_d
 fixtures = Fixtures()
 
 
+@fixtures.register("group1", scope=lambda: db.session)
+def create_group1():
+    """Create a permission group."""
+    result = PermissionGroup(name="group1", entitlement="group1")
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
 @fixtures.register("public_platform1_in_group1", scope=lambda: db.session)
-def create_public_platform1_in_group1():
+@fixtures.use(["group1"])
+def create_public_platform1_in_group1(group1):
     """Create a public platform that uses group 1 for permission management."""
     result = Platform(
         short_name="public platform1",
         is_internal=False,
         is_public=True,
-        group_ids=["1"],
+        group_ids=[str(group1.id)],
     )
     db.session.add(result)
     db.session.commit()
@@ -57,6 +74,16 @@ def create_platform_contact(public_platform1_in_group1, super_user_contact):
         role_uri="http://localhost/cv/roles/1",
         role_name="Owner",
     )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("membership_of_user1_in_group1", scope=lambda: db.session)
+@fixtures.use(["user1", "group1"])
+def create_membership_of_user1_in_group1(user1, group1):
+    """Create a permission group."""
+    result = PermissionGroupMembership(user=user1, permission_group=group1)
     db.session.add(result)
     db.session.commit()
     return result
@@ -134,7 +161,8 @@ class TestPlatformContactRolesServices(BaseTestCase):
             platform_contact_role.role_name, data["data"][0]["attributes"]["role_name"]
         )
 
-    def test_post_a_platform_contact_role(self):
+    @fixtures.use
+    def test_post_a_platform_contact_role(self, user1):
         """Ensure post a platform_contact_role behaves correctly."""
         contact = add_a_contact()
         platform = add_a_platform()
@@ -155,9 +183,10 @@ class TestPlatformContactRolesServices(BaseTestCase):
             }
         }
         url = f"{self.url}?include=platform,contact"
-        result = super().add_object(
-            url=url, data_object=data, object_type=self.object_type
-        )
+        with self.run_requests_as(user1):
+            result = super().add_object(
+                url=url, data_object=data, object_type=self.object_type
+            )
         platform_id = result["data"]["relationships"]["platform"]["data"]["id"]
         platform = db.session.query(Platform).filter_by(id=platform_id).first()
         self.assertEqual(platform.update_description, "create;contact")
@@ -171,7 +200,8 @@ class TestPlatformContactRolesServices(BaseTestCase):
         self.expect(notification_data["attributes"]["role_name"]).to_equal(role_name)
         self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
-    def test_update_a_contact_role(self):
+    @fixtures.use
+    def test_update_a_contact_role(self, user1):
         """Ensure update platform_contact_role behaves correctly."""
         platform_contact_role = add_platform_contact_role()
         contact_updated = {
@@ -183,11 +213,12 @@ class TestPlatformContactRolesServices(BaseTestCase):
                 },
             }
         }
-        result = super().update_object(
-            url=f"{self.url}/{platform_contact_role.id}",
-            data_object=contact_updated,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            result = super().update_object(
+                url=f"{self.url}/{platform_contact_role.id}",
+                data_object=contact_updated,
+                object_type=self.object_type,
+            )
         platform_id = result["data"]["relationships"]["platform"]["data"]["id"]
         platform = db.session.query(Platform).filter_by(id=platform_id).first()
         self.assertEqual(platform.update_description, "update;contact")
@@ -239,7 +270,8 @@ class TestPlatformContactRolesServices(BaseTestCase):
         )
         self.assertIsNone(reloaded)
 
-    def test_update_external_metadata_after_post_of_contact_role(self):
+    @fixtures.use
+    def test_update_external_metadata_after_post_of_contact_role(self, user1):
         """Ensure we ask the system to update external metadata after posting the contact role."""
         contact = add_a_contact()
         platform = add_a_platform()
@@ -269,11 +301,15 @@ class TestPlatformContactRolesServices(BaseTestCase):
             pidinst, "update_external_metadata"
         ) as update_external_metadata:
             update_external_metadata.return_value = None
-            super().add_object(url=url, data_object=data, object_type=self.object_type)
+            with self.run_requests_as(user1):
+                super().add_object(
+                    url=url, data_object=data, object_type=self.object_type
+                )
             update_external_metadata.assert_called_once()
             self.assertEqual(update_external_metadata.call_args.args[0].id, platform.id)
 
-    def test_update_external_metadata_after_patch_of_contact_role(self):
+    @fixtures.use
+    def test_update_external_metadata_after_patch_of_contact_role(self, user1):
         """Ensure we ask the system to update external metadata after patching the contact role."""
         platform_contact_role = add_platform_contact_role()
         contact_updated = {
@@ -296,11 +332,12 @@ class TestPlatformContactRolesServices(BaseTestCase):
             pidinst, "update_external_metadata"
         ) as update_external_metadata:
             update_external_metadata.return_value = None
-            super().update_object(
-                url=f"{self.url}/{platform_contact_role.id}",
-                data_object=contact_updated,
-                object_type=self.object_type,
-            )
+            with self.run_requests_as(user1):
+                super().update_object(
+                    url=f"{self.url}/{platform_contact_role.id}",
+                    data_object=contact_updated,
+                    object_type=self.object_type,
+                )
             update_external_metadata.assert_called_once()
             self.assertEqual(update_external_metadata.call_args.args[0].id, platform.id)
 

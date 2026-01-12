@@ -114,11 +114,12 @@ class TestPlatformServices(BaseTestCase):
 
         platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
 
-        super().add_object(
-            url=self.platform_url,
-            data_object=platform_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            super().add_object(
+                url=self.platform_url,
+                data_object=platform_data,
+                object_type=self.object_type,
+            )
 
     def test_add_platform_contacts_relationship(self):
         """Ensure a new relationship between a platform & contact can be created."""
@@ -134,9 +135,10 @@ class TestPlatformServices(BaseTestCase):
                 },
             }
         }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
-        )
+        with self.run_requests_as(self.normal_user):
+            contact = super().add_object(
+                url=self.contact_url, data_object=contact_data, object_type="contact"
+            )
         platform_json = extract_data_from_json_file(self.json_data_url, "platforms")
 
         platform_data = {
@@ -150,11 +152,12 @@ class TestPlatformServices(BaseTestCase):
                 },
             }
         }
-        data = super().add_object(
-            url=self.platform_url + "?include=contacts",
-            data_object=platform_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            data = super().add_object(
+                url=self.platform_url + "?include=contacts",
+                data_object=platform_data,
+                object_type=self.object_type,
+            )
 
         result_contact_ids = [
             x["id"] for x in data["data"]["relationships"]["contacts"]["data"]
@@ -261,11 +264,12 @@ class TestPlatformServices(BaseTestCase):
 
         platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
 
-        result = super().add_object(
-            url=self.platform_url,
-            data_object=platform_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            result = super().add_object(
+                url=self.platform_url,
+                data_object=platform_data,
+                object_type=self.object_type,
+            )
         result_id = result["data"]["id"]
         platform = db.session.query(Platform).filter_by(id=result_id).first()
 
@@ -289,11 +293,12 @@ class TestPlatformServices(BaseTestCase):
 
         platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
 
-        result = super().add_object(
-            url=self.platform_url,
-            data_object=platform_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            result = super().add_object(
+                url=self.platform_url,
+                data_object=platform_data,
+                object_type=self.object_type,
+            )
         result_id = result["data"]["id"]
 
         user = add_user()
@@ -418,11 +423,12 @@ class TestPlatformServices(BaseTestCase):
         platforms_json = extract_data_from_json_file(self.json_data_url, "platforms")
 
         platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
-        result = super().add_object(
-            url=self.platform_url,
-            data_object=platform_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            result = super().add_object(
+                url=self.platform_url,
+                data_object=platform_data,
+                object_type=self.object_type,
+            )
         result_id = result["data"]["id"]
 
         user = add_user()
@@ -467,11 +473,12 @@ class TestPlatformServices(BaseTestCase):
         platforms_json = extract_data_from_json_file(self.json_data_url, "platforms")
 
         platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
-        result = super().add_object(
-            url=self.platform_url,
-            data_object=platform_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.normal_user):
+            result = super().add_object(
+                url=self.platform_url,
+                data_object=platform_data,
+                object_type=self.object_type,
+            )
         result_id = result["data"]["id"]
 
         user = add_user()

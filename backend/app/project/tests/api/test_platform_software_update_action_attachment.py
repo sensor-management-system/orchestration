@@ -16,13 +16,37 @@ from project.api.models import (
     Platform,
     PlatformAttachment,
     PlatformSoftwareUpdateAction,
+    User,
 )
 from project.api.models.base_model import db
 from project.extensions.instances import mqtt
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data
+from project.tests.base import BaseTestCase, Fixtures, fake, generate_userinfo_data
 from project.tests.models.test_software_update_actions_attachment_model import (
     add_platform_software_update_action_attachment_model,
 )
+
+fixtures = Fixtures()
+
+
+@fixtures.register("contact1", scope=lambda: db.session)
+def create_contact1():
+    """Create a single contact so that it can be used within the tests."""
+    result = Contact(
+        given_name="first", family_name="contact", email="first.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("user1", scope=lambda: db.session)
+@fixtures.use(["contact1"])
+def create_user1(contact1):
+    """Create a normal user to use it in the tests."""
+    result = User(contact=contact1, subject=contact1.email)
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
@@ -73,7 +97,8 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
         # should be only one
         self.assertEqual(response.json["meta"]["count"], 0)
 
-    def test_post_platform_software_update_action_attachment(self):
+    @fixtures.use
+    def test_post_platform_software_update_action_attachment(self, user1):
         """Create PlatformSoftwareUpdateActionAttachment."""
         userinfo = generate_userinfo_data()
         platform = Platform(
@@ -125,11 +150,12 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
-            url=f"{self.url}?include=action,attachment",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().add_object(
+                url=f"{self.url}?include=action,attachment",
+                data_object=data,
+                object_type=self.object_type,
+            )
         # And ensure that we trigger the mqtt.
         mqtt.publish.assert_called_once()
         call_args = mqtt.publish.call_args[0]
@@ -146,7 +172,8 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
         ).to_equal(str(platform_software_update_action.id))
         self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
-    def test_update_platform_software_update_action_attachment(self):
+    @fixtures.use
+    def test_update_platform_software_update_action_attachment(self, user1):
         """Update PlatformSoftwareUpdateActionAttachment."""
         platform_software_update_action_attachment = (
             add_platform_software_update_action_attachment_model()
@@ -177,11 +204,12 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
                 },
             }
         }
-        _ = super().update_object(
-            url=f"{self.url}/{platform_software_update_action_attachment.id}?include=attachment",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().update_object(
+                url=f"{self.url}/{platform_software_update_action_attachment.id}?include=attachment",
+                data_object=data,
+                object_type=self.object_type,
+            )
         # And ensure that we trigger the mqtt.
         mqtt.publish.assert_called_once()
         call_args = mqtt.publish.call_args[0]

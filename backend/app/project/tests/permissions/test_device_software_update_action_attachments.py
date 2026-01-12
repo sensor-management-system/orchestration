@@ -7,7 +7,6 @@
 """Test classes for the device software update action attachments."""
 import datetime
 import json
-from unittest.mock import patch
 
 from project import base_url
 from project.api.models import (
@@ -16,11 +15,11 @@ from project.api.models import (
     DeviceAttachment,
     DeviceSoftwareUpdateAction,
     DeviceSoftwareUpdateActionAttachment,
+    PermissionGroup,
+    PermissionGroupMembership,
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
 from project.tests.base import BaseTestCase
 
 
@@ -29,6 +28,30 @@ class TestDeviceSoftwarUpdateActionAttachments(BaseTestCase):
 
     url = base_url + "/device-software-update-action-attachments"
 
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                normal_contact,
+                self.normal_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
+
     def test_patch_to_non_editable_device(self):
         """Ensure we can't update to a device we can't edit."""
         device1 = Device(
@@ -36,14 +59,14 @@ class TestDeviceSoftwarUpdateActionAttachments(BaseTestCase):
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id)],
         )
         device2 = Device(
             short_name="device2",
             is_public=False,
             is_internal=True,
             is_private=False,
-            group_ids=["2"],
+            group_ids=[str(self.other_group.id)],
         )
         contact = Contact(
             given_name="first",
@@ -82,16 +105,11 @@ class TestDeviceSoftwarUpdateActionAttachments(BaseTestCase):
             action=action1,
             attachment=attachment1,
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
         db.session.add_all(
             [
                 device1,
                 device2,
                 contact,
-                user,
                 action1,
                 action2,
                 attachment1,
@@ -125,18 +143,10 @@ class TestDeviceSoftwarUpdateActionAttachments(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[*device1.group_ids],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{update_attachment.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{update_attachment.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

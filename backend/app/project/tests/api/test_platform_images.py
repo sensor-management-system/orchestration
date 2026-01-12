@@ -7,22 +7,31 @@
 """Tests for the platform image endpoints."""
 
 import json
-from unittest.mock import patch
 
 from project import base_url
 from project.api.models import (
     Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
     Platform,
     PlatformAttachment,
     PlatformImage,
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, mqtt
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, Fixtures
 
 fixtures = Fixtures()
+
+
+@fixtures.register("group1", scope=lambda: db.session)
+def create_group1():
+    """Create a permission group."""
+    result = PermissionGroup(name="group1", entitlement="group1")
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 @fixtures.register("contact1", scope=lambda: db.session)
@@ -90,15 +99,26 @@ def create_super_user(super_user_contact):
     return result
 
 
+@fixtures.register("membership_of_user1_in_group1", scope=lambda: db.session)
+@fixtures.use(["user1", "group1"])
+def create_membership_of_user1_in_group1(user1, group1):
+    """Create a permission group."""
+    result = PermissionGroupMembership(user=user1, permission_group=group1)
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
 @fixtures.register("public_platform1_in_group1", scope=lambda: db.session)
-def create_public_platform1_in_group1():
+@fixtures.use(["group1"])
+def create_public_platform1_in_group1(group1):
     """Create a public platform that uses group 1 for permission management."""
     result = Platform(
         short_name="public platform1",
         is_private=False,
         is_internal=False,
         is_public=True,
-        group_ids=["1"],
+        group_ids=[str(group1.id)],
     )
     db.session.add(result)
     db.session.commit()
@@ -106,14 +126,15 @@ def create_public_platform1_in_group1():
 
 
 @fixtures.register("public_platform2_in_group1", scope=lambda: db.session)
-def create_public_platform2_in_group1():
+@fixtures.use(["group1"])
+def create_public_platform2_in_group1(group1):
     """Create another public platform that uses group 1 for permission management."""
     result = Platform(
         short_name="public platform2",
         is_private=False,
         is_internal=False,
         is_public=True,
-        group_ids=["1"],
+        group_ids=[str(group1.id)],
     )
     db.session.add(result)
     db.session.commit()
@@ -121,14 +142,15 @@ def create_public_platform2_in_group1():
 
 
 @fixtures.register("internal_platform1_in_group1", scope=lambda: db.session)
-def create_internal_platform1_in_group1():
+@fixtures.use(["group1"])
+def create_internal_platform1_in_group1(group1):
     """Create a internal platform that uses group 1 for permission management."""
     result = Platform(
         short_name="internal platform1",
         is_private=False,
         is_internal=True,
         is_public=False,
-        group_ids=["1"],
+        group_ids=[str(group1.id)],
     )
     db.session.add(result)
     db.session.commit()
@@ -635,8 +657,13 @@ class TestPlatformImageServices(BaseTestCase):
         self.expect(resp.status_code).to_equal(401)
         self.expect(mqtt.publish.called).to_equal(False)
 
-    @fixtures.use(["user1", "attachment1_of_public_platform1_in_group1"])
-    def test_post_member(self, user1, attachment1_of_public_platform1_in_group1):
+    @fixtures.use
+    def test_post_member(
+        self,
+        user1,
+        attachment1_of_public_platform1_in_group1,
+        membership_of_user1_in_group1,
+    ):
         """Ensure we can post of we are a member of one of the groups."""
         payload = {
             "data": {
@@ -663,18 +690,11 @@ class TestPlatformImageServices(BaseTestCase):
             }
         }
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=attachment1_of_public_platform1_in_group1.platform.group_ids,
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(201)
         self.expect(resp.json["data"]["attributes"]["order_index"]).to_equal(10)
         self.expect(
@@ -696,48 +716,6 @@ class TestPlatformImageServices(BaseTestCase):
         notification_data = json.loads(call_args[1])["data"]
         self.expect(notification_data["type"]).to_equal("platform_image")
         self.expect(notification_data["attributes"]["order_index"]).to_equal(10)
-
-    @fixtures.use(["user1", "attachment1_of_public_platform1_in_group1"])
-    def test_post_admin(self, user1, attachment1_of_public_platform1_in_group1):
-        """Ensure we can post of we are an admin of one of the groups."""
-        payload = {
-            "data": {
-                "type": "platform_image",
-                "attributes": {
-                    "order_index": 10,
-                },
-                "relationships": {
-                    "platform": {
-                        "data": {
-                            "id": str(
-                                attachment1_of_public_platform1_in_group1.platform_id
-                            ),
-                            "type": "platform",
-                        },
-                    },
-                    "attachment": {
-                        "data": {
-                            "id": str(attachment1_of_public_platform1_in_group1.id),
-                            "type": "platform_attachment",
-                        },
-                    },
-                },
-            }
-        }
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=attachment1_of_public_platform1_in_group1.platform.group_ids,
-                    membered_permission_groups=[],
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
-        self.expect(resp.status_code).to_equal(201)
 
     @fixtures.use(["user1", "attachment1_of_private_platform_of_user1"])
     def test_post_private_creator(
@@ -878,18 +856,11 @@ class TestPlatformImageServices(BaseTestCase):
             }
         }
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.post(
-                    self.url,
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(["super_user", "attachment1_of_public_platform1_in_group1"])
@@ -1215,9 +1186,12 @@ class TestPlatformImageServices(BaseTestCase):
         )
         self.expect(resp.status_code).to_equal(401)
 
-    @fixtures.use(["user1", "image1_of_attachment1_of_public_platform1_in_group1"])
+    @fixtures.use
     def test_patch_for_public_platform_member(
-        self, user1, image1_of_attachment1_of_public_platform1_in_group1
+        self,
+        user1,
+        image1_of_attachment1_of_public_platform1_in_group1,
+        membered_permission_groups,
     ):
         """Ensure we can patch if we are a member of one of the groups."""
         payload = {
@@ -1231,18 +1205,11 @@ class TestPlatformImageServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=image1_of_attachment1_of_public_platform1_in_group1.platform.group_ids,
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{image1_of_attachment1_of_public_platform1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.patch(
+                f"{self.url}/{image1_of_attachment1_of_public_platform1_in_group1.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(200)
         self.expect(resp.json["data"]["attributes"]["order_index"]).to_equal(20)
 
@@ -1269,39 +1236,6 @@ class TestPlatformImageServices(BaseTestCase):
         self.expect(notification_data["attributes"]["order_index"]).to_equal(20)
 
     @fixtures.use(["user1", "image1_of_attachment1_of_public_platform1_in_group1"])
-    def test_patch_for_public_platform_admin(
-        self, user1, image1_of_attachment1_of_public_platform1_in_group1
-    ):
-        """Ensure we can patch if we are an admin of one of the groups."""
-        payload = {
-            "data": {
-                "type": "platform_image",
-                "id": str(image1_of_attachment1_of_public_platform1_in_group1.id),
-                "attributes": {
-                    "order_index": 20,
-                },
-            }
-        }
-        group_ids = (
-            image1_of_attachment1_of_public_platform1_in_group1.platform.group_ids
-        )
-
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=group_ids,
-                    membered_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{image1_of_attachment1_of_public_platform1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
-        self.expect(resp.status_code).to_equal(200)
-
-    @fixtures.use(["user1", "image1_of_attachment1_of_public_platform1_in_group1"])
     def test_patch_for_public_platform_no_member(
         self, user1, image1_of_attachment1_of_public_platform1_in_group1
     ):
@@ -1317,18 +1251,11 @@ class TestPlatformImageServices(BaseTestCase):
         }
 
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.patch(
-                    f"{self.url}/{image1_of_attachment1_of_public_platform1_in_group1.id}",
-                    data=json.dumps(payload),
-                    content_type="application/vnd.api+json",
-                )
+            resp = self.client.patch(
+                f"{self.url}/{image1_of_attachment1_of_public_platform1_in_group1.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(["super_user", "image1_of_attachment1_of_public_platform1_in_group1"])
@@ -1621,25 +1548,18 @@ class TestPlatformImageServices(BaseTestCase):
         )
         self.expect(resp.status_code).to_equal(401)
 
-    @fixtures.use(["user1", "image1_of_attachment1_of_public_platform1_in_group1"])
+    @fixtures.use
     def test_delete_for_public_platform_member(
-        self, user1, image1_of_attachment1_of_public_platform1_in_group1
+        self,
+        user1,
+        image1_of_attachment1_of_public_platform1_in_group1,
+        membership_of_user1_in_group1,
     ):
         """Ensure that we can delete if we are member of a group."""
-        group_ids = (
-            image1_of_attachment1_of_public_platform1_in_group1.platform.group_ids
-        )
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=group_ids,
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{image1_of_attachment1_of_public_platform1_in_group1.id}",
-                )
+            resp = self.client.delete(
+                f"{self.url}/{image1_of_attachment1_of_public_platform1_in_group1.id}",
+            )
         self.expect(resp.status_code).to_equal(200)
         reloaded_platform = (
             db.session.query(Platform)
@@ -1666,42 +1586,14 @@ class TestPlatformImageServices(BaseTestCase):
         )
 
     @fixtures.use(["user1", "image1_of_attachment1_of_public_platform1_in_group1"])
-    def test_delete_for_public_platform_admin(
-        self, user1, image1_of_attachment1_of_public_platform1_in_group1
-    ):
-        """Ensure that we can delete if we are admin of a group."""
-        group_ids = (
-            image1_of_attachment1_of_public_platform1_in_group1.platform.group_ids
-        )
-        with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=group_ids,
-                    membered_permission_groups=[],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{image1_of_attachment1_of_public_platform1_in_group1.id}",
-                )
-        self.expect(resp.status_code).to_equal(200)
-
-    @fixtures.use(["user1", "image1_of_attachment1_of_public_platform1_in_group1"])
     def test_delete_for_public_platform_no_member(
         self, user1, image1_of_attachment1_of_public_platform1_in_group1
     ):
         """Ensure that we can't delete if we are not member of a group."""
         with self.run_requests_as(user1):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id=user1.subject,
-                    username=user1.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[],
-                )
-                resp = self.client.delete(
-                    f"{self.url}/{image1_of_attachment1_of_public_platform1_in_group1.id}",
-                )
+            resp = self.client.delete(
+                f"{self.url}/{image1_of_attachment1_of_public_platform1_in_group1.id}",
+            )
         self.expect(resp.status_code).to_equal(403)
 
     @fixtures.use(["super_user", "image1_of_attachment1_of_public_platform1_in_group1"])

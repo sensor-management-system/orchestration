@@ -5,13 +5,10 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """Set of rules what action is allowed on the entities."""
-import itertools
-
 from flask import g
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import aliased
 
-from ...extensions.instances import idl
 from ..datalayers.esalchemy import AndFilter, OrFilter, TermEqualsExactStringFilter
 from ..helpers.custom_dispatch import custom_dispatch
 from ..models import (
@@ -219,13 +216,10 @@ def can_create(type_, data):
     if not permission_group or permission_group == "{}":
         return False
     # Any kind of membership is sufficient.
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
-
-    if permission_group in itertools.chain(
-        idl_user.administrated_permission_groups, idl_user.membered_permission_groups
-    ):
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    if permission_group in membered_permission_group_ids:
         return True
     return False
 
@@ -244,13 +238,11 @@ def can_edit(entity):
     # then we allow it (to change older entries).
     if not entity.cfg_permission_group or entity.cfg_permission_group == "{}":
         return True
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
 
-    if entity.cfg_permission_group in itertools.chain(
-        idl_user.administrated_permission_groups, idl_user.membered_permission_groups
-    ):
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    if entity.cfg_permission_group in membered_permission_group_ids:
         return True
     return False
 
@@ -266,14 +258,10 @@ def can_change(entity, data):
     # is still at least a member in it.
     if data.get("cfg_permission_group"):
         cfg_permission_group = data["cfg_permission_group"]
-        idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-        if not idl_user:
-            return False
-
-        if cfg_permission_group in itertools.chain(
-            idl_user.administrated_permission_groups,
-            idl_user.membered_permission_groups,
-        ):
+        membered_permission_group_ids = set(
+            [str(memberships.permission_group.id) for memberships in g.user.memberships]
+        )
+        if cfg_permission_group in membered_permission_group_ids:
             return True
         return False
     return True
@@ -297,12 +285,10 @@ def can_archive(entity):
         return False
     if g.user.is_superuser:
         return True
-    # For archiving we need admin role.
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
-
-    if entity.cfg_permission_group in idl_user.administrated_permission_groups:
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    if entity.cfg_permission_group in membered_permission_group_ids:
         return True
 
     return False
@@ -315,12 +301,10 @@ def can_restore(entity):
         return False
     if g.user.is_superuser:
         return True
-    # For restoring we need the admin role.
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
-
-    if entity.cfg_permission_group in idl_user.administrated_permission_groups:
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    if entity.cfg_permission_group in membered_permission_group_ids:
         return True
 
     return False
@@ -855,16 +839,13 @@ def can_create(type_, data):
     # We want to enforce groups for new devices.
     if not data.get("group_ids"):
         return False
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
 
-    for idl_group in itertools.chain(
-        idl_user.administrated_permission_groups, idl_user.membered_permission_groups
-    ):
-        for group in data.get("group_ids", []):
-            if idl_group == group:
-                return True
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    for group in data.get("group_ids", []):
+        if group in membered_permission_group_ids:
+            return True
     return False
 
 
@@ -887,15 +868,12 @@ def can_edit(entity):
     if not entity.group_ids:
         return True
 
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
-    for idl_group in itertools.chain(
-        idl_user.administrated_permission_groups, idl_user.membered_permission_groups
-    ):
-        for group in entity.group_ids:
-            if idl_group == group:
-                return True
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    for group in entity.group_ids:
+        if group in membered_permission_group_ids:
+            return True
 
     return False
 
@@ -915,31 +893,28 @@ def can_change(entity, data):
     # is still at least a member in it.
     if data.get("group_ids"):
         group_ids = data["group_ids"]
-        idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-        if not idl_user:
-            return False
+
+        membered_permission_group_ids = set(
+            [str(memberships.permission_group.id) for memberships in g.user.memberships]
+        )
         is_at_least_member = False
-        for idl_group in itertools.chain(
-            idl_user.administrated_permission_groups,
-            idl_user.membered_permission_groups,
-        ):
-            for group in group_ids:
-                if idl_group == group:
-                    is_at_least_member = True
-                    break
+        for group in group_ids:
+            if group in membered_permission_group_ids:
+                is_at_least_member = True
+                break
         if not is_at_least_member:
             return False
         # And we want to check that those that are removed are removed
-        # because we are admin in it.
-        removed_group_without_being_admin = False
+        # because we are member in it.
+        removed_group_without_being_member = False
         # entity.group_ids could be None initially.
         old_group_ids = entity.group_ids or []
         removed_groups = set(old_group_ids) - set(group_ids)
         for removed_group in removed_groups:
-            if removed_group not in idl_user.administrated_permission_groups:
-                removed_group_without_being_admin = True
+            if removed_group not in membered_permission_group_ids:
+                removed_group_without_being_member = True
                 break
-        if removed_group_without_being_admin:
+        if removed_group_without_being_member:
             return False
     return True
 
@@ -968,14 +943,12 @@ def can_archive(entity):
     if entity.is_private and entity.created_by == g.user:
         return True
 
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
-
-    for idl_group in idl_user.administrated_permission_groups:
-        for group in entity.group_ids:
-            if idl_group == group:
-                return True
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    for group in entity.group_ids:
+        if group in membered_permission_group_ids:
+            return True
 
     return False
 
@@ -990,14 +963,12 @@ def can_restore(entity):
     if entity.is_private and entity.created_by == g.user:
         return True
 
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
-
-    for idl_group in idl_user.administrated_permission_groups:
-        for group in entity.group_ids:
-            if idl_group == group:
-                return True
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    for group in entity.group_ids:
+        if group in membered_permission_group_ids:
+            return True
 
     return False
 
@@ -1609,16 +1580,13 @@ def can_create(type_, data):
     if not group_ids:
         return False
 
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    for group in data.get("group_ids", []):
+        if group in membered_permission_group_ids:
+            return True
 
-    for idl_group in itertools.chain(
-        idl_user.administrated_permission_groups, idl_user.membered_permission_groups
-    ):
-        for group in data.get("group_ids"):
-            if idl_group == group:
-                return True
     return False
 
 
@@ -1635,16 +1603,12 @@ def can_edit(entity):
     if not entity.group_ids:
         return True
 
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
-
-    for idl_group in itertools.chain(
-        idl_user.administrated_permission_groups, idl_user.membered_permission_groups
-    ):
-        for group in entity.group_ids:
-            if idl_group == group:
-                return True
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    for group in entity.group_ids:
+        if group in membered_permission_group_ids:
+            return True
 
     return False
 
@@ -1660,31 +1624,28 @@ def can_change(entity, data):
     # is still at least a member in it.
     if data.get("group_ids"):
         group_ids = data["group_ids"]
-        idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-        if not idl_user:
-            return False
+
+        membered_permission_group_ids = set(
+            [str(memberships.permission_group.id) for memberships in g.user.memberships]
+        )
         is_at_least_member = False
-        for idl_group in itertools.chain(
-            idl_user.administrated_permission_groups,
-            idl_user.membered_permission_groups,
-        ):
-            for group in group_ids:
-                if idl_group == group:
-                    is_at_least_member = True
-                    break
+        for group in group_ids:
+            if group in membered_permission_group_ids:
+                is_at_least_member = True
+                break
         if not is_at_least_member:
             return False
         # And we want to check that those that are removed are removed
-        # because we are admin in it.
-        removed_group_without_being_admin = False
+        # because we are member in it.
+        removed_group_without_being_member = False
         # entity.group_ids could be None initially.
         old_group_ids = entity.group_ids or []
         removed_groups = set(old_group_ids) - set(group_ids)
         for removed_group in removed_groups:
-            if removed_group not in idl_user.administrated_permission_groups:
-                removed_group_without_being_admin = True
+            if removed_group not in membered_permission_group_ids:
+                removed_group_without_being_member = True
                 break
-        if removed_group_without_being_admin:
+        if removed_group_without_being_member:
             return False
     return True
 
@@ -1709,14 +1670,12 @@ def can_archive(entity):
     if g.user.is_superuser:
         return True
 
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
-
-    for idl_group in idl_user.administrated_permission_groups:
-        for group in entity.group_ids:
-            if idl_group == group:
-                return True
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    for group in entity.group_ids:
+        if group in membered_permission_group_ids:
+            return True
 
     return False
 
@@ -1729,14 +1688,12 @@ def can_restore(entity):
     if g.user.is_superuser:
         return True
 
-    idl_user = idl.get_all_permission_groups_for_a_user(g.user.subject)
-    if not idl_user:
-        return False
-
-    for idl_group in idl_user.administrated_permission_groups:
-        for group in entity.group_ids:
-            if idl_group == group:
-                return True
+    membered_permission_group_ids = set(
+        [str(memberships.permission_group.id) for memberships in g.user.memberships]
+    )
+    for group in entity.group_ids:
+        if group in membered_permission_group_ids:
+            return True
 
     return False
 

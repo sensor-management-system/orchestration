@@ -16,12 +16,36 @@ from project.api.models import (
     Device,
     DeviceAttachment,
     DeviceCalibrationAction,
+    User,
 )
 from project.extensions.instances import mqtt
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data
+from project.tests.base import BaseTestCase, Fixtures, fake
 from project.tests.models.test_device_calibration_attachment_model import (
     add_device_calibration_attachment,
 )
+
+fixtures = Fixtures()
+
+
+@fixtures.register("contact1", scope=lambda: db.session)
+def create_contact1():
+    """Create a single contact so that it can be used within the tests."""
+    result = Contact(
+        given_name="first", family_name="contact", email="first.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("user1", scope=lambda: db.session)
+@fixtures.use(["contact1"])
+def create_user1(contact1):
+    """Create a normal user to use it in the tests."""
+    result = User(contact=contact1, subject=contact1.email)
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 class TestDeviceCalibrationAttachment(BaseTestCase):
@@ -72,9 +96,9 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
         # visible anymore.
         self.assertEqual(response.json["meta"]["count"], 0)
 
-    def test_post_generic_device_action_attachment(self):
+    @fixtures.use
+    def test_post_generic_device_action_attachment(self, contact1, user1):
         """Create DeviceCalibrationAttachment."""
-        userinfo = generate_userinfo_data()
         device = Device(
             short_name="Device 1",
             manufacturer_name=fake.company(),
@@ -83,11 +107,6 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
             is_internal=True,
         )
 
-        contact = Contact(
-            given_name=userinfo["given_name"],
-            family_name=userinfo["family_name"],
-            email=userinfo["email"],
-        )
         db.session.add(device)
         db.session.commit()
         attachment = DeviceAttachment(
@@ -98,9 +117,9 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
             current_calibration_date=fake.date(),
             next_calibration_date=fake.date(),
             device=device,
-            contact=contact,
+            contact=contact1,
         )
-        db.session.add_all([device, attachment, contact, device_calibration_action])
+        db.session.add_all([device, attachment, device_calibration_action])
         db.session.commit()
         data = {
             "data": {
@@ -119,11 +138,12 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
-            url=f"{self.url}?include=action,attachment",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().add_object(
+                url=f"{self.url}?include=action,attachment",
+                data_object=data,
+                object_type=self.object_type,
+            )
         # And ensure that we trigger the mqtt.
         mqtt.publish.assert_called_once()
         call_args = mqtt.publish.call_args[0]
@@ -136,7 +156,8 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
         ).to_equal(str(device_calibration_action.id))
         self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
-    def test_update_generic_device_action_attachment(self):
+    @fixtures.use
+    def test_update_generic_device_action_attachment(self, user1):
         """Update DeviceCalibrationAttachment."""
         device_calibration_attachment = add_device_calibration_attachment()
         device = Device(
@@ -151,7 +172,7 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
         attachment = DeviceAttachment(
             label=fake.pystr(), url=fake.url(), device_id=device.id
         )
-        db.session.add(attachment)
+        db.session.add_all([attachment])
         db.session.commit()
         data = {
             "data": {
@@ -165,11 +186,12 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
                 },
             }
         }
-        _ = super().update_object(
-            url=f"{self.url}/{device_calibration_attachment.id}?include=attachment",
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(user1):
+            _ = super().update_object(
+                url=f"{self.url}/{device_calibration_attachment.id}?include=attachment",
+                data_object=data,
+                object_type=self.object_type,
+            )
         # And ensure that we trigger the mqtt.
         mqtt.publish.assert_called_once()
         call_args = mqtt.publish.call_args[0]

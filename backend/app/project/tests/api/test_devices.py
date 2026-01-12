@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 from flask import current_app
 
-from project import base_url, idl
+from project import base_url
 from project.api.models import (
     Configuration,
     Contact,
@@ -26,6 +26,8 @@ from project.api.models import (
     DeviceParameter,
     DeviceParameterValueChangeAction,
     DeviceProperty,
+    PermissionGroup,
+    PermissionGroupMembership,
     User,
 )
 from project.api.models.base_model import db
@@ -48,7 +50,6 @@ from project.tests.models.test_software_update_actions_model import (
     add_device_software_update_action_model,
 )
 from project.tests.models.test_user_model import add_user
-from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 from project.tests.read_from_json import extract_data_from_json_file
 
 fixtures = Fixtures()
@@ -114,7 +115,24 @@ class TestDeviceService(BaseTestCase):
         self.super_user = User(
             subject=contact2.email, contact=contact2, is_superuser=True
         )
-        db.session.add_all([contact1, contact2, self.normal_user, self.super_user])
+
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+
+        db.session.add_all(
+            [
+                contact1,
+                contact2,
+                self.normal_user,
+                self.super_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
         db.session.commit()
 
     def test_get_devices(self):
@@ -127,9 +145,12 @@ class TestDeviceService(BaseTestCase):
         devices_json = extract_data_from_json_file(self.json_data_url, "devices")
 
         device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
-        super().add_object(
-            url=self.device_url, data_object=device_data, object_type=self.object_type
-        )
+        with self.run_requests_as(self.super_user):
+            super().add_object(
+                url=self.device_url,
+                data_object=device_data,
+                object_type=self.object_type,
+            )
 
     def test_add_device_non_valid_token(self):
         """Test the post request for adding a device, but without a valid token."""
@@ -159,9 +180,10 @@ class TestDeviceService(BaseTestCase):
                 },
             }
         }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
-        )
+        with self.run_requests_as(self.super_user):
+            contact = super().add_object(
+                url=self.contact_url, data_object=contact_data, object_type="contact"
+            )
         devices_json = extract_data_from_json_file(self.json_data_url, "devices")
 
         device_data = {
@@ -175,11 +197,12 @@ class TestDeviceService(BaseTestCase):
                 },
             },
         }
-        data = super().add_object(
-            url=self.device_url + "?include=contacts",
-            data_object=device_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(self.super_user):
+            data = super().add_object(
+                url=self.device_url + "?include=contacts",
+                data_object=device_data,
+                object_type=self.object_type,
+            )
 
         result_contact_ids = [
             x["id"] for x in data["data"]["relationships"]["contacts"]["data"]
@@ -410,9 +433,12 @@ class TestDeviceService(BaseTestCase):
         devices_json = extract_data_from_json_file(self.json_data_url, "devices")
 
         device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
-        result = super().add_object(
-            url=self.device_url, data_object=device_data, object_type=self.object_type
-        )
+        with self.run_requests_as(self.super_user):
+            result = super().add_object(
+                url=self.device_url,
+                data_object=device_data,
+                object_type=self.object_type,
+            )
         result_id = result["data"]["id"]
         device = db.session.query(Device).filter_by(id=result_id).first()
 
@@ -424,17 +450,15 @@ class TestDeviceService(BaseTestCase):
         devices_json = extract_data_from_json_file(self.json_data_url, "devices")
 
         device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
-        result = super().add_object(
-            url=self.device_url, data_object=device_data, object_type=self.object_type
-        )
+        with self.run_requests_as(self.super_user):
+            result = super().add_object(
+                url=self.device_url,
+                data_object=device_data,
+                object_type=self.object_type,
+            )
         result_id = result["data"]["id"]
 
-        user = add_user()
-        user.is_superuser = True
-        db.session.add(user)
-        db.session.commit()
-
-        with self.run_requests_as(user):
+        with self.run_requests_as(self.super_user):
             with self.client:
                 resp = self.client.patch(
                     self.device_url + "/" + result_id,
@@ -525,7 +549,7 @@ class TestDeviceService(BaseTestCase):
             is_public=False,
             is_private=False,
             is_internal=True,
-            group_ids=IDL_USER_ACCOUNT.administrated_permission_groups,
+            group_ids=[str(self.permission_group.id)],
             created_by=user,
             updated_by=user,
         )
@@ -536,16 +560,11 @@ class TestDeviceService(BaseTestCase):
         )
         db.session.add_all([device, device_property])
         db.session.commit()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.delete(
-                    self.properties_url + "/" + str(device_property.id),
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.delete(
+                self.properties_url + "/" + str(device_property.id),
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 200)
         result_device = db.session.query(Device).filter_by(id=device.id).first()
@@ -561,7 +580,7 @@ class TestDeviceService(BaseTestCase):
             is_public=False,
             is_private=False,
             is_internal=True,
-            group_ids=IDL_USER_ACCOUNT.administrated_permission_groups,
+            group_ids=[str(self.permission_group.id)],
             created_by=user,
             updated_by=user,
         )
@@ -572,23 +591,18 @@ class TestDeviceService(BaseTestCase):
         )
         db.session.add_all([device, device_property])
         db.session.commit()
-        with patch.object(
-            idl, "get_all_permission_groups_for_a_user"
-        ) as test_get_all_permission_groups_for_a_user:
-            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-            with self.client:
-                response = self.client.patch(
-                    self.properties_url + "/" + str(device_property.id),
-                    json={
-                        "data": {
-                            "id": str(device_property.id),
-                            "type": "device_property",
-                            "attributes": {"label": "updated label"},
-                        }
-                    },
-                    content_type="application/vnd.api+json",
-                    headers=create_token(),
-                )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                self.properties_url + "/" + str(device_property.id),
+                json={
+                    "data": {
+                        "id": str(device_property.id),
+                        "type": "device_property",
+                        "attributes": {"label": "updated label"},
+                    }
+                },
+                content_type="application/vnd.api+json",
+            )
 
         self.assertEqual(response.status_code, 200)
         result_device = db.session.query(Device).filter_by(id=device.id).first()
@@ -692,15 +706,13 @@ class TestDeviceService(BaseTestCase):
         devices_json = extract_data_from_json_file(self.json_data_url, "devices")
 
         device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
-        result = super().add_object(
-            url=self.device_url, data_object=device_data, object_type=self.object_type
-        )
+        with self.run_requests_as(self.super_user):
+            result = super().add_object(
+                url=self.device_url,
+                data_object=device_data,
+                object_type=self.object_type,
+            )
         result_id = result["data"]["id"]
-
-        user = add_user()
-        user.is_superuser = True
-        db.session.add(user)
-        db.session.commit()
 
         device = db.session.query(Device).filter_by(id=result_id).first()
         device.b2inst_record_id = "123"
@@ -709,7 +721,7 @@ class TestDeviceService(BaseTestCase):
 
         current_app.config.update({"B2INST_TOKEN": "123"})
 
-        with self.run_requests_as(user):
+        with self.run_requests_as(self.super_user):
             with self.client:
                 with patch.object(
                     pidinst, "update_external_metadata"
@@ -739,22 +751,20 @@ class TestDeviceService(BaseTestCase):
         devices_json = extract_data_from_json_file(self.json_data_url, "devices")
 
         device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
-        result = super().add_object(
-            url=self.device_url, data_object=device_data, object_type=self.object_type
-        )
+        with self.run_requests_as(self.super_user):
+            result = super().add_object(
+                url=self.device_url,
+                data_object=device_data,
+                object_type=self.object_type,
+            )
         result_id = result["data"]["id"]
-
-        user = add_user()
-        user.is_superuser = True
-        db.session.add(user)
-        db.session.commit()
 
         device = db.session.query(Device).filter_by(id=result_id).first()
         configuration = Configuration(label="Test config", b2inst_record_id="42")
         device_mount_action = DeviceMountAction(
             configuration=configuration,
             device=device,
-            begin_contact=user.contact,
+            begin_contact=self.super_user.contact,
             begin_date=datetime.datetime(
                 2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
             ),
@@ -766,7 +776,7 @@ class TestDeviceService(BaseTestCase):
 
         current_app.config.update({"B2INST_TOKEN": "123"})
 
-        with self.run_requests_as(user):
+        with self.run_requests_as(self.super_user):
             with self.client:
                 with patch.object(
                     pidinst, "update_external_metadata"

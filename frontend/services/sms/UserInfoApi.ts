@@ -24,7 +24,11 @@ export class UserInfoApi {
   }
 
   async get (skipBackendCache: boolean = false): Promise<UserInfo> {
-    const response = await this.axiosApi.get(this.basePath, { params: { skip_cache: skipBackendCache } })
+    const addtionalHeaders: any = {}
+    if (skipBackendCache) {
+      addtionalHeaders['Cache-Control'] = 'no-cache'
+    }
+    const response = await this.axiosApi.get(this.basePath, { headers: { ...addtionalHeaders } })
     return this.serializer.convertJsonApiObjectToModel(response.data)
   }
 }

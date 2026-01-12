@@ -7,12 +7,16 @@
 """Tests for the site contact roles with permission management."""
 
 import json
-from unittest.mock import patch
 
 from project import base_url, db
-from project.api.models import Contact, Site, SiteContactRole, User
-from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
+from project.api.models import (
+    Contact,
+    PermissionGroup,
+    PermissionGroupMembership,
+    Site,
+    SiteContactRole,
+    User,
+)
 from project.tests.base import BaseTestCase
 
 
@@ -21,19 +25,42 @@ class TestSiteContactRoles(BaseTestCase):
 
     url = base_url + "/site-contact-roles"
 
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+        self.permission_group = PermissionGroup(name="test", entitlement="test")
+        self.other_group = PermissionGroup(name="other", entitlement="other")
+        self.membership = PermissionGroupMembership(
+            permission_group=self.permission_group, user=self.normal_user
+        )
+        db.session.add_all(
+            [
+                normal_contact,
+                self.normal_user,
+                self.permission_group,
+                self.other_group,
+                self.membership,
+            ]
+        )
+        db.session.commit()
+
     def test_patch_to_non_editable_site(self):
         """Ensure we can't update to a site we can't edit."""
         site1 = Site(
             label="site1",
             is_public=False,
             is_internal=True,
-            group_ids=["1"],
+            group_ids=[str(self.permission_group.id)],
         )
         site2 = Site(
             label="site2",
             is_public=False,
             is_internal=True,
-            group_ids=["2"],
+            group_ids=[str(self.other_group.id)],
         )
         contact = Contact(
             given_name="first",
@@ -46,11 +73,7 @@ class TestSiteContactRoles(BaseTestCase):
             role_name="Owner",
             role_uri="something",
         )
-        user = User(
-            subject=contact.email,
-            contact=contact,
-        )
-        db.session.add_all([site1, site2, contact, user, role])
+        db.session.add_all([site1, site2, contact, role])
         db.session.commit()
 
         payload = {
@@ -71,18 +94,10 @@ class TestSiteContactRoles(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(user):
-            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
-                mock.return_value = UserAccount(
-                    id="123",
-                    username=user.subject,
-                    administrated_permission_groups=[],
-                    membered_permission_groups=[*site1.group_ids],
-                )
-                with self.client:
-                    response = self.client.patch(
-                        f"{self.url}/{role.id}",
-                        data=json.dumps(payload),
-                        content_type="application/vnd.api+json",
-                    )
+        with self.run_requests_as(self.normal_user):
+            response = self.client.patch(
+                f"{self.url}/{role.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
         self.assertEqual(response.status_code, 403)

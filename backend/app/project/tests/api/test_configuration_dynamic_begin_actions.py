@@ -176,7 +176,8 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             data["data"][0]["attributes"]["begin_description"],
         )
 
-    def test_add_configuration_dynamic_begin_location_action(self):
+    @fixtures.use
+    def test_add_configuration_dynamic_begin_location_action(self, super_user):
         """Ensure a new configuration dynamic location can be added to the database."""
         device = Device(
             short_name="Device 555",
@@ -281,11 +282,12 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         db.session.add(device_mount_action)
         db.session.commit()
 
-        result = super().add_object(
-            url=self.url,
-            data_object=data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            result = super().add_object(
+                url=self.url,
+                data_object=data,
+                object_type=self.object_type,
+            )
         configuration_id = result["data"]["relationships"]["configuration"]["data"][
             "id"
         ]
@@ -664,7 +666,8 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         }
         return data, config
 
-    def test_update_configuration_dynamic_begin_location_action(self):
+    @fixtures.use
+    def test_update_configuration_dynamic_begin_location_action(self, super_user):
         """Ensure a configuration_dynamic_begin_location_action can be updated."""
         dynamic_location_begin_action = add_dynamic_location_begin_action_model()
         userinfo = generate_userinfo_data()
@@ -679,9 +682,10 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                 },
             }
         }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
-        )
+        with self.run_requests_as(super_user):
+            contact = super().add_object(
+                url=self.contact_url, data_object=contact_data, object_type="contact"
+            )
         # This block for the device mount actions is just to make sure
         # that all the device properties have mounts for the timepoints.
         device_mounts_by_device_ids = {}
@@ -722,11 +726,12 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             }
         }
 
-        result = super().update_object(
-            url=f"{self.url}/{dynamic_location_begin_action.id}",
-            data_object=new_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            result = super().update_object(
+                url=f"{self.url}/{dynamic_location_begin_action.id}",
+                data_object=new_data,
+                object_type=self.object_type,
+            )
         configuration_id = result["data"]["relationships"]["configuration"]["data"][
             "id"
         ]
@@ -737,7 +742,8 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             configuration.update_description, "update;dynamic location action"
         )
 
-    def test_update_archived_configuration(self):
+    @fixtures.use
+    def test_update_archived_configuration(self, super_user):
         """Ensure that we can't change for archived configurations."""
         dynamic_location_begin_action = add_dynamic_location_begin_action_model()
         dynamic_location_begin_action.configuration.archived = True
@@ -756,9 +762,10 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                 },
             }
         }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
-        )
+        with self.run_requests_as(super_user):
+            contact = super().add_object(
+                url=self.contact_url, data_object=contact_data, object_type="contact"
+            )
         # This block for the device mount actions is just to make sure
         # that all the device properties have mounts for the timepoints.
         device_mounts_by_device_ids = {}
@@ -799,13 +806,15 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             }
         }
 
-        _ = super().try_update_object_with_status_code(
-            url=f"{self.url}/{dynamic_location_begin_action.id}",
-            data_object=new_data,
-            expected_status_code=403,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().try_update_object_with_status_code(
+                url=f"{self.url}/{dynamic_location_begin_action.id}",
+                data_object=new_data,
+                expected_status_code=403,
+            )
 
-    def test_update_archived_device(self):
+    @fixtures.use
+    def test_update_archived_device(self, super_user):
         """Ensure that we can't change for archived devices."""
         dynamic_location_begin_action = add_dynamic_location_begin_action_model()
         dynamic_location_begin_action.x_property.device.archived = True
@@ -823,9 +832,10 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                 },
             }
         }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
-        )
+        with self.run_requests_as(super_user):
+            contact = super().add_object(
+                url=self.contact_url, data_object=contact_data, object_type="contact"
+            )
         # This block for the device mount actions is just to make sure
         # that all the device properties have mounts for the timepoints.
         device_mounts_by_device_ids = {}
@@ -866,11 +876,12 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             }
         }
 
-        _ = super().try_update_object_with_status_code(
-            url=f"{self.url}/{dynamic_location_begin_action.id}",
-            data_object=new_data,
-            expected_status_code=409,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().try_update_object_with_status_code(
+                url=f"{self.url}/{dynamic_location_begin_action.id}",
+                data_object=new_data,
+                expected_status_code=409,
+            )
 
     def test_update_configuration_dynamic_begin_location_action_fail(self):
         """Ensure we validate the mounts for the xzy properties."""
@@ -910,8 +921,9 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                 )
         self.assertEqual(response.status_code, 409)
 
+    @fixtures.use
     def test_update_configuration_dynamic_begin_location_action_set_end_contact_to_none(
-        self,
+        self, super_user
     ):
         """Ensure that we can reset the end_contact if necessary."""
         dynamic_location_begin_action = add_dynamic_location_begin_action_model()
@@ -927,9 +939,11 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                 },
             }
         }
-        contact_result = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
-        )
+
+        with self.run_requests_as(super_user):
+            contact_result = super().add_object(
+                url=self.contact_url, data_object=contact_data, object_type="contact"
+            )
         contact = (
             db.session.query(Contact).filter_by(id=contact_result["data"]["id"]).one()
         )
@@ -973,11 +987,12 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             }
         }
 
-        _ = super().update_object(
-            url=f"{self.url}/{dynamic_location_begin_action.id}",
-            data_object=new_data,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().update_object(
+                url=f"{self.url}/{dynamic_location_begin_action.id}",
+                data_object=new_data,
+                object_type=self.object_type,
+            )
 
     def test_delete_configuration_dynamic_begin_location_action(self):
         """Ensure a configuration_dynamic_begin_location_action can be deleted."""
@@ -1026,26 +1041,29 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             )
         self.assertEqual(response.status_code, 409)
 
-    def test_filtered_by_configuration(self):
+    @fixtures.use
+    def test_filtered_by_configuration(self, super_user):
         """Ensure that filter by a specific configuration works."""
         data1, config1 = self.prepare_request_data_with_config(
             "test dynamic_location_begin_action1"
         )
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data1,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data1,
+                object_type=self.object_type,
+            )
         data2, _ = self.prepare_request_data_with_config(
             "test dynamic_location_begin_action2"
         )
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data2,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data2,
+                object_type=self.object_type,
+            )
 
         with self.client:
             response = self.client.get(
@@ -1068,26 +1086,29 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             "test dynamic_location_begin_action1",
         )
 
-    def test_filtered_by_configuration_id(self):
+    @fixtures.use
+    def test_filtered_by_configuration_id(self, super_user):
         """Ensure that filter by filter[configuration_id]."""
         data1, config1 = self.prepare_request_data_with_config(
             "test dynamic_location_begin_action1"
         )
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data1,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data1,
+                object_type=self.object_type,
+            )
         data2, _ = self.prepare_request_data_with_config(
             "test dynamic_location_begin_action2"
         )
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data2,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data2,
+                object_type=self.object_type,
+            )
 
         # Test only for the first one
         with self.client:
@@ -1296,28 +1317,31 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         db.session.add(device_mount_action)
         db.session.commit()
 
-    def test_filtered_by_x_property(self):
+    @fixtures.use
+    def test_filtered_by_x_property(self, super_user):
         """Ensure that filter by a specific device-property works."""
         data1, x_property1 = self.prepare_request_data_with_x_property(
             "test dynamic_location_begin_action1"
         )
         self.ensure_device_mount_action_exists(data1, x_property1)
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data1,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data1,
+                object_type=self.object_type,
+            )
         data2, x_property2 = self.prepare_request_data_with_x_property(
             "test dynamic_location_begin_action2"
         )
         self.ensure_device_mount_action_exists(data2, x_property2)
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data2,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data2,
+                object_type=self.object_type,
+            )
 
         with self.client:
             response = self.client.get(
@@ -1341,7 +1365,8 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             "test dynamic_location_begin_action1",
         )
 
-    def test_filtered_by_x_property_id(self):
+    @fixtures.use
+    def test_filtered_by_x_property_id(self, super_user):
         """Ensure that filter by filter[x_property_id]."""
         data1, x_property1 = self.prepare_request_data_with_x_property(
             "test dynamic_location_begin_action1"
@@ -1358,11 +1383,12 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         )
         self.ensure_device_mount_action_exists(data2, x_property2)
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data2,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data2,
+                object_type=self.object_type,
+            )
 
         # Test only for the first one
         with self.client:
@@ -1380,28 +1406,31 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             "test dynamic_location_begin_action1",
         )
 
-    def test_filtered_by_y_property_id(self):
+    @fixtures.use
+    def test_filtered_by_y_property_id(self, super_user):
         """Ensure that filter by filter[y_property_id]."""
         data1, y_property1 = self.prepare_request_data_with_y_property(
             "test dynamic_location_begin_action1"
         )
         self.ensure_device_mount_action_exists(data1, y_property1)
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data1,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data1,
+                object_type=self.object_type,
+            )
         data2, y_property2 = self.prepare_request_data_with_y_property(
             "test dynamic_location_begin_action2"
         )
         self.ensure_device_mount_action_exists(data2, y_property2)
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data2,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data2,
+                object_type=self.object_type,
+            )
 
         # Test only for the first one
         with self.client:
@@ -1419,28 +1448,31 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             "test dynamic_location_begin_action1",
         )
 
-    def test_filtered_by_z_property_id(self):
+    @fixtures.use
+    def test_filtered_by_z_property_id(self, super_user):
         """Ensure that filter by filter[z_property_id]."""
         data1, z_property1 = self.prepare_request_data_with_z_property(
             "test dynamic_location_begin_action1"
         )
         self.ensure_device_mount_action_exists(data1, z_property1)
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data1,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data1,
+                object_type=self.object_type,
+            )
         data2, z_property2 = self.prepare_request_data_with_z_property(
             "test dynamic_location_begin_action2"
         )
         self.ensure_device_mount_action_exists(data2, z_property2)
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data2,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data2,
+                object_type=self.object_type,
+            )
 
         # Test only for the first one
         with self.client:
