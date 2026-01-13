@@ -49,6 +49,15 @@ def upgrade():
     )
     all_user_accounts_response.raise_for_status()
     all_user_accounts = all_user_accounts_response.json()
+    # The endpoint for the user accounts might be buggy, so that it includes duplicates.
+
+    unique_user_accounts = []
+    user_account_ids = set()
+    for ua in all_user_accounts:
+        user_account_id = ua["id"]
+        if user_account_id not in user_account_ids:
+            unique_user_accounts.append(ua)
+            user_account_ids.add(user_account_id)
 
     connection = op.get_bind()
 
@@ -77,7 +86,7 @@ def upgrade():
     """
     connection.execute(sa.text(sequence_update_query), {"id": largest_id})
 
-    for ua in all_user_accounts:
+    for ua in unique_user_accounts:
         select_query = 'select id from "user" where subject = :name limit 1'
         cursor = connection.execute(sa.text(select_query), {"name": ua["userName"]})
         res = cursor.fetchall()
