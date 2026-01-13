@@ -121,6 +121,7 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             entitlement = pm.entitlement
             if entitlement and entitlement not in set_of_entitlements:
                 db.session.delete(current_membership)
+                db.session.commit()
 
         for entitlement in set_of_entitlements:
             permission_group = (
@@ -132,15 +133,17 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
                 name = PermissionGroup.convert_entitlement_to_name(entitlement)
                 permission_group = PermissionGroup(name=name, entitlement=entitlement)
                 db.session.add(permission_group)
-            # Either empty, or 1 element
-            membership_entries = [
-                m
-                for m in existing_memberships
-                if m.permission_group_id == permission_group.id
-            ]
-            if not membership_entries:
+                db.session.commit()
+
+            membership = (
+                db.session.query(PermissionGroupMembership)
+                .filter_by(user_id=user.id, permission_group_id=permission_group.id)
+                .one_or_none()
+            )
+
+            if membership is None:
                 membership = PermissionGroupMembership(
                     permission_group=permission_group, user=user
                 )
                 db.session.add(membership)
-        db.session.commit()
+                db.session.commit()
