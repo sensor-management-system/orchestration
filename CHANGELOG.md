@@ -12,6 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 Changed:
 - permission group handling is now fully integrated into the SMS backend ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/604))
 - combine the permissions for group members and group administrators ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/604))
+- Extended the warning when deleting mount actions ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/624))
 
 ## 1.23.3 - 2026-01-12
 
