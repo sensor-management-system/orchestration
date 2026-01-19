@@ -127,7 +127,7 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             permission_group = (
                 db.session.query(PermissionGroup)
                 .filter_by(entitlement=entitlement)
-                .one_or_none()
+                .first()
             )
             if permission_group is None:
                 name = PermissionGroup.convert_entitlement_to_name(entitlement)
@@ -138,7 +138,7 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             membership = (
                 db.session.query(PermissionGroupMembership)
                 .filter_by(user_id=user.id, permission_group_id=permission_group.id)
-                .one_or_none()
+                .first()
             )
 
             if membership is None:

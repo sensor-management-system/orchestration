@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.24.1 (Unreleased)
 
+Fixed:
+- made the permission group membership test more robust ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/631))
+
 ## 1.24.0 - 2026-01-19
 
 Changed:
