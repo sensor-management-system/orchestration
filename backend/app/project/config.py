@@ -87,6 +87,8 @@ class BaseConfig:
     MQTT_PASSWORD = env("MQTT_PASSWORD", None)
     MQTT_KEEPALIVE = env.int("MQTT_KEEPALIVE", 5)
     MQTT_TLS_ENABLED = env.bool("MQTT_TLS_ENABLED", False)
+    OIDC_ENTITLEMENT_ALLOW_LIST = env.list("OIDC_ENTITLEMENT_ALLOW_LIST", [])
+    OIDC_ENTITLEMENT_IGNORE_LIST = env.list("OIDC_ENTITLEMENT_IGNORE_LIST", [])
 
 
 class DevelopmentConfig(BaseConfig):
