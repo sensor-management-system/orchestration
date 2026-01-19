@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.24.0 (Unreleased)
+## 1.24.1 (Unreleased)
+
+## 1.24.0 - 2026-01-19
 
 Changed:
 - permission group handling is now fully integrated into the SMS backend ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/604))
