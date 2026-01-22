@@ -717,7 +717,7 @@
     "enabled" : true,
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
-    "redirectUris" : [ "http://localhost/login-callback", "http://localhost/backend/api/v1/login-callback" ],
+    "redirectUris" : [ "http://localhost/login-callback", "http://localhost/backend/api/v1/login-callback", "http://localhost/*" ],
     "webOrigins" : [ "http://localhost" ],
     "notBefore" : 0,
     "bearerOnly" : false,

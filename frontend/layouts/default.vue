@@ -500,7 +500,8 @@ export default {
       appBarExtension: null,
       showQrCode: false,
       showQrCodeReader: false,
-      maintenanceText: null
+      maintenanceText: null,
+      currentUrl: window.location.href
     }
   },
   head () {
@@ -644,8 +645,8 @@ export default {
     infoPage () {
       return this.$route.path.startsWith('/info/')
     },
-    currentUrl () {
-      return new URL(this.$route.fullPath, window.location.origin).href
+    fullPath () {
+      return this.$route.fullPath
     },
     version () {
       return process.env.version
@@ -665,6 +666,9 @@ export default {
           this.closeError()
         }, 5000)
       }
+    },
+    fullPath () {
+      this.currentUrl = window.location.href
     }
   },
   async created () {
