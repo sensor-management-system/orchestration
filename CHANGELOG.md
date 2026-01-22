@@ -9,8 +9,12 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.24.2 (Unreleased)
 
+Changed:
+- use gfz.de domain for the handle server ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/634))
+
 Fixed:
 - QR code generator now includes base paths ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/628))
+
 
 ## 1.24.1 - 2026-01-20
 

@@ -1085,7 +1085,7 @@ publish-zenodo-staging:
     REPOSITORY_URL: $CI_PROJECT_URL
     PID_SERVICE_USER: ${GFZ_PID_SERVICE_USER}
     PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
-    PID_SERVICE_URL: https://rz-vm561.gfz-potsdam.de:8000/api/handles
+    PID_SERVICE_URL: https://rz-vm561.gfz.de:8000/api/handles
     PID_PREFIX: 20.500.14372
     ONLY_DRAFT: "no"
     EXISTING_DEPOSITION_ID: 105369
@@ -1115,7 +1115,7 @@ publish-zenodo-prod:
     REPOSITORY_URL: $CI_PROJECT_URL
     PID_SERVICE_USER: ${GFZ_PID_SERVICE_USER}
     PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
-    PID_SERVICE_URL: https://rz-vm561.gfz-potsdam.de:8000/api/handles
+    PID_SERVICE_URL: https://rz-vm561.gfz.de:8000/api/handles
     PID_PREFIX: 20.500.14372
     ONLY_DRAFT: "no"
     EXISTING_DEPOSITION_ID: 13329926
