@@ -844,7 +844,7 @@ deploy-gfz-prod:
       curl \
         -X POST ${MATTERMOST_RELEASE_NOTIFICATION_HOOK} \
         -H "Content-Type: application/json" \
-        -d "{\"text\":\"@here SMS version $SMS_VERSION released on https://sensors.gfz-potsdam.de\"}"
+        -d "{\"text\":\"@here SMS version $SMS_VERSION released on https://sensors.gfz.de\"}"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
