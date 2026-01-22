@@ -6,7 +6,11 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
+
 ## 1.24.2 (Unreleased)
+
+Fixed:
+- QR code generator now includes base paths ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/628))
 
 ## 1.24.1 - 2026-01-20
 
