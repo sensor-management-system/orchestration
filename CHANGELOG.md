@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.24.3 (Unreleased)
 
+Fixed:
+- it is now possible to copy internal devices to be private devices if the user wasn't the creator of the original device ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/637))
+
 ## 1.24.2 - 2026-01-22
 
 Changed:
