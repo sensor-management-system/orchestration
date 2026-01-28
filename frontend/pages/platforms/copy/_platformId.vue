@@ -112,7 +112,7 @@ import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
-import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
+import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter, UserIdGetter } from '@/store/permissions'
 import { PlatformsState, LoadPlatformAction, CopyPlatformAction, CreatePidAction, LoadPlatformAttachmentsAction } from '@/store/platforms'
 
 import { Platform } from '@/models/Platform'
@@ -131,7 +131,7 @@ import { LoadCountriesAction } from '@/store/vocabulary'
   },
   middleware: ['auth'],
   computed: {
-    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups']),
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups', 'userId']),
     ...mapState('platforms', ['platform']),
     ...mapState('progressindicator', ['isLoading']),
     ...mapGetters('vocabulary', ['countryNames'])
@@ -165,6 +165,7 @@ export default class PlatformCopyPage extends Vue {
   canAccessEntity!: CanAccessEntityGetter
   canModifyEntity!: CanModifyEntityGetter
   userGroups!: UserGroupsGetter
+  userId!: UserIdGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
   createPid!: CreatePidAction
@@ -240,6 +241,7 @@ export default class PlatformCopyPage extends Vue {
     }
     platformToEdit.inventoryNumber = ''
     platformToEdit.permissionGroups = this.userGroups.filter(userGroup => this.platform?.permissionGroups.filter(group => userGroup.equals(group)).length)
+    platformToEdit.createdByUserId = this.userId
     return platformToEdit
   }
 

@@ -123,7 +123,7 @@ import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
-import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
+import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter, UserIdGetter } from '@/store/permissions'
 import { LoadDeviceAction, CopyDeviceAction, DevicesState, CreatePidAction, LoadDeviceAttachmentsAction } from '@/store/devices'
 
 import { Device } from '@/models/Device'
@@ -142,7 +142,7 @@ import { LoadCountriesAction } from '@/store/vocabulary'
   },
   middleware: ['auth'],
   computed: {
-    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups']),
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups', 'userId']),
     ...mapState('devices', ['device']),
     ...mapGetters('vocabulary', ['countryNames'])
   },
@@ -175,6 +175,7 @@ export default class DeviceCopyPage extends Vue {
   canAccessEntity!: CanAccessEntityGetter
   canModifyEntity!: CanModifyEntityGetter
   userGroups!: UserGroupsGetter
+  userId!: UserIdGetter
   loadDevice!: LoadDeviceAction
   copyDevice!: CopyDeviceAction
   setTabs!: SetTabsAction
@@ -243,6 +244,7 @@ export default class DeviceCopyPage extends Vue {
     }
     deviceToEdit.inventoryNumber = ''
     deviceToEdit.permissionGroups = this.userGroups.filter(userGroup => this.device?.permissionGroups.filter(group => userGroup.equals(group)).length)
+    deviceToEdit.createdByUserId = this.userId
     return deviceToEdit
   }
 

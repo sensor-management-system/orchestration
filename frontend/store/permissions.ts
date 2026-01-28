@@ -69,6 +69,7 @@ export type CanArchiveEntityGetter = (entity: PermissionHandable) => boolean
 export type CanRestoreEntityGetter = (entity: PermissionHandable) => boolean
 export type CanHandleExportControlGetter = boolean
 export type UserGroupsGetter = PermissionGroup[]
+export type UserIdGetter = string | null
 export type PermissionGroupsGetter = PermissionGroup[]
 export type ContactIdGetter = string | null
 
