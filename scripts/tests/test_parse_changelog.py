@@ -305,3 +305,18 @@ Added:
 """
         )
     ).run()
+
+
+def test_valid_changelog_with_newly_created_empty_unreleased_version():
+    ValidChangelogTestCase(
+        get_changelog_text_with_license(
+            """
+## 1.1.1 (Unreleased)
+
+## 1.1.0 - 01-01-2025
+Added:
+- Release note with Merge Request ([Merge Request](www.example.com)).
+- Another release note with Merge Request ([Merge Request](www.example.com)) and Wiki ([Wiki](www.example.com)).
+"""
+        )
+    ).run()

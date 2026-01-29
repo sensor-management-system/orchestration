@@ -7,16 +7,16 @@
 import re
 
 from .lines import (
-    LicenseLine,
-    LicenseFinishedLine,
-    SectionLine,
-    VersionLine,
-    ReleaseNoteLine,
-    InvalidLine,
     EmptyLine,
+    InvalidLine,
+    LicenseFinishedLine,
+    LicenseLine,
+    ReleaseNoteLine,
+    SectionLine,
+    UnreleasedVersionLine,
+    VersionLine,
 )
 from .errors import LicenseEndNotFoundLineError
-
 
 VERSION_LINE_PATTERN = (
     r"## (\d+\.\d+\.\d+)(?: - (\d{4}-\d{2}-\d{2}))?(?: \(Unreleased\))?"
@@ -26,6 +26,7 @@ RELEASE_NOTE_LINE_PATTERN = r"^-\s.*"
 LINEBREAK_NOTE_LINE_PATTERN = r"^\s\s.*"
 LICENSE_FINISHED_LINE_PATTERN = "-->"
 SEMVER_PATTERN = r"(\d+)\.(\d+)\.(\d+)"
+
 
 class ReleaseNoteVersion:
     def __init__(self, major, minor, patch, is_unreleased=False):
@@ -111,7 +112,15 @@ class Parser:
                 re.match(VERSION_LINE_PATTERN, stripped_line_text).group(1),
                 "Unreleased" in stripped_line_text,
             )
-            return VersionLine(
+            if not current_version.is_unreleased:
+                return VersionLine(
+                    line_number,
+                    stripped_line_text,
+                    self.current_line,
+                    current_version=current_version,
+                )
+
+            return UnreleasedVersionLine(
                 line_number,
                 stripped_line_text,
                 self.current_line,
