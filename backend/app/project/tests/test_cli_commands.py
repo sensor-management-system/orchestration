@@ -72,8 +72,8 @@ class TestCliCommands(BaseTestCase):
         )
         assert result.exit_code != 0
         assert result.exception is not None
-        assert "Can't find" in result.stdout
-        assert "testuser1@ufz.test" in result.stdout
+        assert "Can't find" in result.stderr
+        assert "testuser1@ufz.test" in result.stderr
 
     def test_deactivate_a_user_but_not_destination_user_found(self):
         """Ensure we stop if we don't find a user for substitution while we are asked for that."""
@@ -98,8 +98,8 @@ class TestCliCommands(BaseTestCase):
             )
             assert result.exit_code != 0
             assert result.exception is not None
-            assert "Can't find" in result.stdout
-            assert "testuser2@ufz.test" in result.stdout
+            assert "Can't find" in result.stderr
+            assert "testuser2@ufz.test" in result.stderr
 
     def test_deactivate_a_user_with_no_substituted_user(self):
         """Ensure that a user can be deactivated and all it data are changed to deactivation message."""
