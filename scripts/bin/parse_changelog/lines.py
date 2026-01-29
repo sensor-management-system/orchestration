@@ -19,6 +19,7 @@ from .errors import (
 
 LINK_PATTERN = r"\(\[(.*?)\]\(.*?\)\)"
 
+
 class Line:
     def __init__(
         self,
@@ -55,7 +56,7 @@ class Line:
         if not successor:
             return
         if successor.__class__ not in self.get_allowed_successor_line_types():
-            return successor.errors.append(InvalidSuccessorLineError(successor))
+            successor.errors.append(InvalidSuccessorLineError(successor))
 
     # custom validation for each line type
     def validate(self):
@@ -95,6 +96,12 @@ class VersionLine(Line):
             and self.previous_line.current_version is None
         ):
             self.errors.append(MissingUnreleasedVersionLineError(self))
+
+
+class UnreleasedVersionLine(VersionLine):
+    @staticmethod
+    def get_allowed_successor_line_types():
+        return [VersionLine, SectionLine]
 
 
 class SectionLine(Line):
@@ -137,7 +144,7 @@ class InvalidLine(Line):
 class LicenseFinishedLine(Line):
     @staticmethod
     def get_allowed_successor_line_types():
-        return [VersionLine]
+        return [UnreleasedVersionLine]
 
 
 class EmptyLine(Line):
