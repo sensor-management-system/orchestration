@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2025
+# SPDX-FileCopyrightText: 2021 - 2026
 # - Wilhelm Becker <wilhelm.becker@gfz-potsdam.de>
 # - Hannes Bohring <hannes.bohring@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -876,7 +876,7 @@ deploy-fzj-dev:
   stage: deploy
   environment:
     name: fzj-dev
-    url: https://sms-dev.ibg3container.ibg.kfa-juelich.de
+    url: https://sms-dev.ibg3jucloud-intern.ibg.kfa-juelich.de
   tags:
     - fzj
     - dev
