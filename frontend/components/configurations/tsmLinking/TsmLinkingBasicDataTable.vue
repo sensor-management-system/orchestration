@@ -6,13 +6,14 @@ SPDX-FileCopyrightText: 2020 - 2024
 SPDX-License-Identifier: EUPL-1.2
  -->
 <template>
-  <v-container class="text-left">
+  <v-container>
     <v-skeleton-loader
       v-if="isLoading"
       type="table"
     />
     <v-simple-table
       v-else
+      class="text-left overflow-x-scroll"
     >
       <template #default>
         <thead>

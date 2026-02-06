@@ -74,7 +74,7 @@ SPDX-License-Identifier: EUPL-1.2
         cols="4"
         class="font-weight-medium"
       >
-        Offsets
+        Relative offsets:
       </v-col>
       <v-col
         cols="8"

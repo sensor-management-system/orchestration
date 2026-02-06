@@ -36,7 +36,7 @@ SPDX-License-Identifier: EUPL-1.2
                   class="required"
                   :rules="[rules.required, notInExistingNames]"
                 />
-                <SimilarTermsList :search="newLicense.name" :terms="properties" />
+                <SimilarTermsList :search="newLicense.name" :terms="licenses" />
               </v-col>
             </v-row>
             <v-row>

@@ -21,20 +21,15 @@ SPDX-License-Identifier: EUPL-1.2
       <v-progress-circular indeterminate />
     </td>
     <td v-else-if="missingStaLinkHint">
-      <v-btn disabled icon>
-        <v-icon>mdi-link-off</v-icon>
-      </v-btn>
-
       <v-tooltip
         right
       >
         <template #activator="{ on, attrs }">
           <v-icon
-            x-small
             v-bind="attrs"
             v-on="on"
           >
-            mdi-information
+            mdi-link-off
           </v-icon>
         </template>
         {{ missingStaLinkHint }}

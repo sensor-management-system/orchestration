@@ -161,6 +161,12 @@ export class TsmLinkingSerializer {
   }
 
   convertModelToJsonApiData (tsmLinking: TsmLinking): IJsonApiEntityWithOptionalId {
+    let aggregationPeriodToSend = null
+
+    if (tsmLinking.aggregationPeriod) {
+      aggregationPeriodToSend = isNaN(tsmLinking.aggregationPeriod) ? null : tsmLinking.aggregationPeriod
+    }
+
     const data: any = {
       type: 'datastream_link',
       attributes: {
@@ -174,7 +180,7 @@ export class TsmLinkingSerializer {
         thing_name: tsmLinking.thing!.name,
         license_name: tsmLinking.licenseName,
         license_uri: tsmLinking.licenseUri,
-        aggregation_period: tsmLinking.aggregationPeriod
+        aggregation_period: aggregationPeriodToSend
       },
       relationships: {
         device_mount_action: {

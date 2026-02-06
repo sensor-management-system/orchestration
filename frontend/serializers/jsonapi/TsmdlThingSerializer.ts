@@ -11,7 +11,7 @@
 import { TsmdlEntitySerializer } from './TsmdlEntitySerializer'
 import { TsmdlThing } from '@/models/TsmdlThing'
 
-interface TsdmlApiResponse {
+interface TsmdlApiResponse {
   '@iot.id': string,
   name: string,
   description: string,
@@ -19,11 +19,12 @@ interface TsdmlApiResponse {
 }
 
 export class TsmdlThingSerializer extends TsmdlEntitySerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: TsdmlApiResponse[]): TsmdlThing[] {
-    return super.convertJsonApiObjectListToModelList(jsonApiObjectList)
+  convertJsonApiObjectListToModelList (jsonApiObjectList: TsmdlApiResponse[]): TsmdlThing[] {
+    return super.convertJsonApiObjectListToModelList(jsonApiObjectList) as TsmdlThing[]
   }
 
-  convertJsonApiEntityToModel (jsonApiData: TsdmlApiResponse): TsmdlThing {
-    return super.convertJsonApiEntityToModel(jsonApiData)
+  convertJsonApiEntityToModel (jsonApiData: TsmdlApiResponse): TsmdlThing {
+    const thing = super.convertJsonApiEntityToModel(jsonApiData) as TsmdlThing
+    return thing
   }
 }

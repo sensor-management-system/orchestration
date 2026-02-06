@@ -5,8 +5,8 @@ SPDX-License-Identifier: EUPL-1.2
  -->
 <template>
   <div>
-    <div><span class="text-caption text--secondary">from:</span> {{ from | toUtcDateTimeStringHHMM }}</div>
-    <div><span class="text-caption text--secondary">to:</span> {{ to | toUtcDateTimeStringHHMM }}</div>
+    <span class="text-caption text--secondary">from:</span> {{ from | toUtcDateTimeStringHHMM }}
+    <span class="text-caption text--secondary">to:</span> {{ to | toUtcDateTimeStringHHMM('open end') }}
   </div>
 </template>
 <script lang="ts">
