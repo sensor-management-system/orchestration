@@ -34,7 +34,9 @@ SPDX-License-Identifier: EUPL-1.2
         ref="tsmLinkingForm"
         v-model="editLinking"
         :selected-device-action-property-combination="selectedDeviceActionMeasuredQuantities"
+        :selected-measured-quantity="editLinking.deviceProperty"
         :devices="availableDevices"
+        :new-linkings="[]"
       />
     </v-card>
 
@@ -96,7 +98,7 @@ import { AvailableDevicesGetter } from '@/store/configurations'
   },
   methods: {
     ...mapActions('tsmLinking', [
-      'loadConfigurationTsmLinkings', 'updateConfigurationTsmLinking', 'loadThingsForDatasource', 'loadDatastreamsForDatasourceAndThing', 'loadDatasources'
+      'loadConfigurationTsmLinkings', 'updateConfigurationTsmLinking', 'loadThingsForDatasource', 'loadDatastreamsForDatasourceAndThing', 'loadDatasources', 'loadTsmEndpoints'
     ]),
     ...mapActions('vocabulary', ['loadLicenses']),
     ...mapActions('progressindicator', ['setLoading'])
@@ -123,17 +125,18 @@ export default class TsmLinkingEditPage extends Vue {
   availableDevices!: AvailableDevicesGetter
 
   async created () {
+    this.setLoading(true)
     this.editLinking = TsmLinking.createFromObject(this.linking!)
-    await Promise.all([
-      this.loadDatasources({ endpoint: this.editLinking.tsmEndpoint! }),
-      this.loadThingsForDatasource({ endpoint: this.editLinking.tsmEndpoint!, datasource: this.editLinking.datasource! }),
-      this.loadDatastreamsForDatasourceAndThing({
-        endpoint: this.editLinking.tsmEndpoint!,
-        datasource: this.editLinking.datasource!,
-        thing: this.editLinking.thing!
-      }),
-      this.loadLicenses()
-    ])
+    await this.loadTsmEndpoints()
+    await this.loadDatasources({ endpoint: this.editLinking.tsmEndpoint! })
+    await this.loadThingsForDatasource({ endpoint: this.editLinking.tsmEndpoint!, datasource: this.editLinking.datasource! })
+    await this.loadDatastreamsForDatasourceAndThing({
+      endpoint: this.editLinking.tsmEndpoint!,
+      datasource: this.editLinking.datasource!,
+      thing: this.editLinking.thing!
+    })
+    await this.loadLicenses()
+    this.setLoading(false)
   }
 
   get configurationId (): string {

@@ -138,81 +138,67 @@ SPDX-License-Identifier: EUPL-1.2
       <template #expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           <div class="ml-4">
-            <v-row class="mt-2">
+            <v-row class="my-2">
               <v-col
-                cols="4"
-                xs="4"
-                sm="3"
+                cols="6"
                 md="2"
-                lg="2"
-                xl="1"
                 class="font-weight-medium"
               >
                 License
               </v-col>
               <v-col
-                cols="8"
-                xs="8"
-                sm="9"
+                cols="6"
                 md="4"
-                lg="4"
-                xl="5"
                 class="nowrap-truncate"
               >
-                {{ item.licenseName }}
+                {{ item.licenseName | orDefault }}
                 <a v-if="item.licenseUri" target="_blank" :href="item.licenseUri">
                   <v-icon small>
                     mdi-open-in-new
                   </v-icon>
                 </a>
               </v-col>
-            </v-row>
-            <v-row>
               <v-col
-                cols="4"
-                xs="4"
-                sm="3"
+                cols="6"
                 md="2"
-                lg="2"
-                xl="1"
-                class="font-weight-medium"
-              >
-                Involved Devices
-              </v-col>
-              <v-col
-                cols="8"
-                xs="8"
-                sm="9"
-                md="4"
-                lg="4"
-                xl="5"
-                class="nowrap-truncate"
-              >
-                {{ item.involvedDevices | sparseJoin }}
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="4"
-                xs="4"
-                sm="3"
-                md="2"
-                lg="2"
-                xl="1"
                 class="font-weight-medium"
               >
                 Aggregation
               </v-col>
               <v-col
-                cols="8"
-                xs="8"
-                sm="9"
+                cols="6"
                 md="4"
-                lg="4"
-                xl="5"
                 class="nowrap-truncate"
               >
-                {{ item.aggregationText }}
+                {{ item.aggregationText | orDefault }}
+              </v-col>
+              <v-col
+                cols="6"
+                md="2"
+                class="font-weight-medium"
+              >
+                Involved Devices
+              </v-col>
+              <v-col
+                cols="6"
+                md="4"
+                class="nowrap-truncate"
+              >
+                {{ item.involvedDevices | sparseJoin | orDefault }}
+              </v-col>
+              <v-col
+                cols="6"
+                md="2"
+                class="font-weight-medium"
+              >
+                Offsets
+              </v-col>
+              <v-col
+                cols="6"
+                md="4"
+                class="nowrap-truncate"
+              >
+                {{ item.offsets }}
               </v-col>
             </v-row>
           </div>
@@ -313,11 +299,8 @@ export default class TsmLinkingOverviewTable extends Vue {
       value: 'deviceName'
     },
     {
-      text: 'Measured Quantity',
+      text: 'Measured quantity',
       value: 'measuredQuantity'
-    }, {
-      text: 'Offsets (X | Y | Z)',
-      value: 'offsets'
     }, {
       text: 'Start date',
       value: 'startDate'
@@ -355,7 +338,7 @@ export default class TsmLinkingOverviewTable extends Vue {
     return this.$route.params.configurationId
   }
 
-  get dataTableLinkings (): Array<DataTableLinkingsItem> {
+  get dataTableLinkings (): DataTableLinkingsItem[] {
     return this.filteredLinkings.map((linking: TsmLinking) => {
       return {
         id: linking.id,

@@ -23,11 +23,6 @@ import CheckEditAccess from '@/mixins/CheckEditAccess'
   }
 })
 export default class ConfigurationNewTsmLinkingPageParent extends mixins(CheckEditAccess) {
-  created () {
-    // reset new linkings to remove cached data
-    this.$store.commit('tsmLinking/setNewLinkings', [])
-  }
-
   get configurationId (): string {
     return this.$route.params.configurationId
   }

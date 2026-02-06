@@ -25,15 +25,15 @@ SPDX-License-Identifier: EUPL-1.2
             >
               <v-autocomplete
                 :items="tsmEndpoints"
-                :value="value.tsmEndpoint"
-                label="Select endpoint"
-                item-text="name"
-                return-object
-                required
-                :rules="[rules.required]"
-                clearable
-                class="required"
                 :menu-props="{closeOnContentClick: true}"
+                :rules="[rules.required]"
+                :value="copyValue.tsmEndpoint"
+                class="required"
+                clearable
+                item-text="name"
+                label="Select endpoint"
+                required
+                return-object
                 @input="update('endpoint',$event)"
               >
                 <template #item="data">
@@ -79,18 +79,18 @@ SPDX-License-Identifier: EUPL-1.2
               cols="12"
             >
               <v-autocomplete
-                :items="datasources"
-                :value="value.datasource"
-                :loading="isLoadingDatasource"
-                label="Select datasource"
-                item-text="id"
-                return-object
-                required
-                :rules="[rules.required]"
-                clearable
                 :disabled="datasourceSelectionDisabled"
-                class="required"
+                :items="datasourcesForEndpoint(copyValue.tsmEndpoint)"
+                :loading="isLoadingDatasource"
                 :menu-props="{closeOnContentClick: true}"
+                :rules="[rules.required]"
+                :value="copyValue.datasource"
+                class="required"
+                clearable
+                item-text="id"
+                label="Select datasource"
+                required
+                return-object
                 @input="update('datasource',$event)"
               >
                 <template #item="data">
@@ -128,18 +128,18 @@ SPDX-License-Identifier: EUPL-1.2
               cols="12"
             >
               <v-autocomplete
-                :items="things"
-                :value="value.thing"
-                :loading="isLoadingThing"
-                label="Select thing"
-                item-text="name"
-                return-object
-                required
-                :rules="[rules.required]"
-                clearable
-                class="required"
                 :disabled="thingSelectionDisabled"
+                :items="thingsForDatasource(copyValue.datasource)"
+                :loading="isLoadingThing"
                 :menu-props="{closeOnContentClick: true}"
+                :rules="[rules.required]"
+                :value="copyValue.thing"
+                class="required"
+                clearable
+                item-text="name"
+                label="Select thing"
+                required
+                return-object
                 @input="update('thing',$event)"
               >
                 <template v-if="suggestedThing" #prepend-item>
@@ -168,68 +168,129 @@ SPDX-License-Identifier: EUPL-1.2
             </v-col>
 
             <v-col
-              cols="12"
               class="nowrap-truncate"
+              cols="12"
             >
               <v-autocomplete
-                :items="datastreams"
-                :value="value.datastream"
-                :loading="isLoadingDatastream"
-                label="Select datastream"
-                item-text="name"
-                return-object
-                required
-                :rules="[rules.required]"
-                clearable
-                class="required"
                 :disabled="datastreamSelectionDisabled"
+                :items="filteredDatastreams"
+                :loading="isLoadingDatastream"
+                :rules="[rules.required]"
+                :value="copyValue.datastream"
+                class="required"
+                clearable
+                item-text="name"
+                label="Select datastream"
+                required
+                return-object
                 @input="update('datastream',$event)"
-              />
+              >
+                <template #prepend-item>
+                  <v-list-item>
+                    <v-list-item-title>
+                      <v-radio-group v-model="datastreamFilter" row>
+                        <v-radio label="All datastreams" value="all" />
+                        <v-radio label="Unused datastreams only" value="unused" />
+                        <v-radio label="Used datastreams only" value="used" />
+                      </v-radio-group>
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-divider class="mt-2" />
+                </template>
+                <template #item="{ item }">
+                  <div class="d-flex align-center">
+                    {{ item.name }}
+                    <v-tooltip
+                      bottom
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-chip
+                          v-show="isDatastreamUsedInForm(item)"
+                          class="ml-2"
+                          color="secondary"
+                          label
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          Used
+                          <v-icon right small>
+                            mdi-information-outline
+                          </v-icon>
+                        </v-chip>
+                      </template>
+                      This datastream is already used in another linking
+                    </v-tooltip>
+                  </div>
+                </template>
+              </v-autocomplete>
             </v-col>
             <v-col
-              md="12"
               lg="6"
+              md="12"
               xl="6"
             >
               <DateTimePicker
-                :value="value.startDate"
-                :min-date="dateToString(selectedDeviceActionPropertyCombination.action.beginDate)"
-                :max-date="dateToString(selectedDeviceActionPropertyCombination.action.endDate)"
-                label="Select begin date"
-                hint="Start date"
+                :max-date="dateToString(copyValue.deviceMountAction.endDate)"
+                :min-date="dateToString(copyValue.deviceMountAction.beginDate)"
                 :required="true"
                 :rules="[rules.required,...startDateExtraRules]"
+                :value="copyValue.startDate"
+                hint="Start date"
+                label="Select begin date"
                 @input="update('startDate',$event)"
               />
             </v-col>
             <v-col
-              md="12"
               lg="6"
+              md="12"
               xl="6"
             >
               <DateTimePicker
-                :value="value.endDate"
-                :min-date="dateToString(selectedDeviceActionPropertyCombination.action.beginDate)"
-                :max-date="dateToString(selectedDeviceActionPropertyCombination.action.endDate)"
-                placeholder="Open End"
-                label="Select end date"
+                :max-date="dateToString(copyValue.deviceMountAction.endDate)"
+                :min-date="dateToString(copyValue.deviceMountAction.beginDate)"
                 :rules="[...endDateExtraRules]"
+                :value="copyValue.endDate"
                 hint="Optional. Leave blank for open end"
+                label="Select end date"
+                placeholder="Open End"
                 @input="update('endDate',$event)"
               />
             </v-col>
             <v-col
-              cols="12"
               class="nowrap-truncate"
+              cols="12"
             >
               <combobox
-                label="License"
-                clearable
                 :items="licenseItems"
-                item-text="name"
                 :value="valueLicense"
+                clearable
+                item-text="name"
+                label="License"
                 @input="updateLicense"
               >
+                <template v-if="suggestedLicense" #prepend-item>
+                  <v-list-item @click="updateLicense(suggestedLicense)">
+                    <v-list-item-title>
+                      <label>
+                        Suggested license
+                        <v-tooltip top>
+                          <template #activator="{ on }">
+                            <v-icon
+                              small
+                              v-on="on"
+                            >
+                              mdi-information-outline
+                            </v-icon>
+                          </template>
+                          This license is suggested based on recent selected licenses for this device.
+                        </v-tooltip>
+                      </label>
+                      {{ suggestedLicense }}
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-divider class="mt-2" />
+                </template>
                 <template #append-outer>
                   <v-tooltip
                     v-if="valueLicenseDefinition"
@@ -249,9 +310,9 @@ SPDX-License-Identifier: EUPL-1.2
                   </v-tooltip>
                   <a
                     v-if="valueLicense && valueLicense.uri"
-                    target="_blank"
                     :href="valueLicense.uri"
                     style="line-height: 2;"
+                    target="_blank"
                   >
                     <v-icon small>
                       mdi-open-in-new
@@ -296,15 +357,15 @@ SPDX-License-Identifier: EUPL-1.2
               </combobox>
             </v-col>
             <v-col
-              md="12"
               lg="6"
+              md="12"
               xl="6"
             >
               <v-text-field
                 :label="aggregationPeriodLabel"
-                :value="value.aggregationPeriod"
-                type="number"
+                :value="copyValue.aggregationPeriod"
                 step="any"
+                type="number"
                 @change="update('aggregationPeriod', $event)"
                 @wheel.prevent
               />
@@ -312,8 +373,29 @@ SPDX-License-Identifier: EUPL-1.2
           </v-row>
           <v-row>
             <v-col>
-              <label>Involved devices</label>
-              <tsm-linking-device-select v-model="selectedDevices" :linkings="[value]" :devices="devicesWithoutCurrent" />
+              <label>
+                Involved devices
+                <v-tooltip
+                  bottom
+                >
+                  <template #activator="{ on, attrs }">
+                    <v-icon
+                      small
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      mdi-help-circle
+                    </v-icon>
+                  </template>
+                  Devices that are involved in the measurement (like loggers, multiplexers). These must be mounted in
+                  the current configuration.
+                </v-tooltip>
+              </label>
+              <tsm-linking-device-select
+                v-model="selectedDevices"
+                :devices="devicesWithoutCurrent"
+                :linkings="[value]"
+              />
             </v-col>
           </v-row>
         </v-container>
@@ -327,7 +409,7 @@ SPDX-License-Identifier: EUPL-1.2
   </div>
 </template>
 <script lang="ts">
-import { Component, mixins, Prop, Vue } from 'nuxt-property-decorator'
+import { Component, mixins, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import LicenseDialog from '@/components/devices/LicenseDialog.vue'
@@ -338,13 +420,21 @@ import { TsmLinking } from '@/models/TsmLinking'
 import { TsmdlThing } from '@/models/TsmdlThing'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { TsmdlDatasource } from '@/models/TsmdlDatasource'
-import { TsmDeviceMountPropertyCombination } from '@/utils/configurationInterfaces'
 import {
-  ITsmLinkingState,
+  DatasourcesForEndpointGetter,
+  DatasourcesGetter,
+  DatastreamsForThingGetter,
+  DatastreamsGetter,
   LoadDatasourcesAction,
   LoadDatastreamsForDatasourceAndThingAction,
-  LoadThingsForDatasourceAction, SuggestedDatasourceIdGetter,
-  SuggestedThingIdGetter, SuggestedTsmEndpointIdGetter
+  LoadThingsForDatasourceAction,
+  SuggestedDatasourceIdGetter,
+  SuggestedLicenseNameGetter,
+  SuggestedThingIdGetter,
+  SuggestedTsmEndpointIdGetter,
+  ThingsForDatasourceGetter,
+  ThingsGetter,
+  TsmEndpointsGetter
 } from '@/store/tsmLinking'
 import { dateToString } from '@/utils/dateHelper'
 import { TsmEndpoint } from '@/models/TsmEndpoint'
@@ -354,6 +444,7 @@ import { CvSelectItem, ICvSelectItem } from '@/models/CvSelectItem'
 import { Device } from '@/models/Device'
 import TsmLinkingDeviceSelect from '@/components/configurations/tsmLinking/TsmLinkingDeviceSelect.vue'
 import { TsmLinkingInvolvedDevice } from '@/models/TsmLinkingInvolvedDevice'
+import { TsmdlDatastream } from '@/models/TsmdlDatastream'
 
 type LicenseComboboxValue = License | string | undefined
 
@@ -365,8 +456,19 @@ type LicenseComboboxValue = License | string | undefined
     TsmLinkingDeviceSelect
   },
   computed: {
-    ...mapState('tsmLinking', ['datastreams', 'datasources', 'things', 'linkings', 'tsmEndpoints']),
-    ...mapGetters('tsmLinking', ['suggestedThingId', 'suggestedDatasourceId', 'suggestedTsmEndpointId']),
+    ...mapGetters('tsmLinking', [
+      'datasources',
+      'things',
+      'datastreams',
+      'suggestedThingId',
+      'suggestedDatasourceId',
+      'suggestedTsmEndpointId',
+      'suggestedLicenseName',
+      'datastreamsForThing',
+      'datasourcesForEndpoint',
+      'thingsForDatasource',
+      'tsmEndpoints'
+    ]),
     ...mapState('vocabulary', ['licenses'])
   },
   methods: {
@@ -382,22 +484,46 @@ export default class TsmLinkingForm extends mixins(Rules) {
 
   @Prop({
     required: true,
-    type: Object
+    type: Array
   })
-  readonly selectedDeviceActionPropertyCombination!: TsmDeviceMountPropertyCombination
+  private devices!: Device[]
 
   @Prop({
     required: true,
     type: Array
   })
-  private devices!: Device[]
+  private newLinkings!: TsmLinking[]
+
+  // vuex definition for typescript check
+  tsmEndpoints!: TsmEndpointsGetter
+  licenses!: VocabularyState['licenses']
+  datasources!: DatasourcesGetter
+  things!: ThingsGetter
+  datastreams!: DatastreamsGetter
+  suggestedThingId!: SuggestedThingIdGetter
+  suggestedDatasourceId!: SuggestedDatasourceIdGetter
+  suggestedTsmEndpointId!: SuggestedTsmEndpointIdGetter
+  suggestedLicenseName!: SuggestedLicenseNameGetter
+  datasourcesForEndpoint!: DatasourcesForEndpointGetter
+  thingsForDatasource!: ThingsForDatasourceGetter
+  datastreamsForThing!: DatastreamsForThingGetter
+  loadDatasources!: LoadDatasourcesAction
+  loadThingsForDatasource!: LoadThingsForDatasourceAction
+  loadDatastreamsForDatasourceAndThing!: LoadDatastreamsForDatasourceAndThingAction
+
+  private copyValue: TsmLinking = TsmLinking.createFromObject(this.value)
+  private datastreamFilter = 'all'
+  private isLoadingDatasource = false
+  private isLoadingThing = false
+  private isLoadingDatastream = false
+  private showNewLicenseDialog = false
 
   get selectedDevices (): Device[] {
-    return this.value.filterInvolvedDevices(this.devices)
+    return this.copyValue.filterInvolvedDevices(this.devices)
   }
 
   set selectedDevices (newSelectedDevices: Device[]) {
-    const newObj = TsmLinking.createFromObject(this.value)
+    const newObj = TsmLinking.createFromObject(this.copyValue)
     const newInvolvedDevices = []
     let orderIndex = 0
     for (const device of newSelectedDevices) {
@@ -413,44 +539,25 @@ export default class TsmLinkingForm extends mixins(Rules) {
   }
 
   get devicesWithoutCurrent (): Device[] {
-    return this.devices.filter(d => d.id !== this.value.deviceMountAction?.device.id)
+    return this.devices.filter(d => d.id !== this.copyValue.deviceMountAction?.device.id)
   }
-
-  private isLoadingDatasource = false
-  private isLoadingThing = false
-  private isLoadingDatastream = false
-
-  private showNewLicenseDialog = false
-
-  // vuex definition for typescript check
-  datasources!: ITsmLinkingState['datasources']
-  things!: ITsmLinkingState['things']
-  datastreams!: ITsmLinkingState['datastreams']
-  tsmEndpoints!: ITsmLinkingState['tsmEndpoints']
-  licenses!: VocabularyState['licenses']
-  suggestedThingId!: SuggestedThingIdGetter
-  suggestedDatasourceId!: SuggestedDatasourceIdGetter
-  suggestedTsmEndpointId!: SuggestedTsmEndpointIdGetter
-  loadDatasources!: LoadDatasourcesAction
-  loadThingsForDatasource!: LoadThingsForDatasourceAction
-  loadDatastreamsForDatasourceAndThing!: LoadDatastreamsForDatasourceAndThingAction
 
   get startDateExtraRules (): any[] {
     return [
-      Validator.validateStartDateIsBeforeEndDate(this.value.startDate, this.value.endDate),
-      Validator.startDateMustBeAfterStartOfMountAction(this.value.startDate, this.selectedDeviceActionPropertyCombination.action)
+      Validator.validateStartDateIsBeforeEndDate(this.copyValue.startDate, this.copyValue.endDate),
+      Validator.startDateMustBeAfterStartOfMountAction(this.copyValue.startDate, this.copyValue.deviceMountAction!)
     ]
   }
 
   get endDateExtraRules (): any[] {
     return [
-      Validator.validateStartDateIsBeforeEndDate(this.value.startDate, this.value.endDate),
-      Validator.endDateMustBeBeforeEndOfMountAction(this.value.endDate, this.selectedDeviceActionPropertyCombination.action)
+      Validator.validateStartDateIsBeforeEndDate(this.copyValue.startDate, this.copyValue.endDate),
+      Validator.endDateMustBeBeforeEndOfMountAction(this.copyValue.endDate, this.copyValue.deviceMountAction!)
     ]
   }
 
   get suggestedThing (): TsmdlThing | null {
-    const thingId = this.suggestedThingId(this.selectedDeviceActionPropertyCombination)
+    const thingId = this.suggestedThingId(this.copyValue.deviceMountAction!, this.newLinkings)
     if (thingId === null) {
       return null
     }
@@ -458,7 +565,7 @@ export default class TsmLinkingForm extends mixins(Rules) {
   }
 
   get suggestedDatasource (): TsmdlDatasource | null {
-    const datasourceId = this.suggestedDatasourceId(this.selectedDeviceActionPropertyCombination)
+    const datasourceId = this.suggestedDatasourceId(this.copyValue.deviceMountAction!, this.newLinkings)
     if (datasourceId === null) {
       return null
     }
@@ -466,23 +573,137 @@ export default class TsmLinkingForm extends mixins(Rules) {
   }
 
   get suggestedTsmEndpoint (): TsmEndpoint | null {
-    const endpointId = this.suggestedTsmEndpointId(this.selectedDeviceActionPropertyCombination)
+    const endpointId = this.suggestedTsmEndpointId(this.copyValue.deviceMountAction!, this.newLinkings)
     if (endpointId === null) {
       return null
     }
     return this.tsmEndpoints.find(endpoint => endpoint.id === endpointId) ?? null
   }
 
+  get suggestedLicense (): License | null {
+    const licenseName = this.suggestedLicenseName(this.copyValue.deviceMountAction!, this.newLinkings)
+    if (licenseName === null) {
+      return null
+    }
+    return this.licenses.find(license => license.name === licenseName) ?? null
+  }
+
   get datasourceSelectionDisabled (): boolean {
-    return (!this.value.tsmEndpoint || !this.datasources)
+    return (!this.copyValue.tsmEndpoint || !this.datasources)
   }
 
   get thingSelectionDisabled (): boolean {
-    return (!this.value.datasource || !this.things)
+    return (!this.copyValue.datasource || !this.things)
   }
 
   get datastreamSelectionDisabled (): boolean {
-    return (!this.value.thing || !this.datastreams)
+    return (!this.copyValue.thing || !this.datastreams)
+  }
+
+  get filteredDatastreams (): TsmdlDatastream[] {
+    const allDatastreams = this.datastreamsForThing(this.copyValue.thing)
+
+    // Always keep the currently selected item, even if it doesn't match filter
+    let isCurrentSelectionUsed = false
+    if (this.copyValue.datastream) {
+      isCurrentSelectionUsed = this.isDatastreamUsedInForm(this.copyValue.datastream)
+    }
+
+    const keptItem = this.datastreamFilter === 'unused' && isCurrentSelectionUsed
+      ? [this.copyValue.datastream!]
+      : []
+
+    let filtered: TsmdlDatastream[] = []
+    if (this.datastreamFilter === 'all') {
+      filtered = allDatastreams
+    } else if (this.datastreamFilter === 'used') {
+      filtered = allDatastreams.filter((ds) => {
+        return this.isDatastreamUsedInForm(ds)
+      })
+    } else if (this.datastreamFilter === 'unused') {
+      filtered = allDatastreams.filter((ds) => {
+        return !this.isDatastreamUsedInForm(ds)
+      })
+    }
+
+    return [...keptItem, ...filtered]
+  }
+
+  get aggregationPeriodLabel (): string {
+    if (this.copyValue.deviceProperty?.aggregationTypeName) {
+      return `Aggregation period in seconds - ${this.copyValue.deviceProperty?.aggregationTypeName}`
+    }
+    return 'Aggregation period in seconds'
+  }
+
+  get licenseItems (): License[] {
+    // CC-BY-4.0 on top of list
+    let items = this.licenses
+
+    const licenseCCBY40 = this.licenses.find(el => el.name === 'CC-BY-4.0')
+    if (licenseCCBY40) {
+      const licensesThatAreNotCCBY40 = this.licenses.filter(el => el.name !== 'CC-BY-4.0')
+      items = [licenseCCBY40, ...licensesThatAreNotCCBY40]
+    }
+
+    const licenseIndex = this.licenses.findIndex(l => l.uri === this.copyValue.licenseUri)
+    if (licenseIndex > -1 || (!this.valueLicense)) {
+      return items
+    }
+    const additionalLicense = License.createFromObject({
+      id: '',
+      name: this.copyValue.licenseName,
+      definition: '',
+      provenance: '',
+      provenanceUri: '',
+      category: '',
+      note: '',
+      uri: this.copyValue.licenseUri,
+      globalProvenanceId: null
+    })
+
+    return [additionalLicense, ...items]
+  }
+
+  get valueLicense (): ICvSelectItem | null {
+    if (!this.copyValue.licenseName && !this.copyValue.licenseUri) {
+      return null
+    }
+    const license = this.licenses.find(l => l.uri === this.copyValue.licenseUri)
+    if (license) {
+      return license
+    }
+    return new CvSelectItem({
+      name: this.copyValue.licenseName,
+      uri: this.copyValue.licenseUri,
+      definition: '',
+      id: null
+    })
+  }
+
+  get valueLicenseDefinition (): string {
+    return this.valueLicense?.definition || ''
+  }
+
+  get usedDatastreamIdsInForm (): Set<string> {
+    const usedIds = new Set<string>()
+
+    if (!this.newLinkings || !Array.isArray(this.newLinkings)) {
+      return usedIds
+    }
+
+    this.newLinkings.forEach((linking: TsmLinking) => {
+      // Skip the current linking itself to avoid self-referencing
+      if (linking !== this.value && linking.datastream?.id) {
+        usedIds.add(linking.datastream.id)
+      }
+    })
+
+    return usedIds
+  }
+
+  isDatastreamUsedInForm (datastream: TsmdlDatastream): boolean {
+    return this.usedDatastreamIdsInForm.has(datastream.id)
   }
 
   generatePropertyTitle (measuredQuantity: DeviceProperty) {
@@ -503,55 +724,8 @@ export default class TsmLinkingForm extends mixins(Rules) {
     await new Promise(resolve => setTimeout(resolve, stallTime))
   }
 
-  get aggregationPeriodLabel (): string {
-    if (this.value.deviceProperty?.aggregationTypeName) {
-      return `Aggregation period in seconds - ${this.value.deviceProperty?.aggregationTypeName}`
-    }
-    return 'Aggregation period in seconds'
-  }
-
-  get licenseItems (): License[] {
-    const licenseIndex = this.licenses.findIndex(l => l.uri === this.value.licenseUri)
-    if (licenseIndex > -1 || (!this.valueLicense)) {
-      return this.licenses
-    }
-    const additionalLicense = License.createFromObject({
-      id: '',
-      name: this.value.licenseName,
-      definition: '',
-      provenance: '',
-      provenanceUri: '',
-      category: '',
-      note: '',
-      uri: this.value.licenseUri,
-      globalProvenanceId: null
-    })
-
-    return [additionalLicense, ...this.licenses]
-  }
-
-  get valueLicense (): ICvSelectItem | null {
-    if (!this.value.licenseName && !this.value.licenseUri) {
-      return null
-    }
-    const license = this.licenses.find(l => l.uri === this.value.licenseUri)
-    if (license) {
-      return license
-    }
-    return new CvSelectItem({
-      name: this.value.licenseName,
-      uri: this.value.licenseUri,
-      definition: '',
-      id: null
-    })
-  }
-
-  get valueLicenseDefinition (): string {
-    return this.valueLicense?.definition || ''
-  }
-
   updateLicense (value: LicenseComboboxValue) {
-    const newObj = TsmLinking.createFromObject(this.value)
+    const newObj = TsmLinking.createFromObject(this.copyValue)
     if (value) {
       if (typeof value === 'string') {
         newObj.licenseName = value
@@ -573,14 +747,16 @@ export default class TsmLinkingForm extends mixins(Rules) {
   }
 
   async update (key: string, result: any) {
-    const newObj = TsmLinking.createFromObject(this.value)
+    const newObj = TsmLinking.createFromObject(this.copyValue)
     switch (key) {
       case 'endpoint':
         newObj.tsmEndpoint = result
         newObj.datasource = null
         newObj.thing = null
         newObj.datastream = null
-
+        if (this.datasourcesForEndpoint(result).length !== 0) {
+          break
+        }
         try {
           this.isLoadingDatasource = true
           await this.loadDatasources({ endpoint: result })
@@ -594,10 +770,13 @@ export default class TsmLinkingForm extends mixins(Rules) {
         newObj.datasource = result
         newObj.thing = null
         newObj.datastream = null
+        if (this.thingsForDatasource(result).length !== 0) {
+          break
+        }
         try {
           this.isLoadingThing = true
           await this.loadThingsForDatasource({
-            endpoint: this.value.tsmEndpoint!,
+            endpoint: this.copyValue.tsmEndpoint!,
             datasource: result
           })
         } catch (e) {
@@ -609,11 +788,14 @@ export default class TsmLinkingForm extends mixins(Rules) {
       case 'thing':
         newObj.thing = result
         newObj.datastream = null
+        if (this.datastreamsForThing(result).length !== 0) {
+          break
+        }
         try {
           this.isLoadingDatastream = true
           await this.loadDatastreamsForDatasourceAndThing({
-            endpoint: this.value.tsmEndpoint!,
-            datasource: this.value.datasource!,
+            endpoint: this.copyValue.tsmEndpoint!,
+            datasource: this.copyValue.datasource!,
             thing: result
           })
         } catch (e) {
@@ -640,6 +822,14 @@ export default class TsmLinkingForm extends mixins(Rules) {
 
   public isValid (): boolean {
     return (this.$refs.basicForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  @Watch('value', {
+    deep: true,
+    immediate: true
+  })
+  onValueChanged (newValue: TsmLinking) {
+    this.copyValue = TsmLinking.createFromObject(newValue)
   }
 }
 </script>

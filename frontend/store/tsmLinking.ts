@@ -20,7 +20,6 @@ import { TsmLinking } from '@/models/TsmLinking'
 import { TsmdlThing } from '@/models/TsmdlThing'
 import { TsmdlDatastream } from '@/models/TsmdlDatastream'
 import { TsmdlDatasource } from '@/models/TsmdlDatasource'
-import { TsmDeviceMountPropertyCombination } from '@/utils/configurationInterfaces'
 import { TsmEndpoint } from '@/models/TsmEndpoint'
 import { Device } from '@/models/Device'
 import { filterLinkings } from '@/utils/dataLinkingHelper'
@@ -40,32 +39,38 @@ export type TSMLinkingDateFilter = {
   operation: TsmLinkingDateFilterOption
 }
 
-export interface ITsmLinkingState {
-  tsmEndpoints: TsmEndpoint[]
-  tsmEndpoint: TsmEndpoint | null
-  datasources: TsmdlDatasource[]
-  things: TsmdlThing[]
+export type TsmdlThingTree = {
+  thing: TsmdlThing
   datastreams: TsmdlDatastream[]
-  linkings: TsmLinking[]
-  newLinkings: TsmLinking[]
+}
+
+export type TsmdlDatasourceTree = {
+  datasource: TsmdlDatasource
+  thingTrees: TsmdlThingTree[]
+}
+
+export type TsmEndpointTree = {
+  tsmEndpoint: TsmEndpoint
+  datasourceTrees: TsmdlDatasourceTree[]
+}
+
+export interface ITsmLinkingState {
+  tsmEndpointTrees: TsmEndpointTree[]
+  tsmEndpoint: TsmEndpoint | null
   linking: TsmLinking | null
+  linkings: TsmLinking[]
   filterSelectedDevices: Device[]
   filterSelectedMeasuredQuantities: DeviceProperty[],
   filterSelectedStartDate: DateTime | null
   filterSelectedStartDateOperation: TsmLinkingDateFilterOption | null
   filterSelectedEndDate: DateTime | null
   filterSelectedEndDateOperation: TsmLinkingDateFilterOption | null
-
 }
 
 const state = (): ITsmLinkingState => ({
-  tsmEndpoints: [],
+  tsmEndpointTrees: [],
   tsmEndpoint: null,
-  datasources: [],
-  things: [],
-  datastreams: [],
   linkings: [],
-  newLinkings: [],
   linking: null,
   filterSelectedDevices: [],
   filterSelectedMeasuredQuantities: [],
@@ -77,25 +82,30 @@ const state = (): ITsmLinkingState => ({
 
 export type DevicesPropertiesWithoutLinkingGetter = (action: DeviceMountAction) => DeviceProperty[]
 export type DevicesPropertiesWithLinkingGetter = (action: DeviceMountAction) => DeviceProperty[]
-export type FindThingByIdGetter = (id: String) => TsmdlThing | undefined
-export type FindDatastreamByIdGetter = (id: String) => TsmdlDatastream | undefined
-export type FindDatasourceByIdGetter = (id: String) => TsmdlDatasource | undefined
-export type SuggestedDatasourceIdGetter = (arg: TsmDeviceMountPropertyCombination) => string | null
-export type SuggestedTsmEndpointIdGetter = (arg: TsmDeviceMountPropertyCombination) => string | null
-export type SuggestedThingIdGetter = (arg: TsmDeviceMountPropertyCombination) => string | null
-export type DevicesInLinkingsGetter = Device []
+export type ThingsGetter = TsmdlThing[]
+export type DatastreamsGetter = TsmdlDatastream[]
+export type DatasourcesGetter = TsmdlDatasource[]
+export type TsmEndpointsGetter = TsmEndpoint[]
+export type DatasourcesForEndpointGetter = (arg: TsmEndpoint | null) => TsmdlDatasource[]
+export type ThingsForDatasourceGetter = (arg: TsmdlDatasource | null) => TsmdlThing[]
+export type DatastreamsForThingGetter = (arg: TsmdlDatastream | null) => TsmdlDatastream[]
+export type SuggestedDatasourceIdGetter = (arg: DeviceMountAction, newLinkings: TsmLinking[]) => string | null
+export type SuggestedTsmEndpointIdGetter = (arg: DeviceMountAction, newLinkings: TsmLinking[]) => string | null
+export type SuggestedThingIdGetter = (arg: DeviceMountAction, newLinkings: TsmLinking[]) => string | null
+export type SuggestedLicenseNameGetter = (arg: DeviceMountAction, newLinkings: TsmLinking[]) => string | null
+export type DevicesInLinkingsGetter = Device[]
 export type MeasuredQuantitiesInLinkingsGetter = DeviceProperty[]
 export type DateFilterGetter = TSMLinkingDateFilter | null
 export type FilteredLinkingsGetter = TsmLinking[]
+export type UsedDatastreamIdsGetter = Set<string>
 
-const getMatchingLinking = (state: ITsmLinkingState, selectedDeviceActionPropertyCombination: TsmDeviceMountPropertyCombination): TsmLinking | null => {
+const getMatchingLinking = (state: ITsmLinkingState, action: DeviceMountAction, newLinkings: TsmLinking[]): TsmLinking | null => {
   let matchingLinking = null
 
-  const { action } = selectedDeviceActionPropertyCombination
   matchingLinking = state.linkings.find(linking => linking.device?.id === action.device.id)
 
   if (!matchingLinking) {
-    matchingLinking = state.newLinkings.find(linking => linking.device?.id === action.device.id)
+    matchingLinking = newLinkings.find(linking => linking.device?.id === action.device.id)
   }
 
   if (!matchingLinking) {
@@ -126,6 +136,33 @@ const getSuggestedIdIfOnlyOneOfAKindIsSelected = (linkings: TsmLinking[], type: 
 }
 
 const getters: GetterTree<ITsmLinkingState, RootState> = {
+  tsmEndpoints: (state: ITsmLinkingState): TsmEndpoint[] => {
+    return state.tsmEndpointTrees.map((endpointTree: TsmEndpointTree) => endpointTree.tsmEndpoint)
+  },
+  datasourceTrees: (state: ITsmLinkingState): TsmdlDatasourceTree[] => {
+    return state.tsmEndpointTrees.flatMap((endpointTree: TsmEndpointTree) => endpointTree.datasourceTrees)
+  },
+  datasources: (_state: ITsmLinkingState, getters): TsmdlDatasourceTree[] => {
+    return getters.datasourceTrees.map((tree: TsmdlDatasourceTree) => tree.datasource)
+  },
+  datasourcesForEndpoint: (state: ITsmLinkingState) => (tsmEndpoint: TsmEndpoint): TsmdlDatasource[] => {
+    return findDatasourcesForEndpointInEndpointTrees(state.tsmEndpointTrees, tsmEndpoint)
+  },
+  thingTrees: (_state: ITsmLinkingState, getters): TsmdlThingTree[] => {
+    return getters.datasourceTrees.flatMap((datasourceTree: TsmdlDatasourceTree) => datasourceTree.thingTrees)
+  },
+  things: (_state: ITsmLinkingState, getters): TsmdlDatasourceTree[] => {
+    return getters.thingTrees.map((tree: TsmdlThingTree) => tree.thing)
+  },
+  thingsForDatasource: (state: ITsmLinkingState) => (datasource: TsmdlDatasource): TsmdlThing[] => {
+    return findThingsForDatasourceInEndpointTrees(state.tsmEndpointTrees, datasource)
+  },
+  datastreams: (_state: ITsmLinkingState, getters): TsmdlDatastream[] => {
+    return getters.thingTrees.flatMap((thingTree: TsmdlThingTree) => thingTree.datastreams)
+  },
+  datastreamsForThing: (state: ITsmLinkingState) => (thing: TsmdlThing): TsmdlDatastream[] => {
+    return findDatastreamsForThingInEndpointTrees(state.tsmEndpointTrees, thing)
+  },
   devicesPropertiesWithoutLinking: (state: ITsmLinkingState) => (action: DeviceMountAction): DeviceProperty[] => {
     return action.device.properties.filter((prop: DeviceProperty) => {
       return state.linkings.filter((linking) => {
@@ -144,15 +181,11 @@ const getters: GetterTree<ITsmLinkingState, RootState> = {
       }).length > 0
     })
   },
-  suggestedThingId: (state: ITsmLinkingState) => (selectedDeviceActionPropertyCombination: TsmDeviceMountPropertyCombination): string | null => {
-    if (!state.linkings || !selectedDeviceActionPropertyCombination) {
-      return null
-    }
-
-    const matchingLinking = getMatchingLinking(state, selectedDeviceActionPropertyCombination)
+  suggestedThingId: (state: ITsmLinkingState) => (action: DeviceMountAction, newLinkings: TsmLinking[]): string | null => {
+    const matchingLinking = getMatchingLinking(state, action, newLinkings)
 
     if (!matchingLinking || !matchingLinking.thing) {
-      let suggestedIdByNewLinkings = getSuggestedIdIfOnlyOneOfAKindIsSelected(state.newLinkings, 'thing')
+      let suggestedIdByNewLinkings = getSuggestedIdIfOnlyOneOfAKindIsSelected(newLinkings, 'thing')
       if (!suggestedIdByNewLinkings) {
         suggestedIdByNewLinkings = getSuggestedIdIfOnlyOneOfAKindIsSelected(state.linkings, 'thing')
       }
@@ -161,15 +194,11 @@ const getters: GetterTree<ITsmLinkingState, RootState> = {
 
     return matchingLinking.thing.id
   },
-  suggestedDatasourceId: (state: ITsmLinkingState) => (selectedDeviceActionPropertyCombination: TsmDeviceMountPropertyCombination): string | null => {
-    if (!state.linkings || !selectedDeviceActionPropertyCombination) {
-      return null
-    }
-
-    const matchingLinking = getMatchingLinking(state, selectedDeviceActionPropertyCombination)
+  suggestedDatasourceId: (state: ITsmLinkingState) => (action: DeviceMountAction, newLinkings: TsmLinking[]): string | null => {
+    const matchingLinking = getMatchingLinking(state, action, newLinkings)
 
     if (!matchingLinking || !matchingLinking.datasource) {
-      let suggestedIdByNewLinkings = getSuggestedIdIfOnlyOneOfAKindIsSelected(state.newLinkings, 'datasource')
+      let suggestedIdByNewLinkings = getSuggestedIdIfOnlyOneOfAKindIsSelected(newLinkings, 'datasource')
       if (!suggestedIdByNewLinkings) {
         suggestedIdByNewLinkings = getSuggestedIdIfOnlyOneOfAKindIsSelected(state.linkings, 'datasource')
       }
@@ -178,15 +207,11 @@ const getters: GetterTree<ITsmLinkingState, RootState> = {
 
     return matchingLinking.datasource.id
   },
-  suggestedTsmEndpointId: (state: ITsmLinkingState) => (selectedDeviceActionPropertyCombination: TsmDeviceMountPropertyCombination): string | null => {
-    if (!state.linkings || !selectedDeviceActionPropertyCombination) {
-      return null
-    }
-
-    const matchingLinking = getMatchingLinking(state, selectedDeviceActionPropertyCombination)
+  suggestedTsmEndpointId: (state: ITsmLinkingState) => (action: DeviceMountAction, newLinkings: TsmLinking[]): string | null => {
+    const matchingLinking = getMatchingLinking(state, action, newLinkings)
 
     if (!matchingLinking || !matchingLinking.tsmEndpoint) {
-      let suggestedIdByNewLinkings = getSuggestedIdIfOnlyOneOfAKindIsSelected(state.newLinkings, 'tsmEndpoint')
+      let suggestedIdByNewLinkings = getSuggestedIdIfOnlyOneOfAKindIsSelected(newLinkings, 'tsmEndpoint')
       if (!suggestedIdByNewLinkings) {
         suggestedIdByNewLinkings = getSuggestedIdIfOnlyOneOfAKindIsSelected(state.linkings, 'tsmEndpoint')
       }
@@ -195,8 +220,21 @@ const getters: GetterTree<ITsmLinkingState, RootState> = {
 
     return matchingLinking.tsmEndpoint.id
   },
+  suggestedLicenseName: (state: ITsmLinkingState) => (action: DeviceMountAction, newLinkings: TsmLinking[]): string | null => {
+    const matchingLinking = getMatchingLinking(state, action, newLinkings)
+
+    if (!matchingLinking || !matchingLinking.licenseName) {
+      let suggestedIdByNewLinkings = getSuggestedIdIfOnlyOneOfAKindIsSelected(newLinkings, 'licenseName')
+      if (!suggestedIdByNewLinkings) {
+        suggestedIdByNewLinkings = getSuggestedIdIfOnlyOneOfAKindIsSelected(state.linkings, 'licenseName')
+      }
+      return suggestedIdByNewLinkings
+    }
+
+    return matchingLinking.licenseName
+  },
   devicesInLinkings: (state: ITsmLinkingState): Device[] => {
-    if (!state.linkings) {
+    if (!state.linkings.length) {
       return []
     }
 
@@ -211,7 +249,7 @@ const getters: GetterTree<ITsmLinkingState, RootState> = {
     })
   },
   measuredQuantitiesInLinkings: (state: ITsmLinkingState): DeviceProperty[] => {
-    if (!state.linkings) {
+    if (!state.linkings.length) {
       return []
     }
 
@@ -244,17 +282,16 @@ const getters: GetterTree<ITsmLinkingState, RootState> = {
   },
 
   filteredLinkings: (state, getters): TsmLinking[] => {
-    if (!state.linkings) {
+    if (!state.linkings.length) {
       return []
     }
 
     return filterLinkings(state.linkings, state.filterSelectedDevices, state.filterSelectedMeasuredQuantities, getters.startDateFilter, getters.endDateFilter)
   }
-
 }
 
 export type LoadTsmEndpointsAction = () => Promise<void>
-export type LoadDatasourcesAction = ({ endpoint }: { endpoint: TsmEndpoint }) => Promise<void>
+export type LoadDatasourcesAction = ({ endpoint }: { endpoint: TsmEndpoint | null }) => Promise<void>
 export type LoadThingsForDatasourceAction = ({
   endpoint,
   datasource
@@ -304,18 +341,14 @@ const actions: ActionTree<ITsmLinkingState, RootState> = {
     commit('setTsmEndpoints', await this.$api.tsmEndpoints.findAll())
   },
 
-  async loadTsmEndpoint ({ commit }: { commit: Commit }, { tsmEndpointId }: { tsmEndpointId: string }): Promise<void> {
-    commit('setTsmEndpoint', await this.$api.tsmEndpoints.findOneById(tsmEndpointId))
-  },
-
-  async loadDatasources ({ commit }: { commit: Commit }, { endpoint }: {
+  async loadDatasources ({ commit, state }: { commit: Commit, state: ITsmLinkingState }, { endpoint }: {
     endpoint: TsmEndpoint | null
   }): Promise<void> {
     if (endpoint === null) {
-      commit('setDatasources', [])
-    } else {
-      commit('setDatasources', await this.$api.datasources.findAll(endpoint))
+      return
     }
+    const tsmEndpointTree = state.tsmEndpointTrees.find(tree => tree.tsmEndpoint.id === endpoint.id)
+    commit('setDatasourcesForEndpoint', { tsmEndpointTree, datasources: await this.$api.datasources.findAll(endpoint) })
   },
 
   async loadThingsForDatasource ({ commit }: { commit: Commit }, {
@@ -323,10 +356,13 @@ const actions: ActionTree<ITsmLinkingState, RootState> = {
     datasource
   }: { endpoint: TsmEndpoint | null, datasource: TsmdlDatasource | null }): Promise<void> {
     if (endpoint === null || datasource === null) {
-      commit('setThings', [])
-    } else {
-      commit('setThings', await this.$api.things.findAllByDatasource(endpoint, datasource))
+      return
     }
+    const tsmdlDatasourceTree: TsmdlDatasourceTree = this.getters['tsmLinking/datasourceTrees'].find((tree: TsmdlDatasourceTree) => tree.datasource.id === datasource.id)
+    commit('setThingsForDatasource', {
+      tsmdlDatasourceTree,
+      things: await this.$api.things.findAllByDatasource(endpoint, datasource)
+    })
   },
 
   async loadDatastreamsForDatasourceAndThing ({ commit }: { commit: Commit }, {
@@ -335,10 +371,13 @@ const actions: ActionTree<ITsmLinkingState, RootState> = {
     thing
   }: { endpoint: TsmEndpoint | null, datasource: TsmdlDatasource | null, thing: TsmdlThing | null }): Promise<void> {
     if (endpoint === null || datasource === null || thing === null) {
-      commit('setDatastreams', [])
-    } else {
-      commit('setDatastreams', await this.$api.datastreams.findAllByDatasourceAndThing(endpoint, datasource, thing))
+      return
     }
+    const tsmdlThingTree: TsmdlThingTree = this.getters['tsmLinking/thingTrees'].find((tree: TsmdlThingTree) => tree.thing.id === thing.id)
+    commit('setDatastreamsForThing', {
+      tsmdlThingTree,
+      datastreams: await this.$api.datastreams.findAllByDatasourceAndThing(endpoint, datasource, thing)
+    })
   },
 
   async loadConfigurationTsmLinkings ({ commit }: { commit: Commit }, configurationId: string): Promise<void> {
@@ -394,25 +433,46 @@ const actions: ActionTree<ITsmLinkingState, RootState> = {
 
 const mutations = {
   setTsmEndpoints (state: ITsmLinkingState, tsmEndpoints: TsmEndpoint[]) {
-    state.tsmEndpoints = tsmEndpoints
+    state.tsmEndpointTrees = []
+    for (const endpoint of tsmEndpoints) {
+      state.tsmEndpointTrees.push({
+        tsmEndpoint: endpoint,
+        datasourceTrees: []
+      })
+    }
   },
-  setTsmEndpoint (state: ITsmLinkingState, tsmEndpoint: TsmEndpoint) {
-    state.tsmEndpoint = tsmEndpoint
+  setDatasourcesForEndpoint (_: ITsmLinkingState, { tsmEndpointTree, datasources }: {
+    tsmEndpointTree: TsmEndpointTree,
+    datasources: TsmdlDatasource[]
+  }) {
+    tsmEndpointTree.datasourceTrees = []
+    for (const datasource of datasources) {
+      tsmEndpointTree.datasourceTrees.push({
+        datasource,
+        thingTrees: []
+      })
+    }
   },
-  setDatasources (state: ITsmLinkingState, datasources: TsmdlDatasource[]) {
-    state.datasources = datasources
+  setThingsForDatasource (_: ITsmLinkingState, { tsmdlDatasourceTree, things }: {
+    tsmdlDatasourceTree: TsmdlDatasourceTree,
+    things: TsmdlThing[]
+  }) {
+    tsmdlDatasourceTree.thingTrees = []
+    for (const thing of things) {
+      tsmdlDatasourceTree.thingTrees.push({
+        thing,
+        datastreams: []
+      })
+    }
   },
-  setThings (state: ITsmLinkingState, things: TsmdlThing[]) {
-    state.things = things
-  },
-  setDatastreams (state: ITsmLinkingState, datastreams: TsmdlDatastream[]) {
-    state.datastreams = datastreams
+  setDatastreamsForThing (_: ITsmLinkingState, { tsmdlThingTree, datastreams }: {
+    tsmdlThingTree: TsmdlThingTree,
+    datastreams: TsmdlDatastream[]
+  }) {
+    tsmdlThingTree.datastreams = datastreams
   },
   setLinkings (state: ITsmLinkingState, linkings: TsmLinking[]) {
     state.linkings = linkings
-  },
-  setNewLinkings (state: ITsmLinkingState, linkings: TsmLinking[]) {
-    state.newLinkings = linkings
   },
   setLinking (state: ITsmLinkingState, linking: TsmLinking) {
     state.linking = linking
@@ -436,6 +496,35 @@ const mutations = {
   setFilterSelectedEndDateOperation (state: ITsmLinkingState, operation: TsmLinkingDateFilterOption | null) {
     state.filterSelectedEndDateOperation = operation
   }
+}
+
+function findDatasourcesForEndpointInEndpointTrees (endpointTrees: TsmEndpointTree[], endpoint: TsmEndpoint): TsmdlDatasource[] {
+  if (!endpoint) {
+    return []
+  }
+  return endpointTrees.find(tree => tree.tsmEndpoint.id === endpoint.id)?.datasourceTrees.map(tree => tree.datasource) ?? []
+}
+
+function getDatasourceTreesFromEndpointTrees (endpointTrees: TsmEndpointTree[]): TsmdlDatasourceTree[] {
+  return endpointTrees.flatMap((endpointTree: TsmEndpointTree) => endpointTree.datasourceTrees)
+}
+
+function getThingTreesFromEndpointTrees (endpointTrees: TsmEndpointTree[]): TsmdlThingTree[] {
+  return getDatasourceTreesFromEndpointTrees(endpointTrees).flatMap((datasourceTree: TsmdlDatasourceTree) => datasourceTree.thingTrees)
+}
+
+function findThingsForDatasourceInEndpointTrees (endpointTrees: TsmEndpointTree[], datasource: TsmdlDatasource): TsmdlThing[] {
+  if (!datasource) {
+    return []
+  }
+  return getDatasourceTreesFromEndpointTrees(endpointTrees).find(tree => tree.datasource.id === datasource.id)?.thingTrees.map(tree => tree.thing) ?? []
+}
+
+function findDatastreamsForThingInEndpointTrees (endpointTrees: TsmEndpointTree[], thing: TsmdlDatasource): TsmdlDatastream[] {
+  if (!thing) {
+    return []
+  }
+  return getThingTreesFromEndpointTrees(endpointTrees).find(tree => tree.thing.id === thing.id)?.datastreams ?? []
 }
 
 export default {

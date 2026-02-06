@@ -24,7 +24,38 @@ SPDX-License-Identifier: EUPL-1.2
           selectable
           dense
           @input="update"
-        />
+        >
+          <template #label="{item,leaf}">
+            <div v-if="leaf">
+              {{ item.name }}
+              <span class="text-caption text--disabled font-weight-light">
+                (ID: {{ item.id }})
+              </span>
+              <v-tooltip bottom>
+                <template #activator="{ on, attrs }">
+                  <v-btn
+                    :href="'measuredquantities/' + item.id"
+                    target="_blank"
+                    small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon
+                      small
+                    >
+                      mdi-open-in-new
+                    </v-icon>
+                  </v-btn>
+                </template>
+                Open in new tab
+              </v-tooltip>
+            </div>
+            <div v-else>
+              {{ item.name }}
+            </div>
+          </template>
+        </v-treeview>
       </v-container>
     </v-card>
   </div>

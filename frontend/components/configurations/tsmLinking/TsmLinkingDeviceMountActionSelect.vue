@@ -23,6 +23,12 @@ SPDX-License-Identifier: EUPL-1.2
       <template #label="{item, leaf}">
         <div v-if="leaf">
           {{ item.name }}
+          <v-tooltip v-if="item.label" bottom>
+            <template #activator="{ on, attrs }">
+              <span class="text--disabled" v-bind="attrs" v-on="on">{{ item.label }}</span>
+            </template>
+            Mount label
+          </v-tooltip>
         </div>
         <div v-else>
           <ExtendedItemName :value="item.item" />
@@ -85,10 +91,17 @@ export default class TsmLinkingDeviceMountActionSelect extends Vue {
     })
 
     return filteredActions.map((el) => {
-      const tmpName = `from: ${this.$root.$options.filters!.toUtcDateTimeStringHHMM(el.beginDate)} to: ${this.$root.$options.filters!.toUtcDateTimeStringHHMM(el.endDate)}`
+      let endDateString = 'open end'
+
+      if (el.endDate) {
+        endDateString = this.$root.$options.filters!.toUtcDateTimeStringHHMM(el.endDate)
+      }
+
+      const tmpName = `from: ${this.$root.$options.filters!.toUtcDateTimeStringHHMM(el.beginDate)} to: ${endDateString}`
       return {
         id: el.id,
-        name: tmpName
+        name: tmpName,
+        label: el.label
       }
     })
   }
@@ -125,14 +138,14 @@ export default class TsmLinkingDeviceMountActionSelect extends Vue {
     this.$emit('input', result)
   }
 
-  private setResultToEmptyArrayIfNothingIsSelected (selectedDeviceMountActionsWithMeasuredQuantityArray: Array<TsmDeviceMountPropertyCombination>) {
+  private setResultToEmptyArrayIfNothingIsSelected (selectedDeviceMountActionsWithMeasuredQuantityArray: TsmDeviceMountPropertyCombination[]) {
     if (this.selectedDeviceMountActions.length === 0) {
       selectedDeviceMountActionsWithMeasuredQuantityArray = []
     }
     return selectedDeviceMountActionsWithMeasuredQuantityArray
   }
 
-  private addNewSelectionsToResult (selectedDeviceMountActionsWithMeasuredQuantityArray: Array<TsmDeviceMountPropertyCombination>) {
+  private addNewSelectionsToResult (selectedDeviceMountActionsWithMeasuredQuantityArray: TsmDeviceMountPropertyCombination[]) {
     const copySelectedDeviceMountActionsWithMeasuredQuantityArray = selectedDeviceMountActionsWithMeasuredQuantityArray.slice()
 
     for (const deviceMountAction of this.selectedDeviceMountActions) {
@@ -149,7 +162,7 @@ export default class TsmLinkingDeviceMountActionSelect extends Vue {
     return copySelectedDeviceMountActionsWithMeasuredQuantityArray
   }
 
-  private removeNotSelectedEntriesFromResult (selectedDeviceMountActionsWithMeasuredQuantityArray: Array<TsmDeviceMountPropertyCombination>) {
+  private removeNotSelectedEntriesFromResult (selectedDeviceMountActionsWithMeasuredQuantityArray: TsmDeviceMountPropertyCombination[]) {
     return selectedDeviceMountActionsWithMeasuredQuantityArray.filter((el) => {
       return this.selectedDeviceMountActions.some(action => action.id === el.action.id)
     })

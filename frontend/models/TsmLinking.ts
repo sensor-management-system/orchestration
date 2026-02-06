@@ -21,9 +21,9 @@ import { TsmLinkingInvolvedDevice } from '@/models/TsmLinkingInvolvedDevice'
 export interface ITsmLinking {
   id: string
   configurationId: string
-  deviceMountAction: DeviceMountAction|null
-  device: Device|null
-  deviceProperty: DeviceProperty|null
+  deviceMountAction: DeviceMountAction | null
+  device: Device | null
+  deviceProperty: DeviceProperty | null
   startDate: DateTime | null
   endDate: DateTime | null
   datasource: TsmdlDatasource | null
@@ -35,12 +35,13 @@ export interface ITsmLinking {
   aggregationPeriod: number | null
   involvedDevices: TsmLinkingInvolvedDevice[]
 }
+
 export class TsmLinking implements ITsmLinking {
   private _id: string = ''
   private _configurationId: string = ''
-  private _deviceMountAction: DeviceMountAction|null = null
-  private _device: Device|null = null
-  private _deviceProperty: DeviceProperty|null = null
+  private _deviceMountAction: DeviceMountAction | null = null
+  private _device: Device | null = null
+  private _deviceProperty: DeviceProperty | null = null
   private _startDate: DateTime | null = null
   private _endDate: DateTime | null = null
   private _datasource: TsmdlDatasource | null = null
@@ -185,6 +186,28 @@ export class TsmLinking implements ITsmLinking {
       }
     }
     return result
+  }
+
+  equalsByIdOrMountActionAndDeviceProperty (tsmLinking: TsmLinking): boolean {
+    return this.hasSameId(tsmLinking) ||
+      (this.hasSameDeviceProperties(tsmLinking) &&
+      this.hasSameMountAction(tsmLinking))
+  }
+
+  hasSameId (tsmLinking: TsmLinking): boolean {
+    return !!this.id && !!tsmLinking.id && this.id === tsmLinking.id
+  }
+
+  hasSameDeviceProperties (tsmLinking: TsmLinking): boolean {
+    return !!this.deviceProperty?.id &&
+      !!tsmLinking.deviceProperty?.id &&
+      this.deviceProperty!.id === tsmLinking.deviceProperty!.id
+  }
+
+  hasSameMountAction (tsmLinking: TsmLinking): boolean {
+    return !!this.deviceMountAction?.id &&
+      !!tsmLinking.deviceMountAction?.id &&
+      this.deviceMountAction!.id === tsmLinking.deviceMountAction!.id
   }
 
   get aggregationText (): string {

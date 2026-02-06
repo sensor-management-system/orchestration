@@ -21,7 +21,7 @@ interface TsdmlApiResponse {
 
 export class TsmdlDatasourceSerializer extends TsmdlEntitySerializer {
   convertJsonApiObjectListToModelList (jsonApiObjectList: TsdmlApiResponse[]): TsmdlDatasource[] {
-    return super.convertJsonApiObjectListToModelList(jsonApiObjectList)
+    return super.convertJsonApiObjectListToModelList(jsonApiObjectList) as TsmdlDatasource[]
   }
 
   convertJsonApiEntityToModel (jsonApiData: TsdmlApiResponse): TsmdlDatasource {

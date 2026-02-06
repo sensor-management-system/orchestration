@@ -26,7 +26,7 @@ SPDX-License-Identifier: EUPL-1.2
  * @file provides a wrapper component to v-combobox
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Vue, Component } from 'nuxt-property-decorator'
+import { Vue, Component, Watch } from 'nuxt-property-decorator'
 
 /**
  * A wrapper component to v-combobox. Supports all props, events and slots.
@@ -49,6 +49,24 @@ export default class Combobox extends Vue {
 
   blur (): void {
     (this.$refs.combobox as Vue & { blur: () => void }).blur()
+  }
+
+  /**
+   * @description Method to close the dropdown menu
+   * @description This is needed because the menu won't close if you click on an item in the prepend-item slot. (v-autocomplete behaves different there and closes automatically)
+   */
+  closeMenu (): void {
+    const combobox = this.$refs.combobox as Vue & { isMenuActive: boolean }
+    if (combobox && typeof combobox.isMenuActive !== 'undefined') {
+      combobox.isMenuActive = false
+    }
+  }
+
+  // Watch for changes that might require menu closing
+  @Watch('$attrs.value')
+  onValueChange (): void {
+    // Close menu when value changes via programmatic update
+    this.closeMenu()
   }
 }
 </script>

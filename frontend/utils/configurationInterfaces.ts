@@ -902,5 +902,9 @@ export type TsmDeviceMountPropertyCombination = {
   action: DeviceMountAction,
   measuredQuantities: DeviceProperty[]
 }
+export type TsmDeviceMountProperty = {
+  action: DeviceMountAction,
+  measuredQuantity: DeviceProperty
+}
 
 export type TsmDeviceMountPropertyCombinationList = Array<TsmDeviceMountPropertyCombination>
