@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2025
+# SPDX-FileCopyrightText: 2021 - 2026
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -12,13 +12,11 @@ services:
   nginx:
     image: registry.hzdr.de/hub-terra/sms/orchestration/nginx:fzj-dev-latest
     restart: unless-stopped
-    ports:
-      - 20443:443
     volumes:
-      - /etc/ssl/ibg3container_ibg_kfa-juelich_de.pem:/etc/ssl/default.crt:ro
-      - /etc/ssl/private/ibg3container_ibg_kfa-juelich_de.key:/etc/ssl/private/default.key:ro
+      - /root/traefik-portainer-config/traefik/config/certs/server.pem:/etc/ssl/default.crt:ro
+      - /root/traefik-portainer-config/traefik/config/certs/server.key:/etc/ssl/private/default.key:ro
       - /etc/ssl/dhparam.pem:/etc/ssl/dhparam.pem:ro
-      - /etc/ssl/ibg3container_ibg_kfa-juelich_de-chain.cer:/etc/ssl/chain.pem:ro
+      - /root/traefik-portainer-config/traefik/config/certs/server.pem:/etc/ssl/chain.pem:ro
       - ibg3dev-backend-static-files:/usr/share/nginx/html/static/backend:ro
       - ibg3dev-idl-static-files:/usr/share/nginx/html/static/idl:ro
     networks:
@@ -26,9 +24,9 @@ services:
       - sms-dev-nginx-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sms-dev-nginx-net.rule=Host(`sms-dev.ibg3container.ibg.kfa-juelich.de`)"
+      - "traefik.http.routers.sms-dev-nginx-net.rule=Host(`sms-dev.ibg3jucloud-intern.ibg.kfa-juelich.de`)"
       - "traefik.http.routers.sms-dev-nginx-net.entrypoints=websecure"
-      - "traefik.http.services.sms-dev-nginx-net.loadbalancer.server.port=80"
+      - "traefik.http.services.sms-dev-nginx-net.loadbalancer.server.port=90"
       - "traefik.http.routers.sms-dev-nginx-net.service=sms-dev-nginx-net"
       - "traefik.http.routers.sms-dev-nginx-net.tls=true"
       - "traefik.docker.network=reverseproxy"
@@ -36,12 +34,10 @@ services:
   ibg3dev-idl:
     image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:latest
     restart: unless-stopped
-    ports:
-      - 28000:8000
     environment:
       DJANGO_DEBUG: 'False'
-      DJANGO_ALLOWED_HOSTS: 'sms-dev.ibg3container.ibg.kfa-juelich.de ibg3dev-idl'
-      DJANGO_CSRF_TRUSTED_ORIGINS: 'https://sms-dev.ibg3container.ibg.kfa-juelich.de'
+      DJANGO_ALLOWED_HOSTS: 'sms-dev.ibg3jucloud-intern.ibg.kfa-juelich.de ibg3dev-idl'
+      DJANGO_CSRF_TRUSTED_ORIGINS: 'https://sms-dev.ibg3jucloud-intern.ibg.kfa-juelich.de'
       DJANGO_BASE_PATH: idl/
       DJANGO_STATIC_URL: /static/idl/
       DJANGO_STATIC_ROOT: /static/idl/
@@ -127,8 +123,6 @@ services:
   ibg3dev-backend:
     image: registry.hzdr.de/hub-terra/sms/orchestration/backend:fzj-dev-latest 
     restart: unless-stopped
-    ports:
-      - 25000:5000
     environment:
       URL_PREFIX: /backend/api/v1
       STATIC_URL: /static/backend
@@ -140,7 +134,7 @@ services:
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET_NAME: sms-attachments
       MINIO_ENDPOINT: ibg3dev-minio:9000
-      DOWNLOAD_ENDPOINT: https://sms-dev.ibg3container.ibg.kfa-juelich.de/
+      DOWNLOAD_ENDPOINT: https://sms-dev.ibg3jucloud-intern.ibg.kfa-juelich.de/
       SECRET_KEY: ${BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
       ELASTICSEARCH_URL: http://elastic-search:9200
@@ -152,7 +146,7 @@ services:
       PKCE_CLIENT_ID: sms_ibg3_fzj
       PKCE_SCOPES: profile openid email eduperson_principal_name
       INSTITUTE: fzj
-      SMS_FRONTEND_URL: https://sms-dev.ibg3container.ibg.kfa-juelich.de/
+      SMS_FRONTEND_URL: https://sms-dev.ibg3jucloud-intern.ibg.kfa-juelich.de/
       SMS_VERSION: ${SMS_VERSION}
       TSMDL_API_URL: https://decoupling-api.ibg3container.ibg.kfa-juelich.de/tsmdl/api/v1
       TSM_ENDPOINTS: '[{"fields": {"name": "FZJ", "url": "https://decoupling-api.ibg3container.ibg.kfa-juelich.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 3}]'

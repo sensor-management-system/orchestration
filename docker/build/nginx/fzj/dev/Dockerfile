@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2025
+# SPDX-FileCopyrightText: 2021 - 2026
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -11,7 +11,7 @@ FROM node:20.17.0-bullseye as js-builder
 # First the urls for sms backend and cv backend
 ENV BASE_URL /
 ENV SMS_BACKEND_URL /backend/api/v1
-ENV SMS_FRONTEND_URL https://sms-dev.ibg3container.ibg.kfa-juelich.de/
+ENV SMS_FRONTEND_URL https://sms-dev.ibg3jucloud-intern.ibg.kfa-juelich.de/
 ENV CV_BACKEND_URL https://sms-cv.helmholtz.cloud/sms/cv/api/v1
 
 ENV INSTITUTE fzj
@@ -53,9 +53,7 @@ RUN npm ci
 RUN npm run build
 
 FROM nginx:alpine as webserver
-EXPOSE 80
-EXPOSE 443
-EXPOSE 8443
+EXPOSE 90
 COPY --from=js-builder /smsfrontend/dist/ /usr/share/nginx/html
 COPY ./docker/build/nginx/fzj/dev/nginx.conf /etc/nginx/nginx.conf
 COPY ./docker/build/nginx/fzj/dev/default.conf /etc/nginx/conf.d/default.conf
