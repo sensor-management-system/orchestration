@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Changed:
 - improvements when creating new data linkings ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/547))
+- Removed hint that the datastream links are experimental ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/640))
 
 Fixed:
 - it is now possible to copy internal devices to be private devices if the user wasn't the creator of the original device ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/637))
