@@ -26,7 +26,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.sms-dev-nginx-net.rule=Host(`sms-dev.ibg3jucloud-intern.ibg.kfa-juelich.de`)"
       - "traefik.http.routers.sms-dev-nginx-net.entrypoints=websecure"
-      - "traefik.http.services.sms-dev-nginx-net.loadbalancer.server.port=90"
+      - "traefik.http.services.sms-dev-nginx-net.loadbalancer.server.port=80"
       - "traefik.http.routers.sms-dev-nginx-net.service=sms-dev-nginx-net"
       - "traefik.http.routers.sms-dev-nginx-net.tls=true"
       - "traefik.docker.network=reverseproxy"

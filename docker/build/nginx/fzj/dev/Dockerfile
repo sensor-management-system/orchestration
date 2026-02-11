@@ -53,7 +53,6 @@ RUN npm ci
 RUN npm run build
 
 FROM nginx:alpine as webserver
-EXPOSE 90
 COPY --from=js-builder /smsfrontend/dist/ /usr/share/nginx/html
 COPY ./docker/build/nginx/fzj/dev/nginx.conf /etc/nginx/nginx.conf
 COPY ./docker/build/nginx/fzj/dev/default.conf /etc/nginx/conf.d/default.conf
