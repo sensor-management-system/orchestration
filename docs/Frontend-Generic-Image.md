@@ -25,22 +25,9 @@ The new image will be added to the container registry of the sms and build in th
 ## How to use it
 ### Important
 You must provide your own nginx configuration files and mount them to the right places during runtime.
-__Important__ is the correct definition of the location of the frontend: 
-```
-...
-location /path-to-access-the-sms-frontend{
-    alias /usr/share/nginx/html/;
-    try_files $uri $uri/ /index.html;
-}
-...
-```
-Your location must always use:
-```
-...
-    alias /usr/share/nginx/html/;
-    try_files $uri $uri/ /index.html;
-...
-```
+__Important__ is the correct definition of the location of the frontend. 
+See the following example, for a working nginx configuration.
+
 ### Example
 Here is an example, how to use it with a minimal nginx configuration file and a docker-compose.yml.
 The goal of this example is to make the frontend available under the path `/sms`. 
@@ -52,9 +39,11 @@ server {
   listen       80;
   listen  [::]:80;
   server_name  localhost;
+  root /usr/share/nginx/html/;
 
   location /sms {
     alias /usr/share/nginx/html/;
+    index index.html;
     try_files $uri $uri/ /index.html;
   }
 }
