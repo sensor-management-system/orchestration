@@ -7,7 +7,10 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.24.4 (Unreleased)
+## 1.25.0 (Unreleased)
+
+Changed:
+- Switched to the version 3 of the B2INST api ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/643))
 
 ## 1.24.3 - 2026-02-24
 
@@ -15,7 +18,6 @@ Changed:
 - improvements when creating new data linkings ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/547))
 - Removed hint that the datastream links are experimental ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/640))
 - Update a environment for the FZJ dev instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/641))
-- Switched to the version 3 of the B2INST api ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/643))
 
 Fixed:
 - it is now possible to copy internal devices to be private devices if the user wasn't the creator of the original device ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/637))
