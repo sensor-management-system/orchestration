@@ -7,7 +7,6 @@
 """Test cases for the b2inst mappers."""
 
 import datetime
-from unittest import TestCase
 
 from project.api.models import (
     Configuration,
@@ -40,8 +39,6 @@ class TestB2InstDeviceMapper(BaseTestCase):
         mapper = mappers.B2InstDeviceMapper()
         result = mapper.to_draft_post(
             device,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
@@ -54,38 +51,43 @@ class TestB2InstDeviceMapper(BaseTestCase):
         # For a missing owner or manufacturer, maybe we should use :unav - as there might be an owner
         # or a manufacturer, but we have no information about it.
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name=":unas",
-            Description="",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName=":unav",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[],
-            LandingPage=f"{self.landing_page}/devices/{device.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName=":unav",
-                    manufacturerIdentifier=None,
-                    manufacturerIdentifierType=None,
-                )
-            ],
-            Model=None,
-            MeasuredVariable=[],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                )
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name=":unas",
+                Description="",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName=":unav",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[],
+                LandingPage=f"{self.landing_page}/devices/{device.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName=":unav",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=None,
+                MeasuredVariable=[],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    )
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(enabled=False),
         )
 
         self.assertEqual(result, expected)
@@ -148,61 +150,66 @@ class TestB2InstDeviceMapper(BaseTestCase):
         mapper = mappers.B2InstDeviceMapper()
         result = mapper.to_draft_post(
             device,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="SMT100 - TRUEBENER GmbH - SMT 100 - 123",
-            Description="The SMT 100",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName="LocalHost",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Soil moisture sensor",
-                    instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/1/",
-                    instrumentTypeIdentifierType="URL",
-                )
-            ],
-            LandingPage=f"{self.landing_page}/devices/{device.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="TRUEBENER GmbH",
-                    manufacturerIdentifier="https://cv/api/v1/manufacturers/1/",
-                    manufacturerIdentifierType="URL",
-                )
-            ],
-            Model=schemas.B2InstModel(modelName="SMT 100"),
-            MeasuredVariable=["Soil moisture"],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier="123",
-                    alternateIdentifierType="SerialNumber",
-                    alternateIdentifierName=None,
-                ),
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier="345",
-                    alternateIdentifierType="InventoryNumber",
-                    alternateIdentifierName=None,
-                ),
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                ),
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name="SMT100 - TRUEBENER GmbH - SMT 100 - 123",
+                Description="The SMT 100",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName="LocalHost",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[
+                    schemas.B2InstInstrumentType(
+                        instrumentTypeName="Soil moisture sensor",
+                        instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/1/",
+                        instrumentTypeIdentifierType="URL",
+                    )
+                ],
+                LandingPage=f"{self.landing_page}/devices/{device.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName="TRUEBENER GmbH",
+                        manufacturerIdentifier="https://cv/api/v1/manufacturers/1/",
+                        manufacturerIdentifierType="URL",
+                    )
+                ],
+                Model=schemas.B2InstModel(modelName="SMT 100"),
+                MeasuredVariable=["Soil moisture"],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier="123",
+                        alternateIdentifierType="SerialNumber",
+                        alternateIdentifierName=None,
+                    ),
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier="345",
+                        alternateIdentifierType="InventoryNumber",
+                        alternateIdentifierName=None,
+                    ),
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    ),
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -238,51 +245,56 @@ class TestB2InstDeviceMapper(BaseTestCase):
         mapper = mappers.B2InstDeviceMapper()
         result = mapper.to_draft_post(
             device,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="SMT100 - TRUEBENER GmbH - SMT 100",
-            Description="The SMT 100",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName="LocalHost",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Soil moisture sensor",
-                    instrumentTypeIdentifier=None,
-                    instrumentTypeIdentifierType=None,
-                )
-            ],
-            LandingPage=f"{self.landing_page}/devices/{device.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="TRUEBENER GmbH",
-                    manufacturerIdentifier=None,
-                    manufacturerIdentifierType=None,
-                )
-            ],
-            Model=schemas.B2InstModel(modelName="SMT 100"),
-            MeasuredVariable=["Soil moisture"],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                ),
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name="SMT100 - TRUEBENER GmbH - SMT 100",
+                Description="The SMT 100",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName="LocalHost",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[
+                    schemas.B2InstInstrumentType(
+                        instrumentTypeName="Soil moisture sensor",
+                        instrumentTypeIdentifier=None,
+                        instrumentTypeIdentifierType=None,
+                    )
+                ],
+                LandingPage=f"{self.landing_page}/devices/{device.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName="TRUEBENER GmbH",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=schemas.B2InstModel(modelName="SMT 100"),
+                MeasuredVariable=["Soil moisture"],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    ),
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -318,51 +330,56 @@ class TestB2InstDeviceMapper(BaseTestCase):
         mapper = mappers.B2InstDeviceMapper()
         result = mapper.to_draft_post(
             device,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="SMT100 - TRUEBENER GmbH - SMT 100",
-            Description="The SMT 100",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName=":unav",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Soil moisture sensor",
-                    instrumentTypeIdentifier=None,
-                    instrumentTypeIdentifierType=None,
-                )
-            ],
-            LandingPage=f"{self.landing_page}/devices/{device.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="TRUEBENER GmbH",
-                    manufacturerIdentifier=None,
-                    manufacturerIdentifierType=None,
-                )
-            ],
-            Model=schemas.B2InstModel(modelName="SMT 100"),
-            MeasuredVariable=["Soil moisture"],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                ),
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name="SMT100 - TRUEBENER GmbH - SMT 100",
+                Description="The SMT 100",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName=":unav",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[
+                    schemas.B2InstInstrumentType(
+                        instrumentTypeName="Soil moisture sensor",
+                        instrumentTypeIdentifier=None,
+                        instrumentTypeIdentifierType=None,
+                    )
+                ],
+                LandingPage=f"{self.landing_page}/devices/{device.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName="TRUEBENER GmbH",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=schemas.B2InstModel(modelName="SMT 100"),
+                MeasuredVariable=["Soil moisture"],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    ),
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -399,51 +416,56 @@ class TestB2InstDeviceMapper(BaseTestCase):
         mapper = mappers.B2InstDeviceMapper()
         result = mapper.to_draft_post(
             device,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="SMT100 - TRUEBENER GmbH - SMT 100",
-            Description="The SMT 100",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName=":unav",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Soil moisture sensor",
-                    instrumentTypeIdentifier=None,
-                    instrumentTypeIdentifierType=None,
-                )
-            ],
-            LandingPage=f"{self.landing_page}/devices/{device.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="TRUEBENER GmbH",
-                    manufacturerIdentifier=None,
-                    manufacturerIdentifierType=None,
-                )
-            ],
-            Model=schemas.B2InstModel(modelName="SMT 100"),
-            MeasuredVariable=["Soil moisture"],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                ),
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name="SMT100 - TRUEBENER GmbH - SMT 100",
+                Description="The SMT 100",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName=":unav",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[
+                    schemas.B2InstInstrumentType(
+                        instrumentTypeName="Soil moisture sensor",
+                        instrumentTypeIdentifier=None,
+                        instrumentTypeIdentifierType=None,
+                    )
+                ],
+                LandingPage=f"{self.landing_page}/devices/{device.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName="TRUEBENER GmbH",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=schemas.B2InstModel(modelName="SMT 100"),
+                MeasuredVariable=["Soil moisture"],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    ),
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -463,45 +485,50 @@ class TestB2InstPlatformMapper(BaseTestCase):
         mapper = mappers.B2InstPlatformMapper()
         result = mapper.to_draft_post(
             platform,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name=":unas",
-            Description="",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName=":unav",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[],
-            LandingPage=f"{self.landing_page}/platforms/{platform.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName=":unav",
-                    manufacturerIdentifier=None,
-                    manufacturerIdentifierType=None,
-                )
-            ],
-            Model=None,
-            MeasuredVariable=[],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                )
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name=":unas",
+                Description="",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName=":unav",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[],
+                LandingPage=f"{self.landing_page}/platforms/{platform.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName=":unav",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=None,
+                MeasuredVariable=[],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    )
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -559,61 +586,66 @@ class TestB2InstPlatformMapper(BaseTestCase):
         mapper = mappers.B2InstPlatformMapper()
         result = mapper.to_draft_post(
             platform,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="CR1000 - Campbell Scientific - CR 1000 - 123",
-            Description="The CR 1000",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName="LocalHost",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Logger",
-                    instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/1/",
-                    instrumentTypeIdentifierType="URL",
-                )
-            ],
-            LandingPage=f"{self.landing_page}/platforms/{platform.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="Campbell Scientific",
-                    manufacturerIdentifier="https://cv/api/v1/manufacturers/1/",
-                    manufacturerIdentifierType="URL",
-                )
-            ],
-            Model=schemas.B2InstModel(modelName="CR 1000"),
-            MeasuredVariable=[],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier="123",
-                    alternateIdentifierType="SerialNumber",
-                    alternateIdentifierName=None,
-                ),
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier="345",
-                    alternateIdentifierType="InventoryNumber",
-                    alternateIdentifierName=None,
-                ),
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                ),
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name="CR1000 - Campbell Scientific - CR 1000 - 123",
+                Description="The CR 1000",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName="LocalHost",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[
+                    schemas.B2InstInstrumentType(
+                        instrumentTypeName="Logger",
+                        instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/1/",
+                        instrumentTypeIdentifierType="URL",
+                    )
+                ],
+                LandingPage=f"{self.landing_page}/platforms/{platform.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName="Campbell Scientific",
+                        manufacturerIdentifier="https://cv/api/v1/manufacturers/1/",
+                        manufacturerIdentifierType="URL",
+                    )
+                ],
+                Model=schemas.B2InstModel(modelName="CR 1000"),
+                MeasuredVariable=[],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier="123",
+                        alternateIdentifierType="SerialNumber",
+                        alternateIdentifierName=None,
+                    ),
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier="345",
+                        alternateIdentifierType="InventoryNumber",
+                        alternateIdentifierName=None,
+                    ),
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    ),
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -645,51 +677,56 @@ class TestB2InstPlatformMapper(BaseTestCase):
         mapper = mappers.B2InstPlatformMapper()
         result = mapper.to_draft_post(
             platform,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="CR1000 - Campbell Scientific - CR 1000",
-            Description="The CR 1000",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName="LocalHost",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Logger",
-                    instrumentTypeIdentifier=None,
-                    instrumentTypeIdentifierType=None,
-                )
-            ],
-            LandingPage=f"{self.landing_page}/platforms/{platform.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="Campbell Scientific",
-                    manufacturerIdentifier=None,
-                    manufacturerIdentifierType=None,
-                )
-            ],
-            Model=schemas.B2InstModel(modelName="CR 1000"),
-            MeasuredVariable=[],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                ),
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name="CR1000 - Campbell Scientific - CR 1000",
+                Description="The CR 1000",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName="LocalHost",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[
+                    schemas.B2InstInstrumentType(
+                        instrumentTypeName="Logger",
+                        instrumentTypeIdentifier=None,
+                        instrumentTypeIdentifierType=None,
+                    )
+                ],
+                LandingPage=f"{self.landing_page}/platforms/{platform.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName="Campbell Scientific",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=schemas.B2InstModel(modelName="CR 1000"),
+                MeasuredVariable=[],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    ),
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -721,51 +758,56 @@ class TestB2InstPlatformMapper(BaseTestCase):
         mapper = mappers.B2InstPlatformMapper()
         result = mapper.to_draft_post(
             platform,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="CR1000 - Campbell Scientific - CR 1000",
-            Description="The CR 1000",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName=":unav",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Logger",
-                    instrumentTypeIdentifier=None,
-                    instrumentTypeIdentifierType=None,
-                )
-            ],
-            LandingPage=f"{self.landing_page}/platforms/{platform.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="Campbell Scientific",
-                    manufacturerIdentifier=None,
-                    manufacturerIdentifierType=None,
-                )
-            ],
-            Model=schemas.B2InstModel(modelName="CR 1000"),
-            MeasuredVariable=[],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                ),
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name="CR1000 - Campbell Scientific - CR 1000",
+                Description="The CR 1000",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName=":unav",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[
+                    schemas.B2InstInstrumentType(
+                        instrumentTypeName="Logger",
+                        instrumentTypeIdentifier=None,
+                        instrumentTypeIdentifierType=None,
+                    )
+                ],
+                LandingPage=f"{self.landing_page}/platforms/{platform.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName="Campbell Scientific",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=schemas.B2InstModel(modelName="CR 1000"),
+                MeasuredVariable=[],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    ),
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -798,51 +840,56 @@ class TestB2InstPlatformMapper(BaseTestCase):
         mapper = mappers.B2InstPlatformMapper()
         result = mapper.to_draft_post(
             platform,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="CR1000 - Campbell Scientific - CR 1000",
-            Description="The CR 1000",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName=":unav",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Logger",
-                    instrumentTypeIdentifier=None,
-                    instrumentTypeIdentifierType=None,
-                )
-            ],
-            LandingPage=f"{self.landing_page}/platforms/{platform.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="Campbell Scientific",
-                    manufacturerIdentifier=None,
-                    manufacturerIdentifierType=None,
-                )
-            ],
-            Model=schemas.B2InstModel(modelName="CR 1000"),
-            MeasuredVariable=[],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                ),
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name="CR1000 - Campbell Scientific - CR 1000",
+                Description="The CR 1000",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName=":unav",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[
+                    schemas.B2InstInstrumentType(
+                        instrumentTypeName="Logger",
+                        instrumentTypeIdentifier=None,
+                        instrumentTypeIdentifierType=None,
+                    )
+                ],
+                LandingPage=f"{self.landing_page}/platforms/{platform.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName="Campbell Scientific",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=schemas.B2InstModel(modelName="CR 1000"),
+                MeasuredVariable=[],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    ),
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -862,45 +909,50 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         mapper = mappers.B2InstConfigurationMapper()
         result = mapper.to_draft_post(
             configuration,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name=":unas",
-            Description="",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName=":unav",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[],
-            LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName=":unav",
-                    manufacturerIdentifier=None,
-                    manufacturerIdentifierType=None,
-                )
-            ],
-            Model=None,
-            MeasuredVariable=[],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/configurations/{configuration.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                )
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name=":unas",
+                Description="",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName=":unav",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[],
+                LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName=":unav",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=None,
+                MeasuredVariable=[],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/configurations/{configuration.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    )
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -1023,70 +1075,75 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         mapper = mappers.B2InstConfigurationMapper()
         result = mapper.to_draft_post(
             configuration,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="Example configuration",
-            Description="example description",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName="LocalHost",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Logger",
-                    instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/2/",
-                    instrumentTypeIdentifierType="URL",
-                ),
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Soil moisture sensor",
-                    instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/1/",
-                    instrumentTypeIdentifierType="URL",
-                ),
-            ],
-            LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="Campbell Scientific",
-                    manufacturerIdentifier="https://cv/api/v1/manufacturers/2/",
-                    manufacturerIdentifierType="URL",
-                ),
-                schemas.B2InstManufacturer(
-                    manufacturerName="TRUEBENER GmbH",
-                    manufacturerIdentifier="https://cv/api/v1/manufacturers/1/",
-                    manufacturerIdentifierType="URL",
-                ),
-            ],
-            Model=None,
-            MeasuredVariable=["Soil moisture"],
-            Date=[
-                schemas.B2InstDate(
-                    Date=configuration.start_date,
-                    dateType="Commissioned",
-                ),
-                schemas.B2InstDate(
-                    Date=configuration.end_date,
-                    dateType="DeCommissioned",
-                ),
-            ],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/configurations/{configuration.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                )
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name="Example configuration",
+                Description="example description",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName="LocalHost",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[
+                    schemas.B2InstInstrumentType(
+                        instrumentTypeName="Logger",
+                        instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/2/",
+                        instrumentTypeIdentifierType="URL",
+                    ),
+                    schemas.B2InstInstrumentType(
+                        instrumentTypeName="Soil moisture sensor",
+                        instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/1/",
+                        instrumentTypeIdentifierType="URL",
+                    ),
+                ],
+                LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName="Campbell Scientific",
+                        manufacturerIdentifier="https://cv/api/v1/manufacturers/2/",
+                        manufacturerIdentifierType="URL",
+                    ),
+                    schemas.B2InstManufacturer(
+                        manufacturerName="TRUEBENER GmbH",
+                        manufacturerIdentifier="https://cv/api/v1/manufacturers/1/",
+                        manufacturerIdentifierType="URL",
+                    ),
+                ],
+                Model=None,
+                MeasuredVariable=["Soil moisture"],
+                Date=[
+                    schemas.B2InstDate(
+                        Date=configuration.start_date,
+                        dateType="Commissioned",
+                    ),
+                    schemas.B2InstDate(
+                        Date=configuration.end_date,
+                        dateType="DeCommissioned",
+                    ),
+                ],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/configurations/{configuration.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    )
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -1117,45 +1174,50 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         mapper = mappers.B2InstConfigurationMapper()
         result = mapper.to_draft_post(
             configuration,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name=":unas",
-            Description="",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName=":unav",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[],
-            LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName=":unav",
-                    manufacturerIdentifier=None,
-                    manufacturerIdentifierType=None,
-                )
-            ],
-            Model=None,
-            MeasuredVariable=[],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/configurations/{configuration.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                )
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name=":unas",
+                Description="",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName=":unav",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[],
+                LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName=":unav",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=None,
+                MeasuredVariable=[],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/configurations/{configuration.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    )
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
@@ -1187,554 +1249,50 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         mapper = mappers.B2InstConfigurationMapper()
         result = mapper.to_draft_post(
             configuration,
-            community="A",
-            open_access=True,
             base_landing_page=self.landing_page,
             schema_version="1.0.0",
         )
 
         expected = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name=":unas",
-            Description="",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName=":unav",
-                    ownerContact=None,
-                    ownerIdentifier=None,
-                    ownerIdentifierType=None,
-                )
-            ],
-            InstrumentType=[],
-            LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName=":unav",
-                    manufacturerIdentifier=None,
-                    manufacturerIdentifierType=None,
-                )
-            ],
-            Model=None,
-            MeasuredVariable=[],
-            Date=[],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=f"{self.landing_page}/configurations/{configuration.id}",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                )
-            ],
-            SchemaVersion="1.0.0",
+            metadata=schemas.B2InstMetadata(
+                Name=":unas",
+                Description="",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName=":unav",
+                        ownerContact=None,
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[],
+                LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName=":unav",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=None,
+                MeasuredVariable=[],
+                Date=[],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=f"{self.landing_page}/configurations/{configuration.id}",
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    )
+                ],
+                SchemaVersion="1.0.0",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
         )
 
         self.assertEqual(result, expected)
-
-
-class TestB2InstDraftMapper(TestCase):
-    """Test class for the B2InstDraftMapper."""
-
-    def test_to_json_patch(self):
-        """Ensure we can convert it to a json patch structure."""
-        draft = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="Example configuration",
-            Description="example description",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName="A B",
-                    ownerContact="ab@localhost",
-                    ownerIdentifier="https://orcid.org/1234-5678-9012-3456",
-                    ownerIdentifierType="URN",
-                )
-            ],
-            InstrumentType=[
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Logger",
-                    instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/2/",
-                    instrumentTypeIdentifierType="URL",
-                ),
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Soil moisture sensor",
-                    instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/1/",
-                    instrumentTypeIdentifierType="URL",
-                ),
-            ],
-            LandingPage="https://localhost/configurations/123",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="Campbell Scientific",
-                    manufacturerIdentifier="https://cv/api/v1/manufacturers/2/",
-                    manufacturerIdentifierType="URL",
-                ),
-                schemas.B2InstManufacturer(
-                    manufacturerName="TRUEBENER GmbH",
-                    manufacturerIdentifier="https://cv/api/v1/manufacturers/1/",
-                    manufacturerIdentifierType="URL",
-                ),
-            ],
-            Model=schemas.B2InstModel(modelName="CR 1000"),
-            MeasuredVariable=["Soil moisture"],
-            Date=[
-                schemas.B2InstDate(
-                    Date=datetime.datetime(
-                        2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
-                    ),
-                    dateType="Commissioned",
-                ),
-                schemas.B2InstDate(
-                    Date=datetime.datetime(
-                        2024, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
-                    ),
-                    dateType="DeCommissioned",
-                ),
-            ],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier="https://localhost/configurations/123",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                )
-            ],
-            SchemaVersion="1.0.0",
-        )
-        expected = [
-            {"op": "replace", "path": "/Name", "value": "Example configuration"},
-            {
-                "op": "replace",
-                "path": "/Description",
-                "value": "example description",
-            },
-            {
-                "op": "replace",
-                "path": "/Owner",
-                "value": [
-                    {
-                        "ownerName": "A B",
-                        "ownerContact": "ab@localhost",
-                        "ownerIdentifier": {
-                            "ownerIdentifierValue": "https://orcid.org/1234-5678-9012-3456",
-                            "ownerIdentifierType": "URN",
-                        },
-                    }
-                ],
-            },
-            {
-                "op": "replace",
-                "path": "/LandingPage",
-                "value": "https://localhost/configurations/123",
-            },
-            {
-                "op": "replace",
-                "path": "/Manufacturer",
-                "value": [
-                    {
-                        "manufacturerName": "Campbell Scientific",
-                        "manufacturerIdentifier": {
-                            "manufacturerIdentifierValue": "https://cv/api/v1/manufacturers/2/",
-                            "manufacturerIdentifierType": "URL",
-                        },
-                    },
-                    {
-                        "manufacturerName": "TRUEBENER GmbH",
-                        "manufacturerIdentifier": {
-                            "manufacturerIdentifierValue": "https://cv/api/v1/manufacturers/1/",
-                            "manufacturerIdentifierType": "URL",
-                        },
-                    },
-                ],
-            },
-            {
-                "op": "replace",
-                "path": "/Date",
-                "value": [
-                    {
-                        "Date": "2022-01-01T00:00:00+00:00",
-                        "dateType": "Commissioned",
-                    },
-                    {
-                        "Date": "2024-01-01T00:00:00+00:00",
-                        "dateType": "DeCommissioned",
-                    },
-                ],
-            },
-            {
-                "op": "replace",
-                "path": "/AlternateIdentifier",
-                "value": [
-                    {
-                        "alternateIdentifierValue": "https://localhost/configurations/123",
-                        "alternateIdentifierType": "Other",
-                        "alternateIdentifierName": "URL",
-                    }
-                ],
-            },
-            {
-                "op": "replace",
-                "path": "/InstrumentType",
-                "value": [
-                    {
-                        "instrumentTypeName": "Logger",
-                        "instrumentTypeIdentifier": {
-                            "instrumentTypeIdentifierValue": "https://cv/api/v1/equipmenttypes/2/",
-                            "instrumentTypeIdentifierType": "URL",
-                        },
-                    },
-                    {
-                        "instrumentTypeName": "Soil moisture sensor",
-                        "instrumentTypeIdentifier": {
-                            "instrumentTypeIdentifierValue": "https://cv/api/v1/equipmenttypes/1/",
-                            "instrumentTypeIdentifierType": "URL",
-                        },
-                    },
-                ],
-            },
-            {
-                "op": "replace",
-                "path": "/Model",
-                "value": {
-                    "modelName": "CR 1000",
-                },
-            },
-            {
-                "op": "replace",
-                "path": "/MeasuredVariable",
-                "value": ["Soil moisture"],
-            },
-        ]
-
-        mapper = mappers.B2InstDraftMapper()
-        existing = {
-            "MeasuredVariable": ["ab"],
-            "Model": "xzy",
-            "InstrumentType": [{"instrumentTypeName": "xxx"}],
-        }
-        result = mapper.to_json_patch(draft, existing)
-
-        self.assertEqual(expected, result)
-
-    def test_to_json_patch_adding(self):
-        """Ensure we can add entries with the json patch structure."""
-        draft = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="Example configuration",
-            Description="example description",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName="A B",
-                    ownerContact="ab@localhost",
-                    ownerIdentifier="https://orcid.org/1234-5678-9012-3456",
-                    ownerIdentifierType="URN",
-                )
-            ],
-            InstrumentType=[
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Logger",
-                    instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/2/",
-                    instrumentTypeIdentifierType="URL",
-                ),
-                schemas.B2InstInstrumentType(
-                    instrumentTypeName="Soil moisture sensor",
-                    instrumentTypeIdentifier="https://cv/api/v1/equipmenttypes/1/",
-                    instrumentTypeIdentifierType="URL",
-                ),
-            ],
-            LandingPage="https://localhost/configurations/123",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="Campbell Scientific",
-                    manufacturerIdentifier="https://cv/api/v1/manufacturers/2/",
-                    manufacturerIdentifierType="URL",
-                ),
-                schemas.B2InstManufacturer(
-                    manufacturerName="TRUEBENER GmbH",
-                    manufacturerIdentifier="https://cv/api/v1/manufacturers/1/",
-                    manufacturerIdentifierType="URL",
-                ),
-            ],
-            Model=schemas.B2InstModel(modelName="CR 1000"),
-            MeasuredVariable=["Soil moisture"],
-            Date=[
-                schemas.B2InstDate(
-                    Date=datetime.datetime(
-                        2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
-                    ),
-                    dateType="Commissioned",
-                ),
-                schemas.B2InstDate(
-                    Date=datetime.datetime(
-                        2024, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
-                    ),
-                    dateType="DeCommissioned",
-                ),
-            ],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier="https://localhost/configurations/123",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                )
-            ],
-            SchemaVersion="1.0.0",
-        )
-        expected = [
-            {"op": "replace", "path": "/Name", "value": "Example configuration"},
-            {
-                "op": "replace",
-                "path": "/Description",
-                "value": "example description",
-            },
-            {
-                "op": "replace",
-                "path": "/Owner",
-                "value": [
-                    {
-                        "ownerName": "A B",
-                        "ownerContact": "ab@localhost",
-                        "ownerIdentifier": {
-                            "ownerIdentifierValue": "https://orcid.org/1234-5678-9012-3456",
-                            "ownerIdentifierType": "URN",
-                        },
-                    }
-                ],
-            },
-            {
-                "op": "replace",
-                "path": "/LandingPage",
-                "value": "https://localhost/configurations/123",
-            },
-            {
-                "op": "replace",
-                "path": "/Manufacturer",
-                "value": [
-                    {
-                        "manufacturerName": "Campbell Scientific",
-                        "manufacturerIdentifier": {
-                            "manufacturerIdentifierValue": "https://cv/api/v1/manufacturers/2/",
-                            "manufacturerIdentifierType": "URL",
-                        },
-                    },
-                    {
-                        "manufacturerName": "TRUEBENER GmbH",
-                        "manufacturerIdentifier": {
-                            "manufacturerIdentifierValue": "https://cv/api/v1/manufacturers/1/",
-                            "manufacturerIdentifierType": "URL",
-                        },
-                    },
-                ],
-            },
-            {
-                "op": "replace",
-                "path": "/Date",
-                "value": [
-                    {
-                        "Date": "2022-01-01T00:00:00+00:00",
-                        "dateType": "Commissioned",
-                    },
-                    {
-                        "Date": "2024-01-01T00:00:00+00:00",
-                        "dateType": "DeCommissioned",
-                    },
-                ],
-            },
-            {
-                "op": "replace",
-                "path": "/AlternateIdentifier",
-                "value": [
-                    {
-                        "alternateIdentifierValue": "https://localhost/configurations/123",
-                        "alternateIdentifierType": "Other",
-                        "alternateIdentifierName": "URL",
-                    }
-                ],
-            },
-            {
-                "op": "add",
-                "path": "/InstrumentType",
-                "value": [
-                    {
-                        "instrumentTypeName": "Logger",
-                        "instrumentTypeIdentifier": {
-                            "instrumentTypeIdentifierValue": "https://cv/api/v1/equipmenttypes/2/",
-                            "instrumentTypeIdentifierType": "URL",
-                        },
-                    },
-                    {
-                        "instrumentTypeName": "Soil moisture sensor",
-                        "instrumentTypeIdentifier": {
-                            "instrumentTypeIdentifierValue": "https://cv/api/v1/equipmenttypes/1/",
-                            "instrumentTypeIdentifierType": "URL",
-                        },
-                    },
-                ],
-            },
-            {
-                "op": "add",
-                "path": "/Model",
-                "value": {
-                    "modelName": "CR 1000",
-                },
-            },
-            {
-                "op": "add",
-                "path": "/MeasuredVariable",
-                "value": ["Soil moisture"],
-            },
-        ]
-
-        mapper = mappers.B2InstDraftMapper()
-        existing = {}
-        result = mapper.to_json_patch(draft, existing)
-
-        self.assertEqual(expected, result)
-
-    def test_to_json_patch_removing(self):
-        """Ensure we can remove entries with the json patch structure."""
-        draft = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="Example configuration",
-            Description="example description",
-            Owner=[
-                schemas.B2InstOwner(
-                    ownerName="A B",
-                    ownerContact="ab@localhost",
-                    ownerIdentifier="https://orcid.org/1234-5678-9012-3456",
-                    ownerIdentifierType="URN",
-                )
-            ],
-            InstrumentType=[],
-            LandingPage="https://localhost/configurations/123",
-            Manufacturer=[
-                schemas.B2InstManufacturer(
-                    manufacturerName="Campbell Scientific",
-                    manufacturerIdentifier="https://cv/api/v1/manufacturers/2/",
-                    manufacturerIdentifierType="URL",
-                ),
-                schemas.B2InstManufacturer(
-                    manufacturerName="TRUEBENER GmbH",
-                    manufacturerIdentifier="https://cv/api/v1/manufacturers/1/",
-                    manufacturerIdentifierType="URL",
-                ),
-            ],
-            Model=None,
-            MeasuredVariable=[],
-            Date=[
-                schemas.B2InstDate(
-                    Date=datetime.datetime(
-                        2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
-                    ),
-                    dateType="Commissioned",
-                ),
-                schemas.B2InstDate(
-                    Date=datetime.datetime(
-                        2024, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
-                    ),
-                    dateType="DeCommissioned",
-                ),
-            ],
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier="https://localhost/configurations/123",
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                )
-            ],
-            SchemaVersion="1.0.0",
-        )
-        expected = [
-            {"op": "replace", "path": "/Name", "value": "Example configuration"},
-            {
-                "op": "replace",
-                "path": "/Description",
-                "value": "example description",
-            },
-            {
-                "op": "replace",
-                "path": "/Owner",
-                "value": [
-                    {
-                        "ownerName": "A B",
-                        "ownerContact": "ab@localhost",
-                        "ownerIdentifier": {
-                            "ownerIdentifierValue": "https://orcid.org/1234-5678-9012-3456",
-                            "ownerIdentifierType": "URN",
-                        },
-                    }
-                ],
-            },
-            {
-                "op": "replace",
-                "path": "/LandingPage",
-                "value": "https://localhost/configurations/123",
-            },
-            {
-                "op": "replace",
-                "path": "/Manufacturer",
-                "value": [
-                    {
-                        "manufacturerName": "Campbell Scientific",
-                        "manufacturerIdentifier": {
-                            "manufacturerIdentifierValue": "https://cv/api/v1/manufacturers/2/",
-                            "manufacturerIdentifierType": "URL",
-                        },
-                    },
-                    {
-                        "manufacturerName": "TRUEBENER GmbH",
-                        "manufacturerIdentifier": {
-                            "manufacturerIdentifierValue": "https://cv/api/v1/manufacturers/1/",
-                            "manufacturerIdentifierType": "URL",
-                        },
-                    },
-                ],
-            },
-            {
-                "op": "replace",
-                "path": "/Date",
-                "value": [
-                    {
-                        "Date": "2022-01-01T00:00:00+00:00",
-                        "dateType": "Commissioned",
-                    },
-                    {
-                        "Date": "2024-01-01T00:00:00+00:00",
-                        "dateType": "DeCommissioned",
-                    },
-                ],
-            },
-            {
-                "op": "replace",
-                "path": "/AlternateIdentifier",
-                "value": [
-                    {
-                        "alternateIdentifierValue": "https://localhost/configurations/123",
-                        "alternateIdentifierType": "Other",
-                        "alternateIdentifierName": "URL",
-                    }
-                ],
-            },
-            {
-                "op": "remove",
-                "path": "/InstrumentType",
-            },
-            {
-                "op": "remove",
-                "path": "/Model",
-            },
-            {
-                "op": "remove",
-                "path": "/MeasuredVariable",
-            },
-        ]
-
-        mapper = mappers.B2InstDraftMapper()
-        existing = {
-            "MeasuredVariable": ["ab"],
-            "Model": "xzy",
-            "InstrumentType": [{"instrumentTypeName": "xxx"}],
-        }
-        result = mapper.to_json_patch(draft, existing)
-
-        self.assertEqual(expected, result)

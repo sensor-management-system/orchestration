@@ -208,14 +208,12 @@ class TestB2InstDate(TestCase):
         self.assertEqual(result, expected)
 
 
-class TestB2InstDraftPost(TestCase):
-    """Test class for the B2InstDraftPost class."""
+class TestB2InstMetadata(TestCase):
+    """Test class for the B2InstMetadata class."""
 
     def test_dict(self):
         """Test the dict method."""
-        draft_post = schemas.B2InstDraftPost(
-            community="0000-0001",
-            open_access=True,
+        data = schemas.B2InstMetadata(
             Name="Name2",
             Description="Some text",
             Owner=[
@@ -261,11 +259,9 @@ class TestB2InstDraftPost(TestCase):
             SchemaVersion="1.0.1",
         )
 
-        result = draft_post.dict()
+        result = data.dict()
 
         expected = {
-            "community": "0000-0001",
-            "open_access": True,
             "Name": "Name2",
             "Description": "Some text",
             "Owner": [
@@ -293,11 +289,9 @@ class TestB2InstDraftPost(TestCase):
 
         self.assertEqual(result, expected)
 
-    def test_dict_without_optinal_fields(self):
+    def test_dict_without_optional_fields(self):
         """Test the dict method but this time without some of the fields that are seen as optional in b2inst."""
-        draft_post = schemas.B2InstDraftPost(
-            community="0000-0001",
-            open_access=True,
+        data = schemas.B2InstMetadata(
             Name="Name2",
             Description="Some text",
             Owner=[
@@ -337,11 +331,9 @@ class TestB2InstDraftPost(TestCase):
             SchemaVersion="1.0.1",
         )
 
-        result = draft_post.dict()
+        result = data.dict()
 
         expected = {
-            "community": "0000-0001",
-            "open_access": True,
             "Name": "Name2",
             "Description": "Some text",
             "Owner": [
@@ -362,4 +354,134 @@ class TestB2InstDraftPost(TestCase):
             "SchemaVersion": "1.0.1",
         }
 
+        self.assertEqual(result, expected)
+
+
+class TestB2InstAccess(TestCase):
+    """Test class for the B2InstAccess class."""
+
+    def test_dict(self):
+        """Test the dict method."""
+        data = schemas.B2InstAccess(record="public", files="public")
+        result = data.dict()
+
+        expected = {
+            "record": "public",
+            "files": "public",
+        }
+        self.assertEqual(result, expected)
+
+
+class TestB2InstFiles(TestCase):
+    """Test class for the B2InstFiles class."""
+
+    def test_dict(self):
+        """Test the dict method."""
+        data = schemas.B2InstFiles(enabled=False)
+        result = data.dict()
+
+        expected = {
+            "enabled": False,
+        }
+        self.assertEqual(result, expected)
+
+
+class TestB2InstDraftPost(TestCase):
+    """Test class for the B2InstDraftPost class."""
+
+    def test_dict(self):
+        """Test the dict method."""
+        data = schemas.B2InstDraftPost(
+            metadata=schemas.B2InstMetadata(
+                Name="Name2",
+                Description="Some text",
+                Owner=[
+                    schemas.B2InstOwner(
+                        ownerName="Homer S.",
+                        ownerContact="homerj@nuclear.us",
+                        ownerIdentifier=None,
+                        ownerIdentifierType=None,
+                    )
+                ],
+                InstrumentType=[
+                    schemas.B2InstInstrumentType(
+                        instrumentTypeName="sensor",
+                        instrumentTypeIdentifier=None,
+                        instrumentTypeIdentifierType=None,
+                    )
+                ],
+                LandingPage="https://somewhere.in/the/web",
+                Manufacturer=[
+                    schemas.B2InstManufacturer(
+                        manufacturerName="Sensors GmbH",
+                        manufacturerIdentifier=None,
+                        manufacturerIdentifierType=None,
+                    )
+                ],
+                Model=schemas.B2InstModel(modelName="0815"),
+                MeasuredVariable=["temperature", "voltage"],
+                Date=[
+                    schemas.B2InstDate(
+                        Date=datetime.datetime(
+                            2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                        ),
+                        dateType="Commissioned",
+                    )
+                ],
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier="123",
+                        alternateIdentifierType="SerialNumber",
+                        alternateIdentifierName=None,
+                    )
+                ],
+                SchemaVersion="1.0.1",
+            ),
+            access=schemas.B2InstAccess(
+                record="public",
+                files="public",
+            ),
+            files=schemas.B2InstFiles(
+                enabled=False,
+            ),
+        )
+
+        result = data.dict()
+
+        expected = {
+            "metadata": {
+                "Name": "Name2",
+                "Description": "Some text",
+                "Owner": [
+                    {
+                        "ownerName": "Homer S.",
+                        "ownerContact": "homerj@nuclear.us",
+                    }
+                ],
+                "InstrumentType": [{"instrumentTypeName": "sensor"}],
+                "LandingPage": "https://somewhere.in/the/web",
+                "Manufacturer": [{"manufacturerName": "Sensors GmbH"}],
+                "Model": {
+                    "modelName": "0815",
+                },
+                "MeasuredVariable": ["temperature", "voltage"],
+                "Date": [
+                    {"Date": "2022-01-01T00:00:00+00:00", "dateType": "Commissioned"}
+                ],
+                "AlternateIdentifier": [
+                    {
+                        "alternateIdentifierValue": "123",
+                        "alternateIdentifierType": "SerialNumber",
+                    }
+                ],
+                "SchemaVersion": "1.0.1",
+            },
+            "access": {
+                "record": "public",
+                "files": "public",
+            },
+            "files": {
+                "enabled": False,
+            },
+        }
         self.assertEqual(result, expected)

@@ -131,12 +131,10 @@ class B2InstDate:
         }
 
 
-@dataclasses.dataclass
-class B2InstDraftPost:
+@dataclasses.dataclass(eq=True, frozen=True)
+class B2InstMetadata:
     """Schema for a b2inst post request to create a draft."""
 
-    community: str
-    open_access: bool
     Name: str
     Description: str
     Owner: typing.List[B2InstOwner]
@@ -152,8 +150,6 @@ class B2InstDraftPost:
     def dict(self):
         """Transform to a python dictionary."""
         result = {
-            "community": self.community,
-            "open_access": self.open_access,
             "Name": self.Name,
             "Description": self.Description,
             "Owner": [o.dict() for o in self.Owner],
@@ -176,3 +172,48 @@ class B2InstDraftPost:
         if self.MeasuredVariable:
             result["MeasuredVariable"] = self.MeasuredVariable
         return result
+
+
+@dataclasses.dataclass(eq=True, frozen=True)
+class B2InstAccess:
+    """This represents the access settings for the b2inst record."""
+
+    record: str
+    files: str
+
+    def dict(self):
+        """Return a dict representation of the data."""
+        return {
+            "record": self.record,
+            "files": self.files,
+        }
+
+
+@dataclasses.dataclass(eq=True, frozen=True)
+class B2InstFiles:
+    """This represents the information if files are enabled or not."""
+
+    enabled: bool
+
+    def dict(self):
+        """Return a dict representation of the data."""
+        return {
+            "enabled": self.enabled,
+        }
+
+
+@dataclasses.dataclass(eq=True, frozen=True)
+class B2InstDraftPost:
+    """This represents the content of a post request to create/update a draft."""
+
+    metadata: B2InstMetadata
+    access: B2InstAccess
+    files: B2InstFiles
+
+    def dict(self):
+        """Return a dict representation."""
+        return {
+            "metadata": self.metadata.dict(),
+            "access": self.access.dict(),
+            "files": self.files.dict(),
+        }
