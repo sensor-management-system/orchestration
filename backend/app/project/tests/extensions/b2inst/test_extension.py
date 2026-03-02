@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """Test classes for the b2inst extension."""
-import json
+
 from unittest.mock import patch
 
 from flask import current_app
@@ -14,34 +14,8 @@ from requests import HTTPError
 from project.api.helpers.errors import BadRequestError
 from project.api.models import Configuration, Contact, Device, Platform, Site
 from project.api.models.base_model import db
-from project.extensions.b2inst import schemas
 from project.extensions.instances import pidinst
 from project.tests.base import BaseTestCase
-
-
-class FakeResponse:
-    """Helper class to have a fake response to mock the requests calls."""
-
-    def __init__(self, json=None):
-        """Init the object."""
-        self._json = json
-
-    def json(self):
-        """Return the json value."""
-        return self._json
-
-    def raise_for_status(self):
-        """
-        Raise an exception if the status code is not good.
-
-        Not implemented yet.
-        """
-        pass
-
-    @property
-    def ok(self):
-        """Return true to show that the request was successful."""
-        return True
 
 
 class TestB2Inst(BaseTestCase):
@@ -55,57 +29,21 @@ class TestB2Inst(BaseTestCase):
 
         b2inst = pidinst.b2inst
 
-        with patch.object(b2inst, "_find_community_id") as find_community, patch.object(
-            b2inst, "_create_draft"
-        ) as create_draft, patch.object(b2inst, "_publish_draft") as publish_draft:
-            find_community.return_value = "1234-5678"
-            create_draft.return_value = {"id": "42"}
-            publish_draft.side_effect = HTTPError(
-                request=None, response=FakeResponse({"message": "Validation failed."})
-            )
+        with patch(
+            "project.extensions.b2inst.client.B2InstClient.create_draft_record"
+        ) as create_draft_record, patch.object(
+            b2inst, "_find_community_id"
+        ) as find_community_id, patch(
+            "project.extensions.b2inst.client.B2InstClient.add_communities"
+        ) as add_communities, patch(
+            "project.extensions.b2inst.client.B2InstClient.publish_record"
+        ) as publish_record:
+            create_draft_record.return_value = {"id": "42"}
+            find_community_id.return_value = "1234-5678"
+            add_communities.return_value = {}
+            publish_record.side_effect = HTTPError()
 
             with self.assertRaises(BadRequestError):
-                b2inst.create_pid(instrument)
-
-    def test_create_pid_device_failed_due_to_http_error(self):
-        """Ensure we reraise the HTTPError if we got no message in the error."""
-        instrument = Device(short_name="Test device")
-        db.session.add(instrument)
-        db.session.commit()
-
-        b2inst = pidinst.b2inst
-
-        with patch.object(b2inst, "_find_community_id") as find_community, patch.object(
-            b2inst, "_create_draft"
-        ) as create_draft, patch.object(b2inst, "_publish_draft") as publish_draft:
-            find_community.return_value = "1234-5678"
-            create_draft.return_value = {"id": "42"}
-            publish_draft.side_effect = HTTPError(
-                request=None, response=FakeResponse({"Reason": "Validation failed."})
-            )
-
-            with self.assertRaises(HTTPError):
-                b2inst.create_pid(instrument)
-
-    def test_create_pid_device_failed_due_to_different_error(self):
-        """Ensure we raise a the same exception as we got."""
-        instrument = Device(short_name="Test device")
-        db.session.add(instrument)
-        db.session.commit()
-
-        b2inst = pidinst.b2inst
-
-        class ExampleException(Exception):
-            pass
-
-        with patch.object(b2inst, "_find_community_id") as find_community, patch.object(
-            b2inst, "_create_draft"
-        ) as create_draft, patch.object(b2inst, "_publish_draft") as publish_draft:
-            find_community.return_value = "1234-5678"
-            create_draft.return_value = {"id": "42"}
-            publish_draft.side_effect = ExampleException()
-
-            with self.assertRaises(ExampleException):
                 b2inst.create_pid(instrument)
 
     def test_create_pid_device(self):
@@ -116,27 +54,29 @@ class TestB2Inst(BaseTestCase):
 
         b2inst = pidinst.b2inst
 
-        with patch.object(b2inst, "_find_community_id") as find_community, patch.object(
-            b2inst, "_create_draft"
-        ) as create_draft, patch.object(
-            b2inst, "_publish_draft"
-        ) as publish_draft, patch.object(
-            b2inst, "_get_record_data"
-        ) as get_record_data:
-            find_community.return_value = "1234-5678"
-            create_draft.return_value = {"id": "42"}
-            publish_draft.return_value = None
-            get_record_data.return_value = {
-                "metadata": {"ePIC_PID": "http://hdl.handle.net/42.123/4567890"}
+        with patch(
+            "project.extensions.b2inst.client.B2InstClient.create_draft_record"
+        ) as create_draft_record, patch.object(
+            b2inst, "_find_community_id"
+        ) as find_community_id, patch(
+            "project.extensions.b2inst.client.B2InstClient.add_communities"
+        ) as add_communities, patch(
+            "project.extensions.b2inst.client.B2InstClient.publish_record"
+        ) as publish_record:
+            create_draft_record.return_value = {"id": "42"}
+            find_community_id.return_value = "1234-5678"
+            add_communities.return_value = {}
+            publish_record.return_value = {
+                "metadata": {"Identifier": {"identifierValue": "42.123/4567890"}}
             }
-
             pid = b2inst.create_pid(instrument)
 
-            find_community.assert_called_once()
-            create_draft.assert_called_once()
-            self.assertEqual(create_draft.call_args.args[0].Name, "Test device")
-            publish_draft.assert_called_with("42")
-            get_record_data.assert_called_with("42")
+            find_community_id.assert_called_once()
+            create_draft_record.assert_called_once()
+            self.assertEqual(
+                create_draft_record.call_args.args[0]["metadata"]["Name"], "Test device"
+            )
+            publish_record.assert_called_with("42")
 
         self.assertEqual(pid, "42.123/4567890")
         # We set the b2inst record id field in this process.
@@ -152,27 +92,31 @@ class TestB2Inst(BaseTestCase):
 
         b2inst = pidinst.b2inst
 
-        with patch.object(b2inst, "_find_community_id") as find_community, patch.object(
-            b2inst, "_create_draft"
-        ) as create_draft, patch.object(
-            b2inst, "_publish_draft"
-        ) as publish_draft, patch.object(
-            b2inst, "_get_record_data"
-        ) as get_record_data:
-            find_community.return_value = "1234-5678"
-            create_draft.return_value = {"id": "42"}
-            publish_draft.return_value = None
-            get_record_data.return_value = {
-                "metadata": {"ePIC_PID": "http://hdl.handle.net/42.123/4567890"}
+        with patch(
+            "project.extensions.b2inst.client.B2InstClient.create_draft_record"
+        ) as create_draft_record, patch.object(
+            b2inst, "_find_community_id"
+        ) as find_community_id, patch(
+            "project.extensions.b2inst.client.B2InstClient.add_communities"
+        ) as add_communities, patch(
+            "project.extensions.b2inst.client.B2InstClient.publish_record"
+        ) as publish_record:
+            create_draft_record.return_value = {"id": "42"}
+            find_community_id.return_value = "1234-5678"
+            add_communities.return_value = {}
+            publish_record.return_value = {
+                "metadata": {"Identifier": {"identifierValue": "42.123/4567890"}}
             }
 
             pid = b2inst.create_pid(instrument)
 
-            find_community.assert_called_once()
-            create_draft.assert_called_once()
-            self.assertEqual(create_draft.call_args.args[0].Name, "Test platform")
-            publish_draft.assert_called_with("42")
-            get_record_data.assert_called_with("42")
+            find_community_id.assert_called_once()
+            create_draft_record.assert_called_once()
+            self.assertEqual(
+                create_draft_record.call_args.args[0]["metadata"]["Name"],
+                "Test platform",
+            )
+            publish_record.assert_called_with("42")
 
         self.assertEqual(pid, "42.123/4567890")
         # We set the b2inst record id field in this process.
@@ -188,27 +132,31 @@ class TestB2Inst(BaseTestCase):
 
         b2inst = pidinst.b2inst
 
-        with patch.object(b2inst, "_find_community_id") as find_community, patch.object(
-            b2inst, "_create_draft"
-        ) as create_draft, patch.object(
-            b2inst, "_publish_draft"
-        ) as publish_draft, patch.object(
-            b2inst, "_get_record_data"
-        ) as get_record_data:
-            find_community.return_value = "1234-5678"
-            create_draft.return_value = {"id": "42"}
-            publish_draft.return_value = None
-            get_record_data.return_value = {
-                "metadata": {"ePIC_PID": "http://hdl.handle.net/42.123/4567890"}
+        with patch(
+            "project.extensions.b2inst.client.B2InstClient.create_draft_record"
+        ) as create_draft_record, patch.object(
+            b2inst, "_find_community_id"
+        ) as find_community_id, patch(
+            "project.extensions.b2inst.client.B2InstClient.add_communities"
+        ) as add_communities, patch(
+            "project.extensions.b2inst.client.B2InstClient.publish_record"
+        ) as publish_record:
+            create_draft_record.return_value = {"id": "42"}
+            find_community_id.return_value = "1234-5678"
+            add_communities.return_value = {}
+            publish_record.return_value = {
+                "metadata": {"Identifier": {"identifierValue": "42.123/4567890"}}
             }
 
             pid = b2inst.create_pid(instrument)
 
-            find_community.assert_called_once()
-            create_draft.assert_called_once()
-            self.assertEqual(create_draft.call_args.args[0].Name, "Test configuration")
-            publish_draft.assert_called_with("42")
-            get_record_data.assert_called_with("42")
+            find_community_id.assert_called_once()
+            create_draft_record.assert_called_once()
+            self.assertEqual(
+                create_draft_record.call_args.args[0]["metadata"]["Name"],
+                "Test configuration",
+            )
+            publish_record.assert_called_with("42")
 
         self.assertEqual(pid, "42.123/4567890")
         # We set the b2inst record id field in this process.
@@ -224,21 +172,27 @@ class TestB2Inst(BaseTestCase):
 
         b2inst = pidinst.b2inst
 
-        with patch.object(b2inst, "_find_community_id") as find_community:
-            find_community.return_value = "1234-5678"
-            with patch("requests.get") as requests_get:
-                requests_get.return_value = FakeResponse({"metadata": {}})
-                with patch("requests.patch") as requests_patch:
-                    requests_patch.return_value = FakeResponse()
-                    b2inst.update_external_metadata(instrument, run_async=False)
-                    requests_patch.assert_called_once()
-                    args = requests_patch.call_args.args
-                    url = args[0]
-                    self.assertTrue("api/records/42" in url)
-                    kwargs = requests_patch.call_args.kwargs
-                    data = json.loads(kwargs["data"])
-                    name_change = [x for x in data if x["path"] == "/Name"][0]
-                    self.assertEqual(name_change["value"], "Test device")
+        with patch(
+            "project.extensions.b2inst.client.B2InstClient.create_new_draft"
+        ) as create_new_draft, patch(
+            "project.extensions.b2inst.client.B2InstClient.update_draft"
+        ) as update_draft, patch(
+            "project.extensions.b2inst.client.B2InstClient.publish_record"
+        ) as publish_record:
+            create_new_draft.return_value = {}
+            update_draft.return_value = {}
+            publish_record.return_value = {}
+
+            b2inst.update_external_metadata(instrument, run_async=False)
+
+            create_new_draft.assert_called_with("42")
+            update_draft.assert_called_once()
+            args = update_draft.call_args.args
+            record_id = args[0]
+            self.assertEqual(record_id, "42")
+            draft_data = args[1]
+            self.assertEqual(draft_data["metadata"]["Name"], "Test device")
+            publish_record.assert_called_with("42")
 
     def test_update_external_metadata_platform(self):
         """Ensure we can update the external metadata for a platform."""
@@ -248,21 +202,27 @@ class TestB2Inst(BaseTestCase):
 
         b2inst = pidinst.b2inst
 
-        with patch.object(b2inst, "_find_community_id") as find_community:
-            find_community.return_value = "1234-5678"
-            with patch("requests.get") as requests_get:
-                requests_get.return_value = FakeResponse({"metadata": {}})
-                with patch("requests.patch") as requests_patch:
-                    requests_patch.return_value = FakeResponse()
-                    b2inst.update_external_metadata(instrument, run_async=False)
-                    requests_patch.assert_called_once()
-                    args = requests_patch.call_args.args
-                    url = args[0]
-                    self.assertTrue("api/records/42" in url)
-                    kwargs = requests_patch.call_args.kwargs
-                    data = json.loads(kwargs["data"])
-                    name_change = [x for x in data if x["path"] == "/Name"][0]
-                    self.assertEqual(name_change["value"], "Test platform")
+        with patch(
+            "project.extensions.b2inst.client.B2InstClient.create_new_draft"
+        ) as create_new_draft, patch(
+            "project.extensions.b2inst.client.B2InstClient.update_draft"
+        ) as update_draft, patch(
+            "project.extensions.b2inst.client.B2InstClient.publish_record"
+        ) as publish_record:
+            create_new_draft.return_value = {}
+            update_draft.return_value = {}
+            publish_record.return_value = {}
+
+            b2inst.update_external_metadata(instrument, run_async=False)
+
+            create_new_draft.assert_called_with("42")
+            update_draft.assert_called_once()
+            args = update_draft.call_args.args
+            record_id = args[0]
+            self.assertEqual(record_id, "42")
+            draft_data = args[1]
+            self.assertEqual(draft_data["metadata"]["Name"], "Test platform")
+            publish_record.assert_called_with("42")
 
     def test_update_external_metadata_configuration(self):
         """Ensure we can update the external metadata for a configuration."""
@@ -272,59 +232,47 @@ class TestB2Inst(BaseTestCase):
 
         b2inst = pidinst.b2inst
 
-        with patch.object(b2inst, "_find_community_id") as find_community:
-            find_community.return_value = "1234-5678"
-            with patch("requests.get") as requests_get:
-                requests_get.return_value = FakeResponse({"metadata": {}})
-                with patch("requests.patch") as requests_patch:
-                    requests_patch.return_value = FakeResponse()
-                    b2inst.update_external_metadata(instrument, run_async=False)
-                    requests_patch.assert_called_once()
-                    args = requests_patch.call_args.args
-                    url = args[0]
-                    self.assertTrue("api/records/42" in url)
-                    kwargs = requests_patch.call_args.kwargs
-                    data = json.loads(kwargs["data"])
-                    name_change = [x for x in data if x["path"] == "/Name"][0]
-                    self.assertEqual(name_change["value"], "Test configuration")
+        with patch(
+            "project.extensions.b2inst.client.B2InstClient.create_new_draft"
+        ) as create_new_draft, patch(
+            "project.extensions.b2inst.client.B2InstClient.update_draft"
+        ) as update_draft, patch(
+            "project.extensions.b2inst.client.B2InstClient.publish_record"
+        ) as publish_record:
+            create_new_draft.return_value = {}
+            update_draft.return_value = {}
+            publish_record.return_value = {}
 
-    def test_get_communities(self):
-        """Ensure we can get a list of communities."""
-        b2inst = pidinst.b2inst
-        with patch("requests.get") as requests_get:
-            requests_get.return_value = FakeResponse(
-                {
-                    "hits": {
-                        "hits": [
-                            {
-                                "id": "1",
-                                "name": "EUDAT",
-                            },
-                            {"id": "2", "name": "AWI"},
-                        ]
-                    }
-                }
-            )
-            communities = b2inst._get_communities()
-            requests_get.assert_called_once()
-            url = requests_get.call_args.args[0]
-            self.assertTrue("api/communities" in url)
+            b2inst.update_external_metadata(instrument, run_async=False)
 
-        self.assertEqual(
-            communities, [{"id": "1", "name": "EUDAT"}, {"id": "2", "name": "AWI"}]
-        )
+            create_new_draft.assert_called_with("42")
+            update_draft.assert_called_once()
+            args = update_draft.call_args.args
+            record_id = args[0]
+            self.assertEqual(record_id, "42")
+            draft_data = args[1]
+            self.assertEqual(draft_data["metadata"]["Name"], "Test configuration")
+            publish_record.assert_called_with("42")
 
     def test_find_community_id(self):
         """Ensure we can find the community id for our community name."""
         b2inst = pidinst.b2inst
-        with patch.object(b2inst, "_get_communities") as get_communities:
-            get_communities.return_value = [
-                {
-                    "id": "1",
-                    "name": "EUDAT",
-                },
-                {"id": "2", "name": "AWI"},
-            ]
+        with patch(
+            "project.extensions.b2inst.client.B2InstClient.get_communities"
+        ) as get_communities:
+            get_communities.return_value = {
+                "hits": {
+                    "hits": [
+                        {
+                            "id": "1",
+                            "metadata": {
+                                "title": "EUDAT",
+                            },
+                        },
+                        {"id": "2", "metadata": {"title": "AWI"}},
+                    ]
+                }
+            }
 
             eudat_id = b2inst._find_community_id("EUDAT")
             self.assertEqual(eudat_id, "1")
@@ -333,91 +281,24 @@ class TestB2Inst(BaseTestCase):
             none_id = b2inst._find_community_id("something different")
             self.assertIsNone(none_id)
 
-    def test_create_draft(self):
-        """Ensure we can make requests to create drafts."""
-        b2inst = pidinst.b2inst
-        draft = schemas.B2InstDraftPost(
-            community="A",
-            open_access=True,
-            Name="test Name",
-            Description="test description",
-            Owner=[],
-            InstrumentType=[],
-            LandingPage="http://somewhere.in/the/web",
-            Manufacturer=[],
-            Model=None,
-            MeasuredVariable=[],
-            Date=[],
-            AlternateIdentifier=[],
-            SchemaVersion="1.0.0",
-        )
-
-        with patch("requests.post") as requests_post:
-            requests_post.return_value = FakeResponse({"id": "42"})
-            result = b2inst._create_draft(draft)
-            self.assertEqual(result, {"id": "42"})
-            requests_post.assert_called_once()
-            url = requests_post.call_args.args[0]
-            self.assertTrue("api/records" in url)
-            data = requests_post.call_args.kwargs["json"]
-            expected_data = {
-                "community": "A",
-                "open_access": True,
-                "Name": "test Name",
-                "Description": "test description",
-                "Owner": [],
-                "LandingPage": "http://somewhere.in/the/web",
-                "Manufacturer": [],
-                "Date": [],
-                "AlternateIdentifier": [],
-                "SchemaVersion": "1.0.0",
-            }
-            self.assertEqual(data, expected_data)
-
-    def test_publish_draft(self):
-        """Ensure we can publish the draft."""
-        b2inst = pidinst.b2inst
-        draft_id = "42"
-        with patch("requests.patch") as requests_patch:
-            requests_patch.return_value = FakeResponse()
-            b2inst._publish_draft(draft_id)
-            args = requests_patch.call_args.args
-            url = args[0]
-            self.assertTrue("api/records/42/draft" in url)
-            kwargs = requests_patch.call_args.kwargs
-            data = json.loads(kwargs["data"])
-            expected_data = [
-                {
-                    "op": "add",
-                    "path": "/publication_state",
-                    "value": "submitted",
-                }
-            ]
-            self.assertEqual(data, expected_data)
-
-    def test_get_record_data(self):
-        """Ensure we can get information about the record."""
-        b2inst = pidinst.b2inst
-        record_id = "42"
-        with patch("requests.get") as requests_get:
-            requests_get.return_value = FakeResponse({"id": "42"})
-            result = b2inst._get_record_data(record_id)
-            args = requests_get.call_args.args
-            url = args[0]
-            self.assertTrue("api/records/42" in url)
-            # No further processing of the response.
-            self.assertEqual(result, {"id": "42"})
-
     def test_check_availability(self):
         """Ensure we can check if the service is running or not."""
         b2inst = pidinst.b2inst
-        with patch("requests.get") as requests_get:
-            requests_get.return_value = FakeResponse()
+        with patch("project.extensions.b2inst.client.B2InstClient.ping") as ping:
+            ping.return_value = {}
             b2inst.check_availability()
-            requests_get.assert_called_once()
-            args = requests_get.call_args.args
-            url = args[0]
-            self.assertTrue("api" in url)
+            ping.assert_called_once()
+
+    def test_check_availability_with_error(self):
+        """Ensure we get an exception if the availability fails."""
+        b2inst = pidinst.b2inst
+        with patch("project.extensions.b2inst.client.B2InstClient.ping") as ping:
+            ping.side_effect = Exception("problem")
+
+            with self.assertRaises(Exception):
+                b2inst.check_availability()
+
+            ping.assert_called_once()
 
     def test_has_external_metadata(self):
         """Test the has_external_metadata method."""

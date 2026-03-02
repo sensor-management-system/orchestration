@@ -25,27 +25,27 @@ from . import schemas
 class B2InstDeviceMapper:
     """Mapper to handle device data."""
 
-    def to_draft_post(
-        self, device, community, open_access, base_landing_page, schema_version
-    ):
+    def to_draft_post(self, device, base_landing_page, schema_version):
         """Map to a b2inst post to create a draft."""
         landing_page = f"{base_landing_page}/devices/{device.id}"
         return schemas.B2InstDraftPost(
-            community=community,
-            open_access=open_access,
-            Name=self._device_name(device),
-            Description=device.description or "",
-            Owner=self._device_owners(device),
-            InstrumentType=self._device_instrument_types(device),
-            LandingPage=landing_page,
-            Manufacturer=self._device_manufacturers(device),
-            Model=self._device_models(device),
-            MeasuredVariable=self._device_measured_variables(device),
-            Date=[],
-            AlternateIdentifier=self._device_alternate_identifiers(
-                device, landing_page
+            metadata=schemas.B2InstMetadata(
+                Name=self._device_name(device),
+                Description=device.description or "",
+                Owner=self._device_owners(device),
+                InstrumentType=self._device_instrument_types(device),
+                LandingPage=landing_page,
+                Manufacturer=self._device_manufacturers(device),
+                Model=self._device_models(device),
+                MeasuredVariable=self._device_measured_variables(device),
+                Date=[],
+                AlternateIdentifier=self._device_alternate_identifiers(
+                    device, landing_page
+                ),
+                SchemaVersion=schema_version,
             ),
-            SchemaVersion=schema_version,
+            access=schemas.B2InstAccess(record="public", files="public"),
+            files=schemas.B2InstFiles(enabled=False),
         )
 
     def _device_name(self, device):
@@ -185,27 +185,27 @@ class B2InstDeviceMapper:
 class B2InstPlatformMapper:
     """Mapper to handle platform data."""
 
-    def to_draft_post(
-        self, platform, community, open_access, base_landing_page, schema_version
-    ):
+    def to_draft_post(self, platform, base_landing_page, schema_version):
         """Map to a b2inst post to create a draft."""
         landing_page = f"{base_landing_page}/platforms/{platform.id}"
         return schemas.B2InstDraftPost(
-            community=community,
-            open_access=open_access,
-            Name=self._platform_name(platform),
-            Description=platform.description or "",
-            Owner=self._platform_owners(platform),
-            InstrumentType=self._platform_instrument_types(platform),
-            LandingPage=landing_page,
-            Manufacturer=self._platform_manufacturers(platform),
-            Model=self._platform_models(platform),
-            AlternateIdentifier=self._platform_alternate_identifiers(
-                platform, landing_page
+            metadata=schemas.B2InstMetadata(
+                Name=self._platform_name(platform),
+                Description=platform.description or "",
+                Owner=self._platform_owners(platform),
+                InstrumentType=self._platform_instrument_types(platform),
+                LandingPage=landing_page,
+                Manufacturer=self._platform_manufacturers(platform),
+                Model=self._platform_models(platform),
+                AlternateIdentifier=self._platform_alternate_identifiers(
+                    platform, landing_page
+                ),
+                MeasuredVariable=[],
+                Date=[],
+                SchemaVersion=schema_version,
             ),
-            MeasuredVariable=[],
-            Date=[],
-            SchemaVersion=schema_version,
+            access=schemas.B2InstAccess(record="public", files="public"),
+            files=schemas.B2InstFiles(enabled=False),
         )
 
     def _platform_name(self, platform):
@@ -339,9 +339,7 @@ class B2InstConfigurationMapper:
         self._device_mapper = B2InstDeviceMapper()
         self._platform_mapper = B2InstPlatformMapper()
 
-    def to_draft_post(
-        self, configuration, community, open_access, base_landing_page, schema_version
-    ):
+    def to_draft_post(self, configuration, base_landing_page, schema_version):
         """Map to a b2inst post to create a draft."""
         device_data = []
         platform_data = []
@@ -353,8 +351,6 @@ class B2InstConfigurationMapper:
             device_data.append(
                 self._device_mapper.to_draft_post(
                     device,
-                    community=community,
-                    open_access=open_access,
                     base_landing_page=base_landing_page,
                     schema_version=schema_version,
                 )
@@ -366,8 +362,6 @@ class B2InstConfigurationMapper:
             platform_data.append(
                 self._platform_mapper.to_draft_post(
                     platform,
-                    community=community,
-                    open_access=open_access,
                     base_landing_page=base_landing_page,
                     schema_version=schema_version,
                 )
@@ -377,12 +371,12 @@ class B2InstConfigurationMapper:
         manufacturers = set()
         measured_variables = set()
         for data in itertools.chain(device_data, platform_data):
-            for instrument_type in data.InstrumentType:
+            for instrument_type in data.metadata.InstrumentType:
                 instrument_types.add(instrument_type)
-            for manufacturer in data.Manufacturer:
+            for manufacturer in data.metadata.Manufacturer:
                 if manufacturer.manufacturerName != ":unav":
                     manufacturers.add(manufacturer)
-            for measured_variable in data.MeasuredVariable:
+            for measured_variable in data.metadata.MeasuredVariable:
                 measured_variables.add(measured_variable)
 
         if not manufacturers:
@@ -410,29 +404,33 @@ class B2InstConfigurationMapper:
 
         landing_page = f"{base_landing_page}/configurations/{configuration.id}"
         return schemas.B2InstDraftPost(
-            community=community,
-            open_access=open_access,
-            Name=configuration.label or ":unas",
-            Description=configuration.description or "",
-            Owner=self._configuration_owners(configuration),
-            InstrumentType=sorted(instrument_types, key=lambda x: x.instrumentTypeName),
-            LandingPage=landing_page,
-            Manufacturer=sorted(manufacturers, key=lambda x: x.manufacturerName),
-            # As the model can only have a single value, we can't reuse
-            # the entries of the devices or platforms that are mounted in
-            # the configuration.
-            Model=None,
-            # We don't reuse the alternate identifiers of the platforms & devices here.
-            AlternateIdentifier=[
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=landing_page,
-                    alternateIdentifierType="Other",
-                    alternateIdentifierName="URL",
-                )
-            ],
-            MeasuredVariable=sorted(measured_variables),
-            Date=dates,
-            SchemaVersion=schema_version,
+            metadata=schemas.B2InstMetadata(
+                Name=configuration.label or ":unas",
+                Description=configuration.description or "",
+                Owner=self._configuration_owners(configuration),
+                InstrumentType=sorted(
+                    instrument_types, key=lambda x: x.instrumentTypeName
+                ),
+                LandingPage=landing_page,
+                Manufacturer=sorted(manufacturers, key=lambda x: x.manufacturerName),
+                # As the model can only have a single value, we can't reuse
+                # the entries of the devices or platforms that are mounted in
+                # the configuration.
+                Model=None,
+                # We don't reuse the alternate identifiers of the platforms & devices here.
+                AlternateIdentifier=[
+                    schemas.B2InstAlternateIdentifier(
+                        alternateIdentifier=landing_page,
+                        alternateIdentifierType="Other",
+                        alternateIdentifierName="URL",
+                    )
+                ],
+                MeasuredVariable=sorted(measured_variables),
+                Date=dates,
+                SchemaVersion=schema_version,
+            ),
+            access=schemas.B2InstAccess(record="public", files="public"),
+            files=schemas.B2InstFiles(enabled=False),
         )
 
     def _configuration_owners(self, configuration):
@@ -471,101 +469,3 @@ class B2InstConfigurationMapper:
                 )
             )
         return list(owners)
-
-
-class B2InstDraftMapper:
-    """Mapper to work with b2inst draft post data."""
-
-    def to_json_patch(self, draft, existing):
-        """Transform to a json patch request setting all the field that may changed."""
-        result = [
-            {
-                "op": "replace",
-                "path": "/Name",
-                "value": draft.Name,
-            },
-            {
-                "op": "replace",
-                "path": "/Description",
-                "value": draft.Description or "",
-            },
-            {
-                "op": "replace",
-                "path": "/Owner",
-                "value": [o.dict() for o in draft.Owner],
-            },
-            {
-                "op": "replace",
-                "path": "/LandingPage",
-                "value": draft.LandingPage,
-            },
-            {
-                "op": "replace",
-                "path": "/Manufacturer",
-                "value": [m.dict() for m in draft.Manufacturer],
-            },
-            {
-                "op": "replace",
-                "path": "/Date",
-                "value": [d.dict() for d in draft.Date],
-            },
-            {
-                "op": "replace",
-                "path": "/AlternateIdentifier",
-                "value": [a.dict() for a in draft.AlternateIdentifier],
-            },
-        ]
-        if existing.get("InstrumentType"):
-            if draft.InstrumentType:
-                result.append(
-                    {
-                        "op": "replace",
-                        "path": "/InstrumentType",
-                        "value": [i.dict() for i in draft.InstrumentType],
-                    }
-                )
-            else:
-                result.append({"op": "remove", "path": "/InstrumentType"})
-        elif draft.InstrumentType:
-            result.append(
-                {
-                    "op": "add",
-                    "path": "/InstrumentType",
-                    "value": [i.dict() for i in draft.InstrumentType],
-                }
-            )
-        if existing.get("Model"):
-            if draft.Model:
-                result.append(
-                    {"op": "replace", "path": "/Model", "value": draft.Model.dict()}
-                )
-            else:
-                result.append(
-                    {
-                        "op": "remove",
-                        "path": "/Model",
-                    }
-                )
-        elif draft.Model:
-            result.append({"op": "add", "path": "/Model", "value": draft.Model.dict()})
-        if existing.get("MeasuredVariable"):
-            if draft.MeasuredVariable:
-                result.append(
-                    {
-                        "op": "replace",
-                        "path": "/MeasuredVariable",
-                        "value": draft.MeasuredVariable,
-                    }
-                )
-            else:
-                result.append({"op": "remove", "path": "/MeasuredVariable"})
-        elif draft.MeasuredVariable:
-            result.append(
-                {
-                    "op": "add",
-                    "path": "/MeasuredVariable",
-                    "value": draft.MeasuredVariable,
-                }
-            )
-
-        return result
