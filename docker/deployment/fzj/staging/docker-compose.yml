@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2025
+# SPDX-FileCopyrightText: 2021 - 2026
 # - Wilhelm Becker <wilhelm.becker@gfz-potsdam.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
@@ -80,7 +80,6 @@ services:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true"
-      - "ES_JAVA_OPTS=-Xms4g -Xmx4g -Dlog4j2.formatMsgNoLookups=true"
       - cluster.routing.allocation.disk.threshold_enabled=false
     ulimits:
       memlock:
@@ -183,7 +182,10 @@ volumes:
   backend-static-files:
 networks:
   nginx:
+    name: sms_staging_nginx
   backend:
+    name: sms_staging_backend
   idl-db:
+    name: sms_staging_idl_db
   reverseproxy:
     external: true
