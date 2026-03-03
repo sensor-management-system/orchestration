@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.25.0 (Unreleased)
+## 1.25.1 (Unreleased)
+
+## 1.25.0 - 2026-03-03
 
 Changed:
 - Switched to the version 3 of the B2INST api ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/643))
