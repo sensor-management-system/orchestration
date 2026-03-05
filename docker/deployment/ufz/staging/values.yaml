@@ -19,9 +19,6 @@ sms:
     image:
       repository: "registry.hzdr.de/hub-terra/sms/orchestration/generic-frontend"
       tag: "1.25.0"
-    environmentVariables:
-      - name: NUXT_ENV_MAINTENANCE_DOCUMENT_URL
-        value: "https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-ufz-staging.md"
     nginxConfig: |
       server {
         listen       80;
