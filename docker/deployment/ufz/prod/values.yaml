@@ -36,7 +36,7 @@ sms:
       }
 
   sms-idl:
-    enabled: true
+    enabled: false
     image:
       repository: "registry.hzdr.de/hub-terra/sms/gfz-idl/backend"
       tag: "0.6.0"
