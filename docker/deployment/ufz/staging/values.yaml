@@ -19,6 +19,50 @@ sms:
     image:
       repository: "registry.hzdr.de/hub-terra/sms/orchestration/generic-frontend"
       tag: "1.25.0"
+      environmentVariables:
+        - name: BASE_URL_ENV_PLACEHOLDER
+          value: /sms
+        - name: SMS_BACKEND_URL_ENV_PLACEHOLDER
+          value: https://web-intern-stage.app.ufz.de/sms/backend/api/v1
+        - name: CV_BACKEND_URL_ENV_PLACEHOLDER
+          value: https://sms-cv.helmholtz.cloud/sms/cv/api/v1
+        - name: IDL_SYNC_URL_ENV_PLACEHOLDER
+          value: https://web.app.ufz.de/sms-idl/api/hifis/sync-groups
+        - name: NUXT_ENV_CLIENT_ID_ENV_PLACEHOLDER
+          value: ufz-sms
+        - name: NUXT_ENV_OIDC_WELL_KNOWN_ENV_PLACEHOLDER
+          value: https://login.helmholtz.de/oauth2/.well-known/openid-configuration
+        - name: NUXT_ENV_ALLOWED_MIMETYPES_ENV_PLACEHOLDER
+          value: >-
+            application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed
+        - name: NUXT_ENV_SCOPE_ENV_PLACEHOLDER
+          value: openid profile eduperson_principal_name email offline_access
+        - name: NUXT_ENV_OIDC_REFRESH_TOKEN_ENV_PLACEHOLDER
+          value: refresh_token
+        - name: NUXT_ENV_OIDC_REFRESH_EXPIRE_ENV_PLACEHOLDER
+          value: '28800'
+        - name: NUXT_ENV_OIDC_RESPONSE_TYPE_ENV_PLACEHOLDER
+          value: code
+        - name: NUXT_ENV_OIDC_GRANT_TYPE_ENV_PLACEHOLDER
+          value: authorization_code
+        - name: NUXT_ENV_OIDC_CHALLANGE_ENV_PLACEHOLDER
+          value: S256
+        - name: NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME_ENV_PLACEHOLDER
+          value: '1800000'
+        - name: NUXT_ENV_PID_BASE_URL_ENV_PLACEHOLDER
+          value: https://hdl.handle.net
+        - name: INSTITUTE_ENV_PLACEHOLDER
+          value: ufz
+        - name: NUXT_ENV_MATOMO_SITE_ID_ENV_PLACEHOLDER
+        - name: NUXT_ENV_MATOMO_URL_ENV_PLACEHOLDER
+        - name: NUXT_ENV_MATOMO_TRACKER_URL_ENV_PLACEHOLDER
+        - name: NUXT_ENV_MATOMO_SCRIPT_URL_ENV_PLACEHOLDER
+        - name: SMS_FRONTEND_URL_ENV_PLACEHOLDER
+          value: https://web-intern-stage.app.ufz.de/sms/
+        - name: SHOW_RELEASE_NOTES_ENV_PLACEHOLDER
+          value: 'true'
+        - name: NUXT_ENV_MAINTENANCE_DOCUMENT_URL
+          value: "https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-ufz-staging.md"
     nginxConfig: |
       server {
         listen       80;
