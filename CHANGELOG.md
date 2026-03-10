@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Fixed:
 - Resolved a FZJ staging deployment issue with the defined docker networks ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/650))
+- Resolved shapely Wkt error deprecation ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/661))
 
 ## 1.25.0 - 2026-03-03
 
