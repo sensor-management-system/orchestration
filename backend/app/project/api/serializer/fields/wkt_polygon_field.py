@@ -10,7 +10,7 @@ import shapely.wkt
 from geoalchemy2.shape import from_shape
 from marshmallow import ValidationError
 from marshmallow_jsonapi import fields
-from shapely.errors import WKTReadingError
+from shapely.errors import ShapelyError
 
 from ...helpers.geometry import geometry_to_wkt
 
@@ -33,5 +33,5 @@ class WktPolygonField(fields.Field):
             if not shape.is_valid:
                 raise ValidationError("Geometry must be valid wkt representation")
             return from_shape(shape)
-        except WKTReadingError:
+        except ShapelyError:
             raise ValidationError("Geometry must be valid wkt representation")
