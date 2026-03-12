@@ -152,7 +152,7 @@ services:
       SMS_FRONTEND_URL: https://sms.earth-data.fz-juelich.de
       SMS_VERSION: ${SMS_VERSION}
       B2INST_TOKEN: ${B2INST_TOKEN}
-      B2INST_URL: https://b2inst-test.gwdg.de
+      B2INST_URL: https://b2inst.gwdg.de
       B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
       TSMDL_API_URL: https://decoupling-api.ibg3container.ibg.kfa-juelich.de/tsmdl/api/v1
       TSM_ENDPOINTS: '[{"fields": {"name": "FZJ", "url": "https://decoupling-api.ibg3jucloud-intern.ibg.kfa-juelich.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 3}]'

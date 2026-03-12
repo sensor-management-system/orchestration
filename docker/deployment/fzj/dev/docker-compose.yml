@@ -151,7 +151,7 @@ services:
       TSMDL_API_URL: https://decoupling-api.ibg3container.ibg.kfa-juelich.de/tsmdl/api/v1
       TSM_ENDPOINTS: '[{"fields": {"name": "FZJ", "url": "https://decoupling-api.ibg3container.ibg.kfa-juelich.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 3}]'
       B2INST_TOKEN: ${B2INST_TOKEN}
-      B2INST_URL: https://b2inst-test.gwdg.de
+      B2INST_URL: https://b2inst.demo.pid.gwdg.de
       B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
       PID_SERVICE_URL: https://rz-vm561.gfz.de:8000/api/handles
       PID_SERVICE_USER: ${PID_SERVICE_USER}
