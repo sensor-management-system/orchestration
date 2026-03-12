@@ -79,7 +79,7 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g -Dlog4j2.formatMsgNoLookups=true"
       - cluster.routing.allocation.disk.threshold_enabled=false
     ulimits:
       memlock:
@@ -154,7 +154,7 @@ services:
       SMS_FRONTEND_URL: https://sms-staging.ibg3jucloud-intern.ibg.kfa-juelich.de
       SMS_VERSION: ${SMS_VERSION}
       B2INST_TOKEN: ${B2INST_TOKEN}
-      B2INST_URL: https://b2inst-test.gwdg.de
+      B2INST_URL: https://b2inst.demo.pid.gwdg.de
       B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
       TSMDL_API_URL: https://decoupling-api.ibg3container.ibg.kfa-juelich.de/tsmdl/api/v1
       TSM_ENDPOINTS: '[{"fields": {"name": "FZJ", "url": "https://decoupling-api.ibg3container.ibg.kfa-juelich.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 3}]'
