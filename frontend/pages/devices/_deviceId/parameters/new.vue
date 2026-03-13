@@ -33,6 +33,7 @@ SPDX-License-Identifier: EUPL-1.2
           v-model="value"
           :units="units"
           auto-completion-endpoint="device-parameter-labels"
+          show-calibration-relevant-checkbox
         />
       </v-card-text>
       <v-card-actions>

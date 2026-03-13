@@ -7,7 +7,10 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.25.1 (Unreleased)
+## 1.26.0 (Unreleased)
+
+Added:
+- Option to flag parameters as calibration relevant to allow the user to set those faster when creating a calibration action ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/642))
 
 Changed:
 - KIT deployment, staging, B2INST: use <https://b2inst.demo.pid.gwdg.de> instead of the official server ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/663))

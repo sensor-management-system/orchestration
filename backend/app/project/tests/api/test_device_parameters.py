@@ -719,6 +719,9 @@ class TestDeviceParameterServices(BaseTestCase):
             "http://foo/count"
         )
         self.expect(resp.json["data"]["attributes"]["unit_name"]).to_equal("count")
+        self.expect(
+            resp.json["data"]["attributes"]["is_calibration_relevant"]
+        ).to_equal(False)
 
         # And ensure that we set the created by id.
         self.expect(
@@ -755,6 +758,7 @@ class TestDeviceParameterServices(BaseTestCase):
                     "description": "some description",
                     "unit_uri": "http://foo/count",
                     "unit_name": "count",
+                    "is_calibration_relevant": True,
                 },
                 "relationships": {
                     "device": {
@@ -774,6 +778,9 @@ class TestDeviceParameterServices(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.expect(resp.status_code).to_equal(201)
+        self.expect(
+            resp.json["data"]["attributes"]["is_calibration_relevant"]
+        ).to_equal(True)
 
     @fixtures.use(["user2", "private_device_of_user1"])
     def test_post_private_other_user(self, user2, private_device_of_user1):

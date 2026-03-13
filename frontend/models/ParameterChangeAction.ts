@@ -176,3 +176,10 @@ export class ParameterChangeAction implements IParameterChangeAction, IDateCompa
     return action
   }
 }
+
+export interface UsedCalibrationParameterChangeActions
+{
+  is_used: boolean
+  action: ParameterChangeAction
+
+}

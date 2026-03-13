@@ -24,6 +24,7 @@ SPDX-License-Identifier: EUPL-1.2
       :attachments="deviceAttachments"
       :measured-quantities="deviceMeasuredQuantities"
       :current-user-contact-id="userInfo.contactId"
+      :used-calibration-parameter-change-actions="usedCalibrationParameterChangeActions"
     />
     <v-card-actions>
       <v-spacer />
@@ -39,14 +40,14 @@ SPDX-License-Identifier: EUPL-1.2
 
 <script lang="ts">
 import { Component, Vue, mixins } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   AddDeviceCalibrationAction,
   LoadAllDeviceActionsAction,
-  DevicesState
+  DevicesState, CalibrationRelevantParametersGetter, AddDeviceParameterChangeActionAction
 } from '@/store/devices'
 
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
@@ -54,6 +55,7 @@ import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
+import { UsedCalibrationParameterChangeActions, ParameterChangeAction } from '@/models/ParameterChangeAction'
 
 @Component({
   middleware: ['auth'],
@@ -63,21 +65,25 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
   },
   computed: {
     ...mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction', 'deviceMeasuredQuantities']),
+    ...mapGetters('devices', ['calibrationRelevantParameters']),
     ...mapState('permissions', ['userInfo'])
   },
   methods: {
-    ...mapActions('devices', ['addDeviceCalibrationAction', 'loadAllDeviceActions']),
+    ...mapActions('devices', ['addDeviceCalibrationAction', 'loadAllDeviceActions', 'addDeviceParameterChangeAction']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class NewDeviceCalibrationAction extends mixins(CheckEditAccess) {
   private deviceCalibrationAction: DeviceCalibrationAction = new DeviceCalibrationAction()
+  private usedCalibrationParameterChangeActions: UsedCalibrationParameterChangeActions[] = []
 
   // vuex definition for typescript check
   deviceAttachments!: DevicesState['deviceAttachments']
   deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
   chosenKindOfDeviceAction!: DevicesState['chosenKindOfDeviceAction']
+  calibrationRelevantParameters!: CalibrationRelevantParametersGetter
   addDeviceCalibrationAction!: AddDeviceCalibrationAction
+  addDeviceParameterChangeAction!: AddDeviceParameterChangeActionAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
   setLoading!: SetLoadingAction
 
@@ -112,10 +118,25 @@ export default class NewDeviceCalibrationAction extends mixins(CheckEditAccess) 
       // In case we have only that we could select, we take that as default.
       this.deviceCalibrationAction.measuredQuantities = [...this.deviceMeasuredQuantities]
     }
+
+    this.initalizeCalibrationParameterChangeActions()
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
+  }
+
+  initalizeCalibrationParameterChangeActions () {
+    for (const parameter of this.calibrationRelevantParameters) {
+      const tmp = new ParameterChangeAction()
+      tmp.parameter = parameter
+      const action = ParameterChangeAction.createFromObject(tmp)
+      const obj = {
+        is_used: true,
+        action
+      }
+      this.usedCalibrationParameterChangeActions.push(obj)
+    }
   }
 
   async save () {
@@ -133,6 +154,10 @@ export default class NewDeviceCalibrationAction extends mixins(CheckEditAccess) 
         deviceId: this.deviceId,
         calibrationAction: this.deviceCalibrationAction
       })
+
+      // save parameter change actions relevant for the calibration
+      await this.saveCalibrationRelevantParameterChangeActions()
+
       this.loadAllDeviceActions(this.deviceId)
       this.$router.push('/devices/' + this.deviceId + '/actions')
       this.$store.commit('snackbar/setSuccess', 'New Calibration Action added')
@@ -142,7 +167,23 @@ export default class NewDeviceCalibrationAction extends mixins(CheckEditAccess) 
       this.setLoading(false)
     }
   }
+
+  async saveCalibrationRelevantParameterChangeActions () {
+    for (const entry of this.usedCalibrationParameterChangeActions) {
+      if (entry.is_used === true && entry.action.parameter && entry.action.parameter.id !== null) {
+        // We'll take the date and the contact of the associated device calibration action
+        entry.action.date = this.deviceCalibrationAction.date
+        entry.action.contact = this.deviceCalibrationAction.contact
+
+        await this.addDeviceParameterChangeAction({
+          parameterId: entry.action.parameter.id,
+          action: entry.action
+        })
+      }
+    }
+  }
 }
+
 </script>
 
 <style scoped>

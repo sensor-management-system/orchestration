@@ -44,6 +44,7 @@ describe('ParameterSerializer', () => {
       expect(model.description).toEqual('Test parameter description')
       expect(model.unitName).toEqual('Test Unit')
       expect(model.unitUri).toEqual('http://www.unit.com/test')
+      expect(model.isCalibrationRelevant).toBeNull()
     })
   })
   describe('#convertJsonApiObjectToModel', () => {
@@ -56,7 +57,8 @@ describe('ParameterSerializer', () => {
             label: 'Test Parameter',
             description: 'Test parameter description',
             unit_name: 'Test Unit',
-            unit_uri: 'http://www.unit.com/test'
+            unit_uri: 'http://www.unit.com/test',
+            is_calibration_relevant: true
           },
           relationships: {}
         },
@@ -71,6 +73,7 @@ describe('ParameterSerializer', () => {
       expect(model.description).toEqual('Test parameter description')
       expect(model.unitName).toEqual('Test Unit')
       expect(model.unitUri).toEqual('http://www.unit.com/test')
+      expect(model.isCalibrationRelevant).toBe(true)
     })
   })
   describe('#convertJsonApiObjectListToModelList', () => {
@@ -84,7 +87,8 @@ describe('ParameterSerializer', () => {
               label: 'Test Parameter 1',
               description: 'Test parameter description one',
               unit_name: 'Test Unit 1',
-              unit_uri: 'http://www.unit.com/test1'
+              unit_uri: 'http://www.unit.com/test1',
+              is_calibration_relevant: false
             },
             relationships: {}
           }, {
@@ -94,7 +98,8 @@ describe('ParameterSerializer', () => {
               label: 'Test Parameter 2',
               description: 'Test parameter description two',
               unit_name: 'Test Unit 2',
-              unit_uri: 'http://www.unit.com/test2'
+              unit_uri: 'http://www.unit.com/test2',
+              is_calibration_relevant: true
             },
             relationships: {}
           }
@@ -111,11 +116,13 @@ describe('ParameterSerializer', () => {
       expect(result[0].description).toEqual('Test parameter description one')
       expect(result[0].unitName).toEqual('Test Unit 1')
       expect(result[0].unitUri).toEqual('http://www.unit.com/test1')
+      expect(result[0].isCalibrationRelevant).toBe(false)
       expect(result[1].id).toEqual('456')
       expect(result[1].label).toEqual('Test Parameter 2')
       expect(result[1].description).toEqual('Test parameter description two')
       expect(result[1].unitName).toEqual('Test Unit 2')
       expect(result[1].unitUri).toEqual('http://www.unit.com/test2')
+      expect(result[1].isCalibrationRelevant).toBe(true)
     })
   })
   describe('#convertJsonApiRelationshipsModelList', () => {
@@ -234,7 +241,8 @@ describe('ParameterSerializer', () => {
         label: 'Test Parameter',
         description: 'This is a test parameter',
         unitName: 'Test Unit',
-        unitUri: 'http://www.unit.com/test'
+        unitUri: 'http://www.unit.com/test',
+        isCalibrationRelevant: false
       })
       const relation: IParameterRelation = {
         entityType: ParameterRelationEntityType.DEVICE,
@@ -260,6 +268,8 @@ describe('ParameterSerializer', () => {
       expect(jsonApiPayload.attributes.unit_name).toEqual('Test Unit')
       expect(jsonApiPayload.attributes).toHaveProperty('unit_uri')
       expect(jsonApiPayload.attributes.unit_uri).toEqual('http://www.unit.com/test')
+      expect(jsonApiPayload.attributes).toHaveProperty('is_calibration_relevant')
+      expect(jsonApiPayload.attributes.is_calibration_relevant).toBe(false)
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('device')
       expect(jsonApiPayload.relationships!.device).toHaveProperty('data')

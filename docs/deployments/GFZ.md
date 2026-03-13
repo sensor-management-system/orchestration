@@ -27,7 +27,7 @@ that is mounted on:
 
 which can be found here as well:
 
-- `rzv124n.gfz-potsdam.de:/PROJECT_124n_1/sms-backup`
+- `rzv344n.gfz-potsdam.de:/PROJECT_344n_1/sms-backup`
 
 The backups on the vms themselves are stored for 30 days,
 the ones on the project share for 180.
@@ -50,7 +50,7 @@ For the minio the restore is different:
 - Start a new mc container with a bash session and mount your backup tar.gz file somewhere in the container file system.
 - Extract all the data in an temporary folder.
 - Register the minio client (`mc alias set`). See the /backup.sh command to check how to do it.
-- Run the `mc mirror` command with our temporary folder as first argument, and your $minio/$bucket as second argument. You should check the
+- Run the `mc mirror` command with our temporary folder as first argument, and your `$minio/$bucket` as second argument. You should check the
   possible flags for this command in order to care about creation dates, over the settings for overwriting existing files
   and the option to also remove entries that are not in the backup.
 - There is currently no strategy to restore the metadata - we save them to keep track of the user uploads (if the user wasn't allowed

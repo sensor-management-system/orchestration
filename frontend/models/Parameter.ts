@@ -19,6 +19,15 @@ export interface IParameter {
   unitUri: string
   unitName: string
 
+  // The calibration relevant flag is only there for the
+  // device parameters, as this is the only entity with
+  // calibration actions.
+  // For those the value will be a boolean. For the other
+  // entities it will be null.
+  // (And we need the extra handling to be able to unset
+  // this flag in the serializer).
+  isCalibrationRelevant: boolean | null
+
   createdAt: DateTime | null
   updatedAt: DateTime | null
 
@@ -35,6 +44,8 @@ export class Parameter implements IParameter {
 
   private _unitUri: string = ''
   private _unitName: string = ''
+
+  private _isCalibationRelevant: boolean | null = null
 
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
@@ -80,6 +91,14 @@ export class Parameter implements IParameter {
 
   set unitName (unitName: string) {
     this._unitName = unitName
+  }
+
+  get isCalibrationRelevant (): boolean | null {
+    return this._isCalibationRelevant
+  }
+
+  set isCalibrationRelevant (isCalibrationRelevant: boolean | null) {
+    this._isCalibationRelevant = isCalibrationRelevant
   }
 
   get createdAt (): DateTime | null {
@@ -130,6 +149,8 @@ export class Parameter implements IParameter {
 
     newObject.unitUri = someObject.unitUri || ''
     newObject.unitName = someObject.unitName || ''
+
+    newObject.isCalibrationRelevant = someObject.isCalibrationRelevant !== undefined ? someObject.isCalibrationRelevant : null
 
     newObject.createdAt = someObject.createdAt || null
     newObject.updatedAt = someObject.updatedAt || null

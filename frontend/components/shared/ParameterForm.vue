@@ -108,6 +108,17 @@ SPDX-License-Identifier: EUPL-1.2
           />
         </v-col>
       </v-row>
+      <v-row v-if="showCalibrationRelevantCheckbox">
+        <v-col cols="12" md="9">
+          <v-checkbox
+            :value="value.isCalibrationRelevant"
+            :readonly="readonly"
+            :disabled="readonly"
+            label="Is calibration relevant"
+            @change="update('isCalibrationRelevant', $event)"
+          />
+        </v-col>
+      </v-row>
     </v-form>
     <unit-dialog
       v-model="showNewUnitDialog"
@@ -189,6 +200,12 @@ export default class ParameterForm extends mixins(Rules) {
   })
   readonly readonly!: boolean
 
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  readonly showCalibrationRelevantCheckbox!: boolean
+
   /**
    * returns the URI of an value
    *
@@ -266,6 +283,10 @@ export default class ParameterForm extends mixins(Rules) {
         break
       case 'description':
         newObj.description = value
+        break
+      case 'isCalibrationRelevant':
+        // value can be a boolean true or null
+        newObj.isCalibrationRelevant = String(value) === 'true'
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')
