@@ -90,6 +90,10 @@ export class ParameterSerializer {
     const description = jsonApiData.attributes?.description || ''
     const unitUri = jsonApiData.attributes?.unit_uri || ''
     const unitName = jsonApiData.attributes?.unit_name || ''
+    let isCalibrationRelevant = null
+    if ([true, false].includes(jsonApiData.attributes?.is_calibration_relevant)) {
+      isCalibrationRelevant = jsonApiData.attributes?.is_calibration_relevant
+    }
     const createdAt = jsonApiData.attributes?.created_at != null ? DateTime.fromISO(jsonApiData.attributes.created_at, { zone: 'UTC' }) : null
     const updatedAt = jsonApiData.attributes?.updated_at != null ? DateTime.fromISO(jsonApiData.attributes.updated_at, { zone: 'UTC' }) : null
 
@@ -113,6 +117,7 @@ export class ParameterSerializer {
       description,
       unitUri,
       unitName,
+      isCalibrationRelevant,
       createdAt,
       updatedAt,
       createdBy,
@@ -211,6 +216,9 @@ export class ParameterSerializer {
           }
         }
       }
+    }
+    if (parameter.isCalibrationRelevant !== null) {
+      data.attributes.is_calibration_relevant = parameter.isCalibrationRelevant
     }
     if (parameter.id) {
       data.id = parameter.id

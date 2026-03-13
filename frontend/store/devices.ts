@@ -128,6 +128,7 @@ export type DeviceFilter = {selectedActionTypes: IOptionsForActionType[], select
 export type FilteredActionsGetter = (filter: DeviceFilter) => DeviceActions
 export type AvailableContactsOfActionsGetter = string[]
 export type AvailableYearsOfActionsGetter = number[]
+export type CalibrationRelevantParametersGetter = Parameter[]
 
 const getters: GetterTree<DevicesState, RootState> = {
   availableContactsOfActions: (_state: DevicesState, getters): string[] => {
@@ -188,6 +189,11 @@ const getters: GetterTree<DevicesState, RootState> = {
       return availability
     }
     return null
+  },
+  calibrationRelevantParameters: (state: DevicesState): Parameter[] => {
+    return state.deviceParameters.filter((param) => {
+      return param.isCalibrationRelevant
+    })
   }
 }
 

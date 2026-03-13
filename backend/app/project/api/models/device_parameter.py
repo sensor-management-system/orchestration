@@ -28,6 +28,7 @@ class DeviceParameter(db.Model, IndirectSearchableMixin, AuditMixin):
     description = db.Column(db.Text, nullable=True)
     unit_uri = db.Column(db.String(256), nullable=True)
     unit_name = db.Column(db.String(256), nullable=True)
+    is_calibration_relevant = db.Column(db.Boolean, default=False)
 
     def to_search_entry(self):
         """Transform to a dict to store into full text search index."""

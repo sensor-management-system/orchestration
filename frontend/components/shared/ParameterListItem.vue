@@ -20,7 +20,7 @@ SPDX-License-Identifier: EUPL-1.2
       {{ title }}
     </template>
     <template
-      v-if="value.description || actions.length"
+      v-if="value.description || value.isCalibrationRelevant || actions.length"
       #expandable
     >
       <v-card-text
@@ -28,6 +28,9 @@ SPDX-License-Identifier: EUPL-1.2
         class="py-2"
       >
         {{ value.description }}
+      </v-card-text>
+      <v-card-text v-if="value.isCalibrationRelevant">
+        <v-checkbox :input-value="true" readonly label="Is calibation relevant" />
       </v-card-text>
       <v-simple-table
         v-if="actions.length"

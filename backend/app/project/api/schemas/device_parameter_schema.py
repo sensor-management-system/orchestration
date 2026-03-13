@@ -25,6 +25,7 @@ class DeviceParameterSchema(Schema):
     description = fields.Str(allow_none=True)
     unit_uri = fields.Str(allow_none=True)
     unit_name = fields.Str(allow_none=True)
+    is_calibration_relevant = fields.Bool(default=False)
 
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)

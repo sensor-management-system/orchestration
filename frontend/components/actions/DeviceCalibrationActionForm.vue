@@ -15,31 +15,63 @@ SPDX-License-Identifier: EUPL-1.2
       <v-row>
         <v-col cols="12" md="6">
           <DateTimePicker
+            :required="true"
+            :rules="[rules.currentCalibrationDate,rules.currentCalibrationDateNotNull]"
             :value="actionCopy.currentCalibrationDate"
             label="Current calibration date"
             placeholder="e.g 2000-01-31 12:00"
-            :required="true"
-            :rules="[rules.currentCalibrationDate,rules.currentCalibrationDateNotNull]"
             @input="setCurrentCalibrationDateAndValidate"
           />
         </v-col>
         <v-col>
           <DateTimePicker
+            :rules="[rules.nextCalibrationDate]"
             :value="actionCopy.nextCalibrationDate"
             label="Next calibration date"
             placeholder="e.g. 2000-01-31 12:00"
-            :rules="[rules.nextCalibrationDate]"
             @input="setNextCalibrationDateAndValidate"
           />
         </v-col>
       </v-row>
     </v-form>
-    <v-row>
+    <v-row v-if="usedCalibrationParameterChangeActions.length > 0">
       <v-col cols="12" md="6">
         <autocomplete-text-input
           :value="actionCopy.formula"
-          label="Formula"
           endpoint="device-calibration-action-formulas"
+          label="Formula"
+          @input="setFormula"
+        />
+      </v-col>
+      <v-col cols="12">
+        Calibration relevant parameters
+      </v-col>
+      <v-col>
+        <v-row v-for="entry in usedCalibrationParameterChangeActions" :key="entry.action.parameter.id">
+          <v-col cols="12" md="3" align-self="center">
+            <v-checkbox
+              v-model="entry.is_used"
+              :label="entry.action.parameter.label + (entry.action.parameter.unitName ? ' (' + entry.action.parameter.unitName + ')' : '')"
+            />
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-text-field
+              v-model="entry.action.value"
+              label="Value"
+              step="any"
+              type="number"
+              @wheel.prevent
+            />
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
+    <v-row v-else>
+      <v-col cols="12" md="6">
+        <autocomplete-text-input
+          :value="actionCopy.formula"
+          endpoint="device-calibration-action-formulas"
+          label="Formula"
           @input="setFormula"
         />
       </v-col>
@@ -47,10 +79,10 @@ SPDX-License-Identifier: EUPL-1.2
         <v-text-field
           :value="actionCopy.value"
           label="Value"
-          type="number"
           step="any"
-          @wheel.prevent
+          type="number"
           @change="setValue"
+          @wheel.prevent
         />
       </v-col>
     </v-row>
@@ -71,12 +103,12 @@ SPDX-License-Identifier: EUPL-1.2
                to the v-select tag.
           -->
           <v-select
+            :item-text="(x) => x.toString()"
+            :items="measuredQuantities"
             :value="actionCopy.measuredQuantities"
-            multiple
             clearable
             label="Affected measured quantities"
-            :items="measuredQuantities"
-            :item-text="(x) => x.toString()"
+            multiple
             return-object
             @input="setMeasuredQuantities"
           />
@@ -85,10 +117,10 @@ SPDX-License-Identifier: EUPL-1.2
     </v-form>
     <CommonActionForm
       ref="commonForm"
-      :value="actionCopy"
       :attachments="attachments"
-      :rules="[rules.contactNotNull]"
       :current-user-contact-id="currentUserContactId"
+      :rules="[rules.contactNotNull]"
+      :value="actionCopy"
       @input="updateCommonFields"
     />
   </div>
@@ -111,6 +143,7 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 import CommonActionForm from '@/components/actions/CommonActionForm.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
+import { UsedCalibrationParameterChangeActions } from '@/models/ParameterChangeAction'
 
 /**
  * A class component for a form for Device calibration actions
@@ -124,15 +157,6 @@ import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue
   }
 })
 export default class DeviceCalibationActionForm extends Vue {
-  private actionCopy: DeviceCalibrationAction = new DeviceCalibrationAction()
-  private rules: Object = {
-    currentCalibrationDate: this.validateInputForCurrentCalibrationDate,
-    currentCalibrationDateNotNull: this.mustBeProvided('Current calibration date'),
-    nextCalibrationDate: this.validateInputForNextCalibrationDate,
-    contactNotNull: this.mustBeProvided('Contact'),
-    measuredQuantitiesNotEmpty: this.measuredQuantitiesNotEmpty
-  }
-
   /**
    * a DeviceCalibrationAction
    */
@@ -162,10 +186,26 @@ export default class DeviceCalibationActionForm extends Vue {
   readonly measuredQuantities!: DeviceProperty[]
 
   @Prop({
+    default: () => [],
+    required: true,
+    type: Array
+  })
+  readonly usedCalibrationParameterChangeActions!: UsedCalibrationParameterChangeActions[]
+
+  @Prop({
     type: String
   })
   // @ts-ignore
   readonly currentUserContactId: string | null
+
+  private actionCopy: DeviceCalibrationAction = new DeviceCalibrationAction()
+  private rules: Object = {
+    currentCalibrationDate: this.validateInputForCurrentCalibrationDate,
+    currentCalibrationDateNotNull: this.mustBeProvided('Current calibration date'),
+    nextCalibrationDate: this.validateInputForNextCalibrationDate,
+    contactNotNull: this.mustBeProvided('Contact'),
+    measuredQuantitiesNotEmpty: this.measuredQuantitiesNotEmpty
+  }
 
   created () {
     this.createActionCopy(this.value)
@@ -215,7 +255,7 @@ export default class DeviceCalibationActionForm extends Vue {
   }
 
   checkValidationOfDates () {
-    return (this.$refs.datesForm as Vue & { validate (): boolean }).validate()
+    return (this.$refs.datesForm as Vue & { validate(): boolean }).validate()
   }
 
   validateInputForCurrentCalibrationDate (): boolean | string {
@@ -277,7 +317,7 @@ export default class DeviceCalibationActionForm extends Vue {
   }
 
   checkValidationOfMeasuredQuantitiesForm () {
-    return (this.$refs.measuredQuanititiesForm as Vue & { validate (): boolean }).validate()
+    return (this.$refs.measuredQuanititiesForm as Vue & { validate(): boolean }).validate()
   }
 
   isValid (): boolean {
