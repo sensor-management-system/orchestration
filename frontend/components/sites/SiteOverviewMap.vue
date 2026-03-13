@@ -172,13 +172,19 @@ export default class SiteOverviewMap extends Vue {
   }
 
   get boundingBox () {
-    const sitegeometries = this.sitesWithGeometry.map((site: Site) => {
-      return site.geometry.map((point: ILatLng) => {
-        return new LatLng(point.lat, point.lng)
-      })
-    }).flat()
-
-    return latLngBounds(sitegeometries)
+    if (this.sitesWithGeometry.length > 0) {
+      const sitegeometries = this.sitesWithGeometry.map((site: Site) => {
+        return site.geometry.map((point: ILatLng) => {
+          return new LatLng(point.lat, point.lng)
+        })
+      }).flat()
+      return latLngBounds(sitegeometries)
+    } else {
+      // In case we don't have any features to show, we go with the current
+      // map state & its bounding box (there is some initialization, so
+      // it is there in any case).
+      return this.mapState.bounds!
+    }
   }
 
   public fitToAllSites () {
