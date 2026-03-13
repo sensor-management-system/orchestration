@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Changed:
 - KIT deployment, staging, B2INST: use <https://b2inst.demo.pid.gwdg.de> instead of the official server ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/663))
+- non used idl component from the deployments removed ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/630))
 
 Fixed:
 - Resolved a FZJ staging deployment issue with the defined docker networks ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/650))

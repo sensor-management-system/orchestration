@@ -25,58 +25,6 @@ services:
         networks:
             - sms
 
-    # idl:
-    #     image: "registry.hzdr.de/hub-terra/sms/gfz-idl/backend:latest"
-    #     container_name: idl
-    #     restart: unless-stopped
-    #     # expose:
-    #     #     - "8000"
-    #     environment:
-    #         DJANGO_DEBUG: "true"
-    #         DJANGO_ALLOWED_HOSTS: "https://sms.atmohub.kit.edu backend idl"
-    #         DJANGO_BASE_PATH: idl/
-    #         DJANGO_STATIC_URL: /static/idl/
-    #         DJANGO_STATIC_ROOT: /static/idl/
-    #         DJANGO_DB_ENGINE: django.db.backends.postgresql
-    #         DJANGO_DB_NAME: idl
-    #         DJANGO_DB_USER: ${IDL_DB_USER}
-    #         DJANGO_DB_PASSWORD: ${IDL_DB_PASSWORD}
-    #         DJANGO_DB_HOST: idl-db
-    #         DJANGO_DB_PORT: 5432
-    #         IDL_TOKEN: ${SMS_IDL_TOKEN}
-    #         OIDC_WELL_KNOWN_URL: https://login.helmholtz.de/oauth2/.well-known/openid-configuration
-    #         VO_ADMIN_CONVENTIONS: ${VO_ADMIN_CONVENTIONS:-'*:kit-sms-admin'}
-    #         VO_MEMBER_CONVENTIONS: ${VO_MEMBER_CONVENTIONS:-'kit:*,*:kit-sms-member'}
-    #     volumes:
-    #         - "idl-static-files:/static/idl"
-    #     networks:
-    #         - sms
-    #     depends_on:
-    #         idl-db:
-    #             condition: service_healthy
-    #
-    # idl-db:
-    #     # TODO : KIT uses older version; main is on 14.1 - can/should this be upgraded?
-    #     image: postgres:12-alpine
-    #     container_name: sms_idl_db
-    #     restart: unless-stopped
-    #     # ports:
-    #     #     - "5432:5432"
-    #     environment:
-    #         POSTGRES_PASSWORD: ${IDL_DB_PASSWORD}
-    #         POSTGRES_USER: ${IDL_DB_USER}
-    #         POSTGRES_DB: idl
-    #     volumes:
-    #         - "idl-db-data:/var/lib/postgresql/data"
-    #     shm_size: 128M
-    #     networks:
-    #         - sms
-    #     healthcheck:
-    #         test: ["CMD-SHELL", "pg_isready -U ${IDL_DB_USER}"]
-    #         interval: 30s
-    #         timeout: 5s
-    #         retries: 5
-
     backend:
         image: python:3.11-slim-bookworm
         restart: unless-stopped
@@ -103,8 +51,6 @@ services:
             MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
             DOWNLOAD_ENDPOINT: ${DOWNLOAD_ENDPOINT:-https://localhost.localdomain}
             ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES:-application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed}
-            # IDL_URL: ${IDL_URL}
-            # SMS_IDL_TOKEN: ${SMS_IDL_TOKEN}
             CV_URL: ${CV_URL}
             INSTITUTE: ${INSTITUTE:-kit}
             PKCE_SCOPES: ${NUXT_ENV_SCOPE:-openid profile eduperson_principal_name email offline_access}
@@ -201,7 +147,6 @@ services:
             NUXT_ENV_OIDC_LOGIN_PARAMS: ${NUXT_ENV_OIDC_LOGIN_PARAMS}
             NUXT_ENV_PID_BASE_URL: ${NUXT_ENV_PID_BASE_URL}
             INSTITUTE: ${INSTITUTE:-kit}
-            # IDL_SYNC_URL: ${IDL_SYNC_URL}
             NUXT_ENV_MAINTENANCE_DOCUMENT_URL: https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-kit-staging.md
         volumes:
             - "${SMS_BASEPATH}/orchestration/frontend/:/home/node/"
@@ -264,10 +209,7 @@ services:
             - "${SMS_BASEPATH}/orchestration/frontend/dist:/etc/nginx/html"
             - "${SMS_BASEPATH}/orchestration/backend/app/project/static:/usr/share/nginx/html/static/backend:ro"
             - "static-files:/usr/share/nginx/html/static/cv:ro"
-            # - "idl-static-files:/usr/share/nginx/html/static/idl:ro"
         depends_on:
-            # - keycloak
-            # - idl
             - frontend
             - minio
             - backend
@@ -367,18 +309,6 @@ volumes:
             type: none
             o: bind
             device: ${SMS_BASEPATH}/volumes/static-files
-    # idl-static-files:
-    #     driver: local
-    #     driver_opts:
-    #         type: none
-    #         o: bind
-    #         device: ${SMS_BASEPATH}/volumes/idl-static-files
-    # idl-db-data:
-    #     driver: local
-    #     driver_opts:
-    #         type: none
-    #         o: bind
-    #         device: ${SMS_BASEPATH}/volumes/idl-db-data
     db-data:
         driver: local
         driver_opts:
