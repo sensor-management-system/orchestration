@@ -55,7 +55,6 @@ services:
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
       DOWNLOAD_ENDPOINT: ${DOWNLOAD_ENDPOINT:-http://localhost}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES:-application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed}
-      IDL_URL: ${IDL_URL:-http://idl:8000/idl/api/idl}
       SMS_IDL_TOKEN: ${SMS_IDL_TOKEN:-x214-gdfg-dfge-r34s-cvg8-7999}
       CV_URL: ${CV_URL:-http://localhost/cv/api/v1}
       CV_URL_BACKEND_ACCESS: http://vocabulary:8000/${CV_BASE_URL:-cv/}api/v1
@@ -173,7 +172,6 @@ services:
       NUXT_ENV_OIDC_LOGIN_PARAMS: "${NUXT_ENV_OIDC_LOGIN_PARAMS:-{\"params\": {\"prompt\": \"consent\"}}}"
       NUXT_ENV_PID_BASE_URL: ${NUXT_ENV_PID_BASE_URL:-https://hdl.handle.net}
       INSTITUTE: ${INSTITUTE:-ufz}
-      IDL_SYNC_URL: ${IDL_SYNC_URL:-http://localhost/idl/api/hifis/sync-groups/}
       SHOW_RELEASE_NOTES: ${SHOW_RELEASE_NOTES:-true}
       NUXT_ENV_MAINTENANCE_DOCUMENT_URL: ${NUXT_ENV_MAINTENANCE_DOCUMENT_URL:-https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-dev.md}
 
@@ -240,10 +238,8 @@ services:
       - ./frontend/dist:/etc/nginx/html
       - static-files:/usr/share/nginx/html/static/cv:ro
       - ./backend/app/project/static:/usr/share/nginx/html/static/backend:ro
-      - idl-static-files:/usr/share/nginx/html/static/idl:ro
     depends_on:
       - keycloak
-      - idl
       - frontend
       - minio
       - vocabulary
@@ -352,56 +348,6 @@ services:
     volumes:
       - "keycloak-data:/var/lib/postgresql/data/"
   
-  idl:
-    image: "registry.hzdr.de/hub-terra/sms/gfz-idl/backend:latest"
-    container_name: idl
-    networks:
-      - sms
-    environment:
-      DJANGO_DEBUG: "${IDL_DJANGO_DEBUG:-1}"
-      DJANGO_ALLOWED_HOSTS: "${IDL_DJANGO_ALLOWED_HOSTS:-idl localhost}"
-      IDL_TOKEN: "${IDL_TOKEN:-x214-gdfg-dfge-r34s-cvg8-7999}"
-      OIDC_WELL_KNOWN_URL: "${WELL_KNOWN_URL_BACKEND:-http://nginx/keycloak/realms/local-dev/.well-known/openid-configuration}"
-      VO_ADMIN_CONVENTIONS: "${VO_ADMIN_CONVENTIONS:-*:admin}"
-      VO_MEMBER_CONVENTIONS: "${VO_MEMBER_CONVENTIONS:-*:member}"
-      DJANGO_DB_ENGINE: "${IDL_DJANGO_DB_ENGINE:-django.db.backends.postgresql}"
-      DJANGO_DB_NAME: "${IDL_DJANGO_DB_NAME:-postgres}"
-      DJANGO_DB_USER: "${IDL_DJANGO_DB_USER:-postgres}"
-      DJANGO_DB_PASSWORD: "${IDL_DJANGO_DB_PASSWORD:-postgres}"
-      DJANGO_DB_HOST: "${IDL_DJANGO_DB_HOST:-sms_idl_db}"
-      DJANGO_DB_PORT: "${IDL_DJANGO_DB_PORT:-5432}"
-      DJANGO_STATIC_ROOT: ${IDL_DJANGO_STATIC_ROOT:-/static/idl/}
-      DJANGO_STATIC_URL: ${IDL_DJANGO_STATIC_URL:-/static/idl/}
-      DJANGO_BASE_PATH: ${IDL_DJANGO_BASE_PATH:-idl/}
-      DJANGO_CSRF_TRUSTED_ORIGINS: "${IDL_DJANGO_CSRF_TRUSTED_ORIGINS:-http://idl http://localhost}"
-    volumes:
-      - idl-static-files:/static/idl
-    depends_on:
-      idl-db:
-        condition: service_healthy
-      
-  idl-db:
-    image: postgres:14.1-alpine3.14
-    container_name: sms_idl_db
-    networks:
-      - sms
-    logging:
-      driver: json-file
-      options:
-        max-size: 50m
-    environment:
-      POSTGRES_PASSWORD: "${IDL_DB_POSTGRES_NAME:-postgres}"
-      POSTGRES_USER: "${IDL_DB_POSTGRES_USER:-postgres}"
-      POSTGRES_DB: "${IDL_DB_POSTGRES_PASSWORD:-postgres}"
-    volumes:
-      - "idl_dev_db_data:/var/lib/postgresql/data"
-    shm_size: 128M
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${IDL_DB_POSTGRES_USER:-postgres}" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  
   tsmdl:
     image: "registry.hzdr.de/hub-terra/sms/tsmdl-mock:latest"
     networks:
@@ -412,9 +358,7 @@ volumes:
     driver: local
   minio-data: {}
   static-files: {}
-  idl_dev_db_data: {}
   keycloak-data:
-  idl-static-files: {}
   mq-config: {}
   mq-data: {}
 
