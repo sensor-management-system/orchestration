@@ -44,7 +44,7 @@ and customization possibilities due to the use of common standards.
 
 - [Nils Brinckmann](https://orcid.org/0000-0001-8159-3888)
 - Kotyba Alhaj Taha
-- Tobias Kuhnert
+- [Tobias Kuhnert](https://orcid.org/0009-0002-3854-3417)
 - [Marc Hanisch](https://orcid.org/0000-0001-5272-4674)
 - Maximilian Schaldach
 - Florian Gransee
@@ -77,11 +77,17 @@ on GitHub.
 In case you have problems or questions, please use https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/issues/new
 to create an issue.
 
+The development is done via feature branches that are merged into the main branches once they are reviewed by another developer. All merge requests need to provide an entry in the CHANGELOG.md file.
+
+All changes in the main branch are automatically deployed on a staging server, so that we can see if everything is ready to be released.
+
+Releases are done by setting tags on the main branch.
+
 ## Used By
 
 This project is used by the following research centers:
 
-- GFZ Potsdam: https://sensors.gfz-potsdam.de
+- GFZ: https://sensors.gfz.de
 - UFZ Leipzig: https://web.app.ufz.de/sms/
 - Karlsruhe Institute of Technology: https://sms.atmohub.kit.edu/
 - Research Centre Jülich: https://sms.earth-data.fz-juelich.de/
@@ -133,7 +139,7 @@ For more advanced institute specific information, please take a look [here](docs
 ## Demo
 
 If you just want to try out the Sensor Management System, you are welcome to do
-so on [our test instance](https://sensors-sandbox.gfz-potsdam.de).
+so on [our test instance](https://sensors-sandbox.gfz.de).
 
 ⚠️ Please be aware that the data you enter there will not be stored permanently
 and the instance should not be used for productive work!
@@ -141,7 +147,7 @@ and the instance should not be used for productive work!
 ## API Reference
 
 The OpenAPI specification can be explored interactively on the SMS instances.
-For example on [sensors.gfz-potsdam.de](https://sensors.gfz-potsdam.de/backend/api/v1/openapi).
+For example on [sensors.gfz.de](https://sensors.gfz.de/backend/api/v1/openapi).
 
 ## Environment Variables
 
@@ -159,6 +165,20 @@ and re-start the container using
 docker compose --env-file ./docker/env.dev  up -d
 ```
 
+## Persistent identifiers
+
+The SMS allows to the users to get persistent identifiers for their devices, platforms,
+configurations and sites.
+
+For devices, platforms and configurations we use the [B2INST](https://b2inst.gwdg.de).
+We send PIDINST metadata, register those in the system and get a persistent identifier
+in return.
+
+Every change in the SMS on instruments published in the B2INST will be updated
+automatically.
+
+Please note that the metadata in the B2INST is completely public.
+
 ## User documentation
 
 In the [wiki](https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/home)
@@ -167,34 +187,41 @@ of the different pages and some best practices.
 
 ## FAQ
 
-### What is the connection between the user subject and the username from the IDL?
+### How is the group management done?
 
-We use the users subject entry as a user readable unque identifier for our
-users. It looks like
+Group management happens on side of the identity provider. For the productive
+usages in the helmholtz centers we usually use the Helmholtz ID.
+They provide group management features with virtual organizations or resource
+capabilities.
+Both of them work similar, that they provide an entry in the
+eduperson_entitlement attribute of the user information.
+Those entries are used as permission groups in the SMS.
 
-```
-username@institute.org
-```
+The virtual organizations are meant to represent a project that might be used
+in various applications. You can think about having a measuring campaign and you
+use a nextcloud folder, the SMS and some kind of time seires management system.
+All of those applications could use the same virtual organization, so that
+the management of adding the members only needs to be done once.
+Virtual organizations are usally managed on the user side.
 
-In past it was identical to the `sub` entry in the userinfo response of
-the IDP instances (both at UFZ and GFZ).
+In contrast resource capabilities are meant to be managed by the providers
+of a service. They might add users and move them around into sub groups.
+A use case for this is to give a group of users the permissions to use an instance
+of the SMS for example.
 
-With the switch to the Helmholtz AAI, this changed.
-We introducted the `OIDC_USERNAME_CLAIM` environment variable for the backend
-(default to `sub`) to make it configurable from which attribute of the user
-response we want to fill our subject entry in the user table.
+The SMS supports both kind of groups.
 
-The Helmholtz AAI fills `sub` with cryptic uuid, which is unique, but not
-user friendly readable. However it gives the `eduperson_principal_name`
-which is exactly what we used for subject in the past.
 
-In any case the interaction with the IDL will use the subject from our
-users table to search for usernames within the IDL.
-So both should be identical.
+### What is export control?
 
-In case you want to use the `gfz-idl` implementation, as well as the
-Helmholtz AAI, make sure that you set the `OIDC_USERNAME_CLAIM` variable
-to `eduperson_principal_name`.
+Export control related information are there to have all the information needed to send devices to remote locations in other countries.
+
+For example there are regulations that forbid to use of devices with parts of from the US to be used in Cuba.
+
+Special care is needed for devices that can be used for military usage (mostly refered as
+"Dual use").
+
+At GFZ there are collegues that must take care of this categorization: sensor-management-system-export-control@gfz.de
 
 ## Appendix
 
@@ -255,3 +282,9 @@ used in the `EXPORT_CONTROL_VO_LIST` variable.
 ## How to cite
 
 > Brinckmann, N., Alhaj Taha, K., Kuhnert, T., Abbrent, M., Becker, W., Bohring, H., Breier, J., Bumberger, J., Ecker, D., Eder, T., Gransee, F., Hanisch, M., Lorenz, C., Moorthy, R., Nendel, L. J., Pongratz, E., Remmler, P., Rosin, V., Schaeffer, M., … Ziegner, N. (2024). Sensor Management System - SMS (1.16.1). Zenodo. [https://doi.org/10.5281/zenodo.13329926](https://doi.org/10.5281/zenodo.13329926)
+
+## See also
+
+- [sms_interface](https://codebase.helmholtz.cloud/aida/sms_interface)
+- [MaTS](https://codebase.helmholtz.cloud/hub-terra/mats)
+- [B2INST API](https://docs.eudat.eu/b2inst/v3-rest/overview/)
