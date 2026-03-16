@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Added:
 - Option to flag parameters as calibration relevant to allow the user to set those faster when creating a calibration action ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/642))
+- Configured FZJ S3 bucket for the sms-attachments ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/668))
 
 Changed:
 - KIT deployment, staging, B2INST: use <https://b2inst.demo.pid.gwdg.de> instead of the official server ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/663))
