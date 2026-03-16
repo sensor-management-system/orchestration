@@ -1,11 +1,39 @@
-# SPDX-FileCopyrightText: 2025 Hannes Bohring <hannes.bohring@ufz.de>
-# SPDX-FileCopyrightText: 2025 Helmholtz Centre for Environmental Research GmbH - UFZ
+# SPDX-FileCopyrightText: 2026 Hannes Bohring <hannes.bohring@ufz.de>
+# SPDX-FileCopyrightText: 2026 Helmholtz Centre for Environmental Research GmbH - UFZ
 #
 # SPDX-License-Identifier: EUPL-1.2
 
 sms:
 
   sms-backend:
+    enabled: true
+
+    imagePullSecrets:
+      - name: custom-rdm-sms.docker-registry
+
+    ingress:
+      enabled: true
+      className: "nginx"
+      annotations:
+        cert-manager.io/cluster-issuer: "cert-manager-acme"
+        cert-manager.io/private-key-algorithm: "ECDSA"
+        cert-manager.io/private-key-size: "384"
+        cert-manager.io/private-key-rotation-policy: "Always"
+        nginx.ingress.kubernetes.io/enable-cors: "false"
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          add_header 'X-Content-Type-Options' 'nosniff' always;
+          add_header 'Content-Security-Policy' "default-src 'self'; script-src 'self' 'unsafe-inline'; img-src * data: ; style-src 'self' 'unsafe-inline' * ; font-src 'self' *; frame-src 'self' *.ufz.de ; child-src 'self' *.ufz.de ; object-src 'none' ; frame-ancestors 'self' http://*.ufz.de https://*.ufz.de ;connect-src https://*.ufz.de ;" always;
+          add_header 'X-XSS-Protection' '1';
+      hosts:
+        - host: "web-intern-stage.app.ufz.de"
+          paths:
+            - path: /sms/backend/
+              pathType: Prefix
+      tls:
+        - secretName: "web-intern-stage-app-ufz-de"
+          hosts:
+            - "web-intern-stage.app.ufz.de"
+
     nginx:
       image:
         tag: "ufz-backend-1.25.0"
@@ -13,12 +41,118 @@ sms:
     backend:
       image:
         tag: "ufz-staging-1.25.0"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ "ALL" ]
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          seccompProfile:
+            type: RuntimeDefault
+      environmentVariables:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: custom-rdm-sms-backend
+              key: DATABASE_URL_ADM
+        - name: OIDC_CLIENT_ID
+          value: ufz-sms
+        - name: MINIO_ACCESS_KEY
+          value: 'AKIA8ZP9W4RG6GYPCTKXM'
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: custom-rdm-sms-backend
+              key: MINIO_SECRET_KEY
+        - name: MINIO_ENDPOINT
+          value: 'vip.s3.ufz.de'
+        - name: MINIO_BUCKET_NAME
+          value: 'sms-stage'
+        - name: DOWNLOAD_ENDPOINT
+          value: 'https://vip.s3.ufz.de'
+        - name: ELASTICSEARCH_URL
+          #        value: "https://web-intern-stage.app.ufz.de:443/sms/elasticsearch/"
+          value: "http://custom-rdm-sms-stage-elasticsearch.custom-rdm-sms.svc.cluster.local:9200/"
+        - name: HTTP_ORIGINS
+          value: 'https://web-intern-stage.app.ufz.de'
+        - name: CV_URL
+          #          value: 'https://sms-cv.helmholtz.cloud/sms/cv/api/v1'
+          value: 'https://web-intern-stage.app.ufz.de/sms/cv/api/v1'
+        - name: SMS_FRONTEND_URL
+          value: 'https://web-intern-stage.app.ufz.de/sms'
+        - name: SMS_BACKEND_URL
+          value: 'https://web-intern-stage.app.ufz.de/sms/backend/api/v1'
+        - name: B2INST_URL
+          value: 'https://b2inst.demo.pid.gwdg.de'
+        - name: B2INST_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: custom-rdm-sms-backend
+              key: B2INST_TOKEN
+        - name: PID_SERVICE_USER
+          value: "300%3A20.500.14372/SMS"
+        - name: PID_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: custom-rdm-sms-backend
+              key: PID_SERVICE_PASSWORD
+
+  elasticsearch:
+    local:
+      enabled: true
+    global:
+      security:
+        allowInsecureImages: true
+    master:
+      masterOnly: false
+      replicaCount: 1
+      resourcesPreset: none
+      persistence:
+        enabled: true
+        storageClass: "tanzu-storage-policy-raid5-ftt1"
+        #        existingClaim: ""
+        #        existingVolume: ""
+        size: 1Gi
+    data:
+      replicaCount: 0
+    coordinating:
+      replicaCount: 0
+    ingest:
+      replicaCount: 0
 
   sms-frontend:
     enabled: true
     image:
       repository: "registry.hzdr.de/hub-terra/sms/orchestration/generic-frontend"
       tag: "1.25.0"
+
+    imagePullSecrets:
+      - name: custom-rdm-sms.docker-registry
+
+    ingress:
+      enabled: true
+      className: "nginx"
+      annotations:
+        cert-manager.io/cluster-issuer: "cert-manager-acme"
+        cert-manager.io/private-key-algorithm: "ECDSA"
+        cert-manager.io/private-key-size: "384"
+        cert-manager.io/private-key-rotation-policy: "Always"
+        nginx.ingress.kubernetes.io/enable-cors: "false"
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          add_header 'X-Content-Type-Options' 'nosniff' always;
+          add_header 'Content-Security-Policy' "default-src 'self' https://*.ufz.de https://login.helmholtz.de https://sms-cv.helmholtz.cloud; script-src 'self' 'unsafe-inline' 'unsafe-eval' ; img-src 'self' blob: data: https://*.osm.org ; style-src 'self' 'unsafe-inline' * ; font-src 'self' *; frame-src 'self' *.ufz.de ; child-src 'self' *.ufz.de ; object-src 'none' ; frame-ancestors 'self' http://*.ufz.de https://*.ufz.de ;" always;
+          add_header 'X-XSS-Protection' '1';
+      hosts:
+        - host: "web-intern-stage.app.ufz.de"
+          paths:
+            - path: /sms/
+              pathType: Prefix
+      tls:
+        - secretName: web-intern-stage-app-ufz-de
+          hosts:
+            - "web-intern-stage.app.ufz.de"
+
     environmentVariables:
       - name: BASE_URL_ENV_PLACEHOLDER
         value: /sms
@@ -79,6 +213,7 @@ sms:
   
   sms-cv:
     enabled: true
+
     cv:
       enabled: true
       image:
@@ -141,6 +276,8 @@ sms:
     enabled: true
     fullnameOverride: "sms-cv-db"
     global:
+      security:
+        allowInsecureImages: true
       postgresql:
         auth:
           username: "sms-cv"
@@ -153,6 +290,9 @@ sms:
   
   # dont deploy IDL - Stage-SMS uses Prod-IDL
   sms-idl:
+    enabled: false
+
+  sms-idl-db:
     enabled: false
 
   # dont deploy local backend DB (central Postgres is used)
