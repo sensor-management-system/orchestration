@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.26.1 (Unreleased)
 
+Fixed:
+- Resolved the s3 bucket issue for FZJ with secured protocol ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/670))
+
 ## 1.26.0 - 2026-03-17
 
 Added:
