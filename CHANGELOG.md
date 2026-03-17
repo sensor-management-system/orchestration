@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.26.0 (Unreleased)
+## 1.26.1 (Unreleased)
+
+## 1.26.0 - 2026-03-17
 
 Added:
 - Option to flag parameters as calibration relevant to allow the user to set those faster when creating a calibration action ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/642))
