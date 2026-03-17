@@ -96,7 +96,7 @@ services:
       MINIO_ACCESS_KEY: ${FZJ_S3_ACCESS_KEY}
       MINIO_SECRET_KEY: ${FZJ_S3_SECRET_KEY}
       MINIO_BUCKET_NAME: sms-attachments
-      MINIO_ENDPOINT: s3.fz-juelich.de:443
+      MINIO_ENDPOINT: ${FZJ_S3_ENDPOINT}
       DOWNLOAD_ENDPOINT: https://sms-staging.ibg3jucloud-intern.ibg.kfa-juelich.de
       SECRET_KEY: ${BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
