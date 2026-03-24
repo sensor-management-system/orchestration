@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 # KIT STAGING
+
 services:
     elastic-search:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.17.28
@@ -20,8 +21,6 @@ services:
                 hard: -1
         volumes:
             - "esdata01:/usr/share/elasticsearch/data"
-        # ports:
-        #     - 9200:9200
         networks:
             - sms
 
@@ -95,7 +94,6 @@ services:
             OIDC_TOKEN_ENDPOINT_FOR_FRONTEND: ${OIDC_TOKEN_ENDPOINT_FOR_FRONTEND:-http://localhost/keycloak/realms/local-dev/protocol/openid-connect/token}
         depends_on:
             - db
-            # - keycloak
         entrypoint: /usr/src/app/entrypoint-dev.sh
         networks:
             - sms
@@ -103,8 +101,6 @@ services:
     db:
         image: postgis/postgis:12-3.3-alpine
         container_name: sms_db
-        # ports:
-        #     - "5433:5433"
         environment:
             POSTGRES_USER: ${POSTGRES_USER:-postgres}
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -122,8 +118,6 @@ services:
         user: "node"
         networks:
             - sms
-        # ports:
-        #     - 3000:3000
         environment:
             SMS_VERSION: ${SMS_VERSION:-develop}
             BASE_URL: ${BASE_URL:-/}
@@ -158,9 +152,6 @@ services:
         container_name: sms_minio
         volumes:
             - "minio-data:/data/minio"
-        # ports:
-        #     - 9000:9000
-        #     - 9001:9001
         networks:
             - sms
         environment:
@@ -213,82 +204,6 @@ services:
             - frontend
             - minio
             - backend
-
-    # tsmdl:
-    #     image: "registry.hzdr.de/hub-terra/sms/tsmdl-mock:latest"
-    #     networks:
-    #         - sms
-
-    # vocabulary:
-    #     image: python:3.11-alpine
-    #     container_name: sms_cv
-    #     working_dir: /usr/cv/app
-    #     volumes:
-    #         - "${SMS_BASEPATH}/orchestration/sms-cv/src:/usr/cv/app"
-    #         - "static-files:/static/cv"
-    #     ports:
-    #         - 8000:8000
-    #     environment:
-    #     CV_BASE_URL: ${CV_BASE_URL:-cv/}
-    #     STATIC_URL: ${CV_STATIC_URL:-/static/cv/}
-    #     STATIC_ROOT: ${CV_STATIC_ROOT:-/static/cv/}
-    #     DEBUG: ${DEBUG:-1}
-    #     SECRET_KEY: ${SECRET_KEY:-TopSecret}
-    #     SQL_ENGINE: ${SQL_ENGINE:-django.db.backends.postgresql_psycopg2}
-    #     SQL_DATABASE: ${SQL_DATABASE:-postgres}
-    #     SQL_USER: ${SQL_USER:-postgres}
-    #     SQL_PASSWORD: ${SQL_PASSWORD:-postgres}
-    #     SQL_HOST: ${SQL_HOST:-db}
-    #     SQL_PORT: ${SQL_PORT:-5433}
-    #     CORS_ORIGIN_WHITELIST: ${CORS_ORIGIN_WHITELIST:-http://localhost}
-    #     EMAIL_HOST: ${EMAIL_HOST:-}
-    #     OIDC_WELL_KNOWN_URLS: "${WELL_KNOWN_URLS_CV:-http://nginx/keycloak/realms/local-dev/.well-known/openid-configuration}"
-    #     entrypoint: ${SMS_BASEPATH}/orchestration/entrypoint-dev.sh
-    #     networks:
-    #         - sms
-    #     depends_on:
-    #         - db
-
-    # keycloak:
-    #   image: "quay.io/keycloak/keycloak:24.0.3"
-    #   container_name: sms_keycloak
-    #   expose:
-    #     - "${KEYCLOAK_PORT:-8080}"
-    #   user: "${KEYCLOAK_UID:-1000}:${KEYCLOAK_GID:-1000}"
-    #   networks:
-    #     - sms
-    #   environment:
-    #     KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
-    #     KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
-    #     KC_DB: ${KC_DB:-postgres}
-    #     KC_DB_URL_DATABASE: ${KC_DB_URL_DATABASE:-keycloak}
-    #     KC_DB_SCHEMA: ${KC_DB_SCHEMA:-public}
-    #     KC_DB_URL: ${KC_DB_URL:-jdbc:postgresql://keycloak-db/keycloak}
-    #     KC_DB_USERNAME: ${KC_DB_USERNAME:-keycloak}
-    #     KC_DB_PASSWORD: ${KC_DB_PASSWORD:-password}
-    #     KC_HTTP_RELATIVE_PATH: ${KC_HTTP_RELATIVE_PATH:-/keycloak}
-    #     KC_PROXY_HEADERS: ${KC_PROXY_HEADERS:-xforwarded}
-    #     KC_HOSTNAME_STRICT: ${KC_HOSTNAME_STRICT:-false}
-    #     KC_HOSTNAME_URL: ${KC_HOSTNAME_URL:-http://localhost/keycloak}
-    #   volumes:
-    #     - "${SMS_BASEPATH}/orchestration/keycloak/keycloak-init.json:/opt/keycloak/data/import/keycloak-init.json"
-    #   command:
-    #     - start-dev
-    #     - --import-realm
-    #     - --http-port=${KEYCLOAK_PORT:-8080}
-    #   depends_on:
-    #     - keycloak-db
-    #
-    # keycloak-db:
-    #   image: "postgres:14-alpine"
-    #   environment:
-    #     POSTGRES_DB: ${KEYCLOAK_DB_POSTGRES_DB:-keycloak}
-    #     POSTGRES_USER: ${KEYCLOAK_DB_POSTGRES_USER:-keycloak}
-    #     POSTGRES_PASSWORD: ${KEYCLOAK_DB_POSTGRES_PASSWORD:-password}
-    #   networks:
-    #     - sms
-    #   volumes:
-    #     - "keycloak-data:/var/lib/postgresql/data/"
 
 volumes:
     esdata01:
