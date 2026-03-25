@@ -1,0 +1,15 @@
+## SPDX-FileCopyrightText: 2026 Hannes Bohring <hannes.bohring@ufz.de>
+## SPDX-FileCopyrightText: 2026 Helmholtz Centre for Environmental Research GmbH - UFZ
+##
+## SPDX-License-Identifier: EUPL-1.2
+
+apiVersion: v2
+name: sms-prod
+description: Umbrella-Chart for SMS-Prod
+version: 0.3.0
+
+dependencies:
+- name: sms
+  version: "0.3.0"
+  repository: "https://codebase.helmholtz.cloud/api/v4/projects/7722/packages/helm/stable"
+  alias: "sms"

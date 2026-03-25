@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 Hannes Bohring <hannes.bohring@ufz.de>
+# SPDX-FileCopyrightText: 2026 Helmholtz Centre for Environmental Research GmbH - UFZ
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt-production
+  namespace: custom-rdm-sms
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: sms-administration@ufz.de
+    privateKeySecretRef:
+      name: letsencrypt-production
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: haproxy
