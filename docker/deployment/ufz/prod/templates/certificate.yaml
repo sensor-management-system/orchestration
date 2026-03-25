@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 Hannes Bohring <hannes.bohring@ufz.de>
+# SPDX-FileCopyrightText: 2026 Helmholtz Centre for Environmental Research GmbH - UFZ
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+{{/*apiVersion: cert-manager.io/v1*/}}
+{{/*kind: Certificate*/}}
+{{/*metadata:*/}}
+{{/*  name: sms-cv.helmholtz.cloud*/}}
+{{/*  namespace: custom-rdm-sms*/}}
+{{/*spec:*/}}
+{{/*  secretName: sms-cv-helmholtz-cloud-tls*/}}
+{{/*  issuerRef:*/}}
+{{/*    name: letsencrypt-production*/}}
+{{/*  dnsNames:*/}}
+{{/*    - sms-cv.helmholtz.cloud*/}}
