@@ -1,26 +1,157 @@
-# SPDX-FileCopyrightText: 2024 Hannes Bohring <hannes.bohring@ufz.de>
-# SPDX-FileCopyrightText: 2024 Helmholtz Centre for Environmental Research GmbH - UFZ
-#
-# SPDX-License-Identifier: EUPL-1.2
+## SPDX-FileCopyrightText: 2026 Hannes Bohring <hannes.bohring@ufz.de>
+## SPDX-FileCopyrightText: 2026 Helmholtz Centre for Environmental Research GmbH - UFZ
+##
+## SPDX-License-Identifier: EUPL-1.2
 
 sms:
 
   sms-backend:
     enabled: true
 
+    imagePullSecrets:
+      - name: custom-rdm-sms.docker-registry
+
+    ingress:
+      enabled: true
+      className: "haproxy"
+      annotations:
+        cert-manager.io/cluster-issuer: "cert-manager-acme"
+        cert-manager.io/private-key-algorithm: "ECDSA"
+        cert-manager.io/private-key-size: "384"
+        cert-manager.io/private-key-rotation-policy: "Always"
+        haproxy-ingress.github.io/config-backend: |
+          http-response set-header 'X-Content-Type-Options' 'nosniff';
+          http-response set-header 'Content-Security-Policy' "default-src 'self'; script-src 'self' 'unsafe-inline'; img-src * data: ; style-src 'self' 'unsafe-inline' * ; font-src 'self' *; frame-src 'self' *.ufz.de ; child-src 'self' *.ufz.de ; object-src 'none' ; frame-ancestors 'self' https://*.ufz.de ;connect-src https://*.ufz.de ;";
+
+      hosts:
+        - host: "web.app.ufz.de"
+          paths:
+            - path: /sms/backend
+              pathType: Prefix
+      tls:
+        - secretName: "web-app-ufz-de"
+          hosts:
+            - "web.app.ufz.de"
+
     nginx:
       image:
         tag: "ufz-backend-1.26.0"
+        securityContext: {}
 
     backend:
       image:
         tag: "ufz-prod-1.26.0"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ "ALL" ]
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          seccompProfile:
+            type: RuntimeDefault
+      environmentVariables:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: custom-rdm-sms-backend
+              key: DATABASE_URL_ADM
+        - name: OIDC_CLIENT_ID
+          value: ufz-sms
+        - name: MINIO_ACCESS_KEY
+          value: 'AKIARSTR9Q8148V3Q0RCH'
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: custom-rdm-sms-backend
+              key: MINIO_SECRET_KEY
+        - name: MINIO_ENDPOINT
+          value: 'vip.s3.ufz.de'
+        - name: MINIO_BUCKET_NAME
+          value: 'sms-prod'
+        - name: DOWNLOAD_ENDPOINT
+          value: 'https://vip.s3.ufz.de'      
+        - name: ELASTICSEARCH_URL
+          value: "http://custom-rdm-sms-prod-elasticsearch.custom-rdm-sms.svc.cluster.local:9200/"
+        - name: HTTP_ORIGINS
+          value: 'https://web.app.ufz.de'
+        - name: CV_URL
+          value: 'https://sms-cv.helmholtz.cloud/sms/cv/api/v1'
+        - name: SMS_FRONTEND_URL
+          value: 'https://web.app.ufz.de/sms'
+        - name: SMS_BACKEND_URL
+          value: 'https://web.app.ufz.de/sms/backend/api/v1'
+        - name: B2INST_COMMUNITY
+          value: 'DataHub-Helmholtz-RF-EE'
+        - name: B2INST_URL
+          value: 'https://b2inst.gwdg.de'
+        - name: B2INST_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: custom-rdm-sms-backend
+              key: B2INST_TOKEN
+        - name: PID_SERVICE_USER
+          value: "300%3A20.500.14372/SMS"
+        - name: PID_SERVICE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: custom-rdm-sms-backend
+              key: PID_SERVICE_PASSWORD
+
+  elasticsearch:
+    global:
+      security:
+        allowInsecureImages: true
+    local:
+      enabled: true
+    master:
+      masterOnly: false
+      replicaCount: 1
+      resourcesPreset: none
+      persistence:
+        enabled: true
+        storageClass: "tanzu-storage-policy-raid5-ftt1"
+        #        existingClaim: ""
+        #        existingVolume: ""
+        size: 8Gi
+    data:
+      replicaCount: 0
+    coordinating:
+      replicaCount: 0
+    ingest:
+      replicaCount: 0
 
   sms-frontend:
     enabled: true
     image:
       repository: "registry.hzdr.de/hub-terra/sms/orchestration/generic-frontend"
       tag: "1.26.0"
+
+    imagePullSecrets:
+      - name: custom-rdm-sms.docker-registry
+
+    ingress:
+      enabled: true
+      className: "haproxy"
+      annotations:
+        cert-manager.io/cluster-issuer: "cert-manager-acme"
+        cert-manager.io/private-key-algorithm: "ECDSA"
+        cert-manager.io/private-key-size: "384"
+        cert-manager.io/private-key-rotation-policy: "Always"
+        haproxy-ingress.github.io/config-backend: |
+          http-response set-header 'X-Content-Type-Options' 'nosniff';
+          http-response set-header 'Content-Security-Policy' "default-src 'self' https://*.ufz.de https://login.helmholtz.de https://sms-cv.helmholtz.cloud; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.ufz.de; img-src 'self' blob: data: https://*.osm.org ; style-src 'self' 'unsafe-inline' * ; font-src 'self' *; frame-src 'self' *.ufz.de ; child-src 'self' *.ufz.de ; object-src 'none' ; frame-ancestors 'self' http://*.ufz.de https://*.ufz.de ;";
+
+      hosts:
+        - host: "web.app.ufz.de"
+          paths:
+            - path: /sms
+              pathType: Prefix
+      tls:
+        - secretName: web-app-ufz-de
+          hosts:
+            - "web.app.ufz.de"
+
     environmentVariables:
       - name: BASE_URL_ENV_PLACEHOLDER
         value: /sms
@@ -137,18 +268,18 @@ sms:
 
     ingress:
       enabled: true
-      className: "nginx"
+      className: "haproxy"
       annotations:
+        kubernetes.io/ingress.class: 'haproxy'
         cert-manager.io/issuer: "letsencrypt-production"
         cert-manager.io/private-key-algorithm: "ECDSA"
         cert-manager.io/private-key-size: "384"
         cert-manager.io/private-key-rotation-policy: "Always"
-        nginx.ingress.kubernetes.io/enable-cors: "false"
-        nginx.ingress.kubernetes.io/configuration-snippet: |
-          add_header 'X-Content-Type-Options' 'nosniff' always;
-          add_header 'Content-Security-Policy' "default-src 'self'; script-src 'self' 'unsafe-inline'; img-src * data: ; style-src 'self' 'unsafe-inline' * ; font-src 'self' *; frame-src 'self' *.ufz.de ; child-src 'self' *.ufz.de ; object-src 'none' ; frame-ancestors 'self' http://*.ufz.de https://*.ufz.de ;connect-src https://*.ufz.de ;" always;
-          add_header 'X-XSS-Protection' '1';
-        nginx.ingress.kubernetes.io/app-root: /sms/cv
+        haproxy-ingress.github.io/app-root: /sms/cv
+        haproxy-ingress.github.io/config-backend: |
+          http-response set-header 'X-Content-Type-Options' 'nosniff';
+          http-response set-header 'Content-Security-Policy' "default-src 'self'; script-src 'self' 'unsafe-inline'; img-src * data: ; style-src 'self' 'unsafe-inline' * ; font-src 'self' *; frame-src 'self' *.ufz.de ; child-src 'self' *.ufz.de ; object-src 'none' ; frame-ancestors 'self' http://*.ufz.de https://*.ufz.de ;connect-src https://*.ufz.de ;";
+
       hosts:
         - host: "sms-cv.helmholtz.cloud"
           paths:
@@ -165,4 +296,7 @@ sms:
     enabled: false
 
   sms-backend-db:
+    enabled: false
+
+  sms-idl-db:
     enabled: false
