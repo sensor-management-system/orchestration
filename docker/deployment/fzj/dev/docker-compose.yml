@@ -66,6 +66,17 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+  
+  mc:
+    image: registry.hzdr.de/hub-terra/sms/orchestration/mc:fzj-dev-latest
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    depends_on:
+      - minio
+    networks:
+      - ibg3dev-backend
+    entrypoint: ['/create_bucket.sh']
 
   ibg3dev-backend-db:
     image: postgis/postgis:12-3.3-alpine
@@ -90,10 +101,10 @@ services:
       DATABASE_URL: postgresql://${BACKEND_DB_USER}:${BACKEND_DB_PASSWORD}@ibg3dev-backend-db:5432/backend
       OIDC_USERNAME_CLAIM: eduperson_principal_name
       WELL_KNOWN_URL: https://login.helmholtz.de/oauth2/.well-known/openid-configuration
-      MINIO_ACCESS_KEY: ${FZJ_S3_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${FZJ_S3_SECRET_KEY}
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET_NAME: sms-attachments
-      MINIO_ENDPOINT: ${FZJ_S3_ENDPOINT}
+      MINIO_ENDPOINT: ibg3dev-minio:9000
       DOWNLOAD_ENDPOINT: https://sms-dev.ibg3jucloud-intern.ibg.kfa-juelich.de/
       SECRET_KEY: ${BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
