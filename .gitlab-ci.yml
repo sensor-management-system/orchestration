@@ -519,9 +519,9 @@ build-deploy-image-mc-fzj-staging:
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/mc:fzj-latest" -f docker/build/mc/fzj/staging/Dockerfile \
+        docker build --tag "$CI_REGISTRY_IMAGE/mc:fzj-staging-latest" -f docker/build/mc/fzj/staging/Dockerfile \
           docker/build/mc/fzj/staging
-    - docker push "$CI_REGISTRY_IMAGE/mc:fzj-latest"
+    - docker push "$CI_REGISTRY_IMAGE/mc:fzj-staging-latest"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
