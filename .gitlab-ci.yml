@@ -514,6 +514,38 @@ build-deploy-image-mc-gfz-staging:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
 
+build-deploy-image-mc-fzj-staging:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE/mc:fzj-latest" -f docker/build/mc/fzj/staging/Dockerfile \
+          docker/build/mc/fzj/staging
+    - docker push "$CI_REGISTRY_IMAGE/mc:fzj-latest"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+
+build-deploy-image-mc-fzj-dev:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE/mc:fzj-dev-latest" -f docker/build/mc/fzj/dev/Dockerfile \
+          docker/build/mc/fzj/dev
+    - docker push "$CI_REGISTRY_IMAGE/mc:fzj-dev-latest"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+
 build-deploy-image-mc-gfz-prod:
   stage: build
   extends: .docker_build
