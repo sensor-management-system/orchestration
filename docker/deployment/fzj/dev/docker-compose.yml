@@ -73,7 +73,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     depends_on:
-      - minio
+      - ibg3dev-minio
     networks:
       - ibg3dev-backend
     entrypoint: ['/create_bucket.sh']

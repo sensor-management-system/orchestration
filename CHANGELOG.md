@@ -11,7 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Fixed:
 - Resolved the s3 bucket issue for FZJ with secured protocol ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/670))
-- Configure the internal MinIO bucket for FZJ sms attachements ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/670))
+- Configure the internal MinIO bucket for FZJ sms attachements ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/671))
 
 ## 1.26.0 - 2026-03-17
 
