@@ -152,6 +152,7 @@ For example on [sensors.gfz.de](https://sensors.gfz.de/backend/api/v1/openapi).
 ## Environment Variables
 
 A list of all supported Environment Variables can be found in ```./docker/env.template```.
+There are also some notes about some of the usages and values of the env variables.
 
 If you want to change any of these variables, rename the ```env.template``` to ```env.dev``` via
 
