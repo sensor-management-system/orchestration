@@ -44,6 +44,14 @@ You may also want to use the `-e` flag for pg_restore, so that it stops in the v
 
 It should be possible to restore the vocabulary-db in the very same way.
 
+After you restored the backend backup, you need to rebuild the elastic search index.
+Go into the backend docker container and run:
+
+```
+python3 manage.py es reindex
+```
+
+
 For the minio the restore is different:
 
 - Make sure your minio server runs and that the bucket was already created.
