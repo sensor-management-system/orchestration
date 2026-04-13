@@ -104,6 +104,9 @@ You can find the versions and their changes in [CHANGELOG.md](./CHANGELOG.md).
 
 The SMS is usually run within a Docker Container according to the following steps.
 
+Please note: For GFZ specific parts take a look in [docs/deployments/GFZ.md](the GFZ deployment
+markdown file).
+
 ### Set up Controlled Vocabulary
 
 Before we can start the SMS-Container, we have to set up the SMS Controlled Vocabulary (which contains terms and defintions used for filling the SMS) as a Git Submodule:
@@ -279,6 +282,18 @@ The full name of the group muss be added to the `EXPORT_CONTROL_VO_LIST`.
 For the GFZ we have a `sensor-management-system-export-control` group within myprofile.
 This is visible as `urn:geant:helmholtz.de:gfz:group:sensor-management-system-export-control#idp.gfz-potsdam.de` within the Helmholtz AAI - and this is the value that is
 used in the `EXPORT_CONTROL_VO_LIST` variable.
+
+### MaTS and STA
+
+One of the use cases of the SMS is to be able to provide metadata for a standardized api
+access. In the DataHub we decided to go with the Sensor Things API (STA), as it is an
+OGC standard that is in use in a couple of other international initiatives, like Water4All.
+
+[MaTS](https://codebase.helmholtz.cloud/hub-terra/mats)
+(Meta data and time series data for STA) is a component that fetches the SMS data and
+transforms it to payloads ready to be stored into STA following the
+[STAMPLATE](https://codebase.helmholtz.cloud/stamplate/jsonschemas) schema
+definitions.
 
 ## How to cite
 
