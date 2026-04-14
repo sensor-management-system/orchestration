@@ -11,7 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Added:
 - extra US export control classification number ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/679)))
-
+- Assigned backend DB port for the FZJ dev sms instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/682)))
 Fixed:
 - Resolved the s3 bucket issue for FZJ with secured protocol ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/670))
 - Configure the internal MinIO bucket for FZJ sms attachements ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/671))

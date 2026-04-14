@@ -81,6 +81,8 @@ services:
   ibg3dev-backend-db:
     image: postgis/postgis:12-3.3-alpine
     restart: unless-stopped
+    ports:
+      - "5437:5432"
     environment:
       POSTGRES_PASSWORD: $BACKEND_DB_PASSWORD
       POSTGRES_USER: $BACKEND_DB_USER
