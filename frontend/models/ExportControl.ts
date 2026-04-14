@@ -13,7 +13,9 @@ import { DateTime } from 'luxon'
 export interface IExportControl {
   id: string
   dualUse: boolean | null
-  exportControlClassificationNumber: string
+  euExportControlClassificationNumber: string
+  usExportControlClassificationNumber: string
+  usReExportControl: boolean | null
   customsTariffNumber: string
   additionalInformation: string
   internalNote: string
@@ -27,7 +29,10 @@ export interface IExportControl {
 export class ExportControl implements IExportControl {
   private _id: string = ''
   private _dualUse: boolean | null = null
-  private _exportControlClassificationNumber: string = ''
+  private _euExportControlClassificationNumber: string = ''
+  private _usExportControlClassificationNumber: string = ''
+  private _usReExportControl: boolean | null = null
+
   private _customsTariffNumber: string = ''
   private _additionalInformation: string = ''
   private _internalNote: string = ''
@@ -55,12 +60,28 @@ export class ExportControl implements IExportControl {
     this._dualUse = newDualUse
   }
 
-  get exportControlClassificationNumber (): string {
-    return this._exportControlClassificationNumber
+  get euExportControlClassificationNumber (): string {
+    return this._euExportControlClassificationNumber
   }
 
-  set exportControlClassificationNumber (newExportControlClassificationNumber: string) {
-    this._exportControlClassificationNumber = newExportControlClassificationNumber
+  set euExportControlClassificationNumber (newExportControlClassificationNumber: string) {
+    this._euExportControlClassificationNumber = newExportControlClassificationNumber
+  }
+
+  get usExportControlClassificationNumber (): string {
+    return this._usExportControlClassificationNumber
+  }
+
+  set usExportControlClassificationNumber (newExportControlClassificationNumber: string) {
+    this._usExportControlClassificationNumber = newExportControlClassificationNumber
+  }
+
+  get usReExportControl (): boolean | null {
+    return this._usReExportControl
+  }
+
+  set usReExportControl (newExportControl: boolean | null) {
+    this._usReExportControl = newExportControl
   }
 
   get customsTariffNumber (): string {
@@ -132,7 +153,9 @@ export class ExportControl implements IExportControl {
 
     newObject.id = someObject.id
     newObject.dualUse = someObject.dualUse
-    newObject.exportControlClassificationNumber = someObject.exportControlClassificationNumber
+    newObject.euExportControlClassificationNumber = someObject.euExportControlClassificationNumber
+    newObject.usExportControlClassificationNumber = someObject.usExportControlClassificationNumber
+    newObject.usReExportControl = someObject.usReExportControl
     newObject.customsTariffNumber = someObject.customsTariffNumber
     newObject.additionalInformation = someObject.additionalInformation
     newObject.internalNote = someObject.internalNote

@@ -7,7 +7,10 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.26.1 (Unreleased)
+## 1.27.0 (Unreleased)
+
+Added:
+- extra US export control classification number ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/679)))
 
 Fixed:
 - Resolved the s3 bucket issue for FZJ with secured protocol ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/670))

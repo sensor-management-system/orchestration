@@ -23,7 +23,9 @@ class ExportControlSchema(Schema):
 
     id = fields.Integer(as_string=True)
     dual_use = fields.Boolean(allow_none=True)
-    export_control_classification_number = fields.Str(allow_none=True)
+    eu_export_control_classification_number = fields.Str(allow_none=True)
+    us_export_control_classification_number = fields.Str(allow_none=True)
+    us_re_export_control = fields.Boolean(allow_none=True)
     customs_tariff_number = fields.Str(allow_none=True)
     additional_information = fields.Str(allow_none=True)
     internal_note = fields.Str(allow_none=True)
@@ -74,6 +76,9 @@ class PublicExportControlSchema(Schema):
 
     id = fields.Integer(as_string=True)
     dual_use = fields.Boolean(allow_none=True)
+    eu_export_control_classification_number = fields.Str(allow_none=True)
+    us_export_control_classification_number = fields.Str(allow_none=True)
+    us_re_export_control = fields.Boolean(allow_none=True)
     export_control_classification_number = fields.Str(allow_none=True)
     customs_tariff_number = fields.Str(allow_none=True)
     additional_information = fields.Str(allow_none=True)

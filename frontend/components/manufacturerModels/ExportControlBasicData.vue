@@ -11,17 +11,27 @@ SPDX-License-Identifier: EUPL-1.2
     <v-row>
       <v-col cols="12" md="6">
         <label>Dual use<span v-if="visibiltyMarkerPublic"> {{ visibiltyMarkerPublic }}</span></label>
-        {{ dualUseText }}
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="6">
-        <label>Export control classification number<span v-if="visibiltyMarkerPublic"> {{ visibiltyMarkerPublic }}</span></label>
-        {{ value.exportControlClassificationNumber | orDefault }}
+        {{ value.dualUse | trueFalseDefaultText('Yes', 'No', 'Not yet specified') }}
       </v-col>
       <v-col cols="12" md="6">
         <label>Customs tariff number<span v-if="visibiltyMarkerPublic"> {{ visibiltyMarkerPublic }}</span></label>
         {{ value.customsTariffNumber | orDefault }}
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <label>EU Export control classification number<span v-if="visibiltyMarkerPublic"> {{ visibiltyMarkerPublic }}</span></label>
+        {{ value.euExportControlClassificationNumber | orDefault }}
+      </v-col>
+      <v-col cols="12" md="6">
+        <label>US Export control classification number<span v-if="visibiltyMarkerPublic"> {{ visibiltyMarkerPublic }}</span></label>
+        {{ value.usExportControlClassificationNumber | orDefault }}
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <label>US Re-export control<span v-if="visibiltyMarkerPublic"> {{ visibiltyMarkerPublic }}</span></label>
+        {{ value.usReExportControl | trueFalseDefaultText('Yes', 'No', 'Not yet specified') }}
       </v-col>
     </v-row>
     <v-row>
@@ -43,9 +53,12 @@ SPDX-License-Identifier: EUPL-1.2
 
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import { ExportControl } from '@/models/ExportControl'
+import { trueFalseDefaultText } from '@/utils/booleanHelpers'
 
 @Component({
-
+  filters: {
+    trueFalseDefaultText
+  }
 })
 export default class ExportControlBasicData extends Vue {
   @Prop({
@@ -72,15 +85,6 @@ export default class ExportControlBasicData extends Vue {
     type: String
   })
   readonly visibiltyMarkerInternal!: string
-
-  get dualUseText (): string {
-    if (this.value.dualUse === true) {
-      return 'Yes'
-    } else if (this.value.dualUse === false) {
-      return 'No'
-    }
-    return 'Not yet specified'
-  }
 }
 </script>
 

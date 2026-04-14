@@ -18,7 +18,9 @@ describe('ExportControlSerializer', () => {
       const model = ExportControl.createFromObject({
         id: '',
         dualUse: null,
-        exportControlClassificationNumber: '',
+        euExportControlClassificationNumber: '',
+        usExportControlClassificationNumber: '',
+        usReExportControl: null,
         customsTariffNumber: '',
         additionalInformation: '',
         internalNote: '',
@@ -40,7 +42,9 @@ describe('ExportControlSerializer', () => {
       const attributes = jsonApiData.attributes
 
       expect(attributes).toHaveProperty('dual_use', null)
-      expect(attributes).toHaveProperty('export_control_classification_number', '')
+      expect(attributes).toHaveProperty('eu_export_control_classification_number', '')
+      expect(attributes).toHaveProperty('us_export_control_classification_number', '')
+      expect(attributes).toHaveProperty('us_re_export_control', null)
       expect(attributes).toHaveProperty('customs_tariff_number', '')
       expect(attributes).toHaveProperty('additional_information', '')
       expect(attributes).toHaveProperty('internal_note', '')
@@ -55,7 +59,9 @@ describe('ExportControlSerializer', () => {
       const model = ExportControl.createFromObject({
         id: '123',
         dualUse: true,
-        exportControlClassificationNumber: '999',
+        euExportControlClassificationNumber: '999',
+        usExportControlClassificationNumber: '666',
+        usReExportControl: true,
         customsTariffNumber: '777',
         additionalInformation: 'DANGEROUS',
         internalNote: 'very dangerous',
@@ -77,7 +83,9 @@ describe('ExportControlSerializer', () => {
       const attributes = jsonApiData.attributes
 
       expect(attributes).toHaveProperty('dual_use', true)
-      expect(attributes).toHaveProperty('export_control_classification_number', '999')
+      expect(attributes).toHaveProperty('eu_export_control_classification_number', '999')
+      expect(attributes).toHaveProperty('us_export_control_classification_number', '666')
+      expect(attributes).toHaveProperty('us_re_export_control', true)
       expect(attributes).toHaveProperty('customs_tariff_number', '777')
       expect(attributes).toHaveProperty('additional_information', 'DANGEROUS')
       expect(attributes).toHaveProperty('internal_note', 'very dangerous')
@@ -113,7 +121,9 @@ describe('ExportControlSerializer', () => {
       const expectedModel = ExportControl.createFromObject({
         id: '',
         dualUse: null,
-        exportControlClassificationNumber: '',
+        euExportControlClassificationNumber: '',
+        usExportControlClassificationNumber: '',
+        usReExportControl: null,
         customsTariffNumber: '',
         additionalInformation: '',
         internalNote: '',
@@ -132,7 +142,9 @@ describe('ExportControlSerializer', () => {
           type: 'export_control',
           attributes: {
             dual_use: true,
-            export_control_classification_number: '456',
+            eu_export_control_classification_number: '456',
+            us_export_control_classification_number: '666',
+            us_re_export_control: true,
             customs_tariff_number: '789',
             additional_information: 'careful',
             internal_note: 'not sure',
@@ -168,7 +180,9 @@ describe('ExportControlSerializer', () => {
       const expectedModel = ExportControl.createFromObject({
         id: '123',
         dualUse: true,
-        exportControlClassificationNumber: '456',
+        euExportControlClassificationNumber: '456',
+        usExportControlClassificationNumber: '666',
+        usReExportControl: true,
         customsTariffNumber: '789',
         additionalInformation: 'careful',
         internalNote: 'not sure',
