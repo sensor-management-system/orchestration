@@ -23,20 +23,37 @@ SPDX-License-Identifier: EUPL-1.2
           @change="update('dualUse', $event)"
         />
       </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="6">
-        <v-text-field
-          :value="value.exportControlClassificationNumber"
-          label="Export control classification number"
-          @input="update('exportControlClassificationNumber', $event)"
-        />
-      </v-col>
       <v-col cols="12" md="6">
         <v-text-field
           :value="value.customsTariffNumber"
           label="Customs tariff number"
           @input="update('customsTariffNumber', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-text-field
+          :value="value.euExportControlClassificationNumber"
+          label="EU Export control classification number"
+          @input="update('euExportControlClassificationNumber', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-text-field
+          :value="value.usExportControlClassificationNumber"
+          label="US Export control classification number"
+          @input="update('usExportControlClassificationNumber', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-select
+          :value="value.usReExportControl"
+          label="US Re-export control"
+          :items="exportControlOptions"
+          @change="update('usReExportControl', $event)"
         />
       </v-col>
     </v-row>
@@ -88,8 +105,14 @@ export default class ExportControlBasicDataForm extends Vue {
       case 'dualUse':
         newObj.dualUse = value
         break
-      case 'exportControlClassificationNumber':
-        newObj.exportControlClassificationNumber = value as string
+      case 'euExportControlClassificationNumber':
+        newObj.euExportControlClassificationNumber = value as string
+        break
+      case 'usExportControlClassificationNumber':
+        newObj.usExportControlClassificationNumber = value as string
+        break
+      case 'usReExportControl':
+        newObj.usReExportControl = value
         break
       case 'customsTariffNumber':
         newObj.customsTariffNumber = value as string

@@ -34,14 +34,28 @@ SPDX-License-Identifier: EUPL-1.2
           md="3"
           class="font-weight-medium"
         >
-          Export control classification number:
+          EU ECCN:
         </v-col>
         <v-col
           cols="3"
           md="3"
           class="nowrap-truncate"
         >
-          {{ manufacturerModel.exportControl?.exportControlClassificationNumber | orDefault }}
+          {{ manufacturerModel.exportControl?.euExportControlClassificationNumber | orDefault }}
+        </v-col>
+        <v-col
+          cols="3"
+          md="3"
+          class="font-weight-medium"
+        >
+          US ECCN:
+        </v-col>
+        <v-col
+          cols="3"
+          md="3"
+          class="nowrap-truncate"
+        >
+          {{ manufacturerModel.exportControl?.usExportControlClassificationNumber | orDefault }}
         </v-col>
         <v-col
           cols="3"
@@ -57,6 +71,20 @@ SPDX-License-Identifier: EUPL-1.2
         >
           {{ manufacturerModel.exportControl?.customsTariffNumber | orDefault }}
         </v-col>
+        <v-col
+          cols="3"
+          md="3"
+          class="font-weight-medium"
+        >
+          US Re-export control:
+        </v-col>
+        <v-col
+          cols="3"
+          md="3"
+          class="nowrap-truncate"
+        >
+          {{ manufacturerModel.exportControl?.usReExportControl | trueFalseDefaultText('Yes', 'No', undefined) | orDefault }}
+        </v-col>
       </v-row>
     </template>
   </base-expandable-list-item>
@@ -69,11 +97,15 @@ import { ManufacturerModel } from '@/models/ManufacturerModel'
 
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 import ExportControlChip from '@/components/manufacturerModels/ExportControlChip.vue'
+import { trueFalseDefaultText } from '@/utils/booleanHelpers'
 
 @Component({
   components: {
     BaseExpandableListItem,
     ExportControlChip
+  },
+  filters: {
+    trueFalseDefaultText
   }
 })
 export default class ManufacturerModelsListItem extends Vue {

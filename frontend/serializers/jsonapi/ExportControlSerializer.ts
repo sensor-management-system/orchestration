@@ -18,7 +18,9 @@ export class ExportControlSerializer {
       type: 'export_control',
       attributes: {
         dual_use: exportControl.dualUse,
-        export_control_classification_number: exportControl.exportControlClassificationNumber,
+        eu_export_control_classification_number: exportControl.euExportControlClassificationNumber,
+        us_export_control_classification_number: exportControl.usExportControlClassificationNumber,
+        us_re_export_control: exportControl.usReExportControl,
         customs_tariff_number: exportControl.customsTariffNumber,
         additional_information: exportControl.additionalInformation,
         internal_note: exportControl.internalNote
@@ -54,7 +56,13 @@ export class ExportControlSerializer {
     } else {
       result.dualUse = null
     }
-    result.exportControlClassificationNumber = attributes.export_control_classification_number || ''
+    result.euExportControlClassificationNumber = attributes.eu_export_control_classification_number || ''
+    result.usExportControlClassificationNumber = attributes.us_export_control_classification_number || ''
+    if (attributes.us_re_export_control === true || attributes.us_re_export_control === false) {
+      result.usReExportControl = attributes.us_re_export_control
+    } else {
+      result.usReExportControl = null
+    }
     result.customsTariffNumber = attributes.customs_tariff_number || ''
     result.additionalInformation = attributes.additional_information || ''
     result.internalNote = attributes.internal_note || ''

@@ -31,12 +31,18 @@ class ManufacturerModel(db.Model, SearchableMixin):
         export_control = {}
         if self.export_control:
             export_control[
-                "export_control_classification_number"
-            ] = self.export_control.export_control_classification_number
+                "eu_export_control_classification_number"
+            ] = self.export_control.eu_export_control_classification_number
+            export_control[
+                "us_export_control_classification_number"
+            ] = self.export_control.us_export_control_classification_number
             export_control[
                 "customs_tariff_number"
             ] = self.export_control.customs_tariff_number
             export_control["dual_use"] = self.export_control.dual_use
+            export_control[
+                "us_re_export_control"
+            ] = self.export_control.us_re_export_control
 
         return {
             "manufacturer_name": self.manufacturer_name,
@@ -61,9 +67,11 @@ class ManufacturerModel(db.Model, SearchableMixin):
             "export_control": {
                 "type": "nested",
                 "properties": {
-                    "export_control_classification_number": type_keyword_and_full_searchable,
+                    "eu_export_control_classification_number": type_keyword_and_full_searchable,
+                    "us_export_control_classification_number": type_keyword_and_full_searchable,
                     "customs_tariff_number": type_keyword_and_full_searchable,
                     "dual_use": {"type": "boolean"},
+                    "us_re_export_control": {"type": "boolean"},
                 },
             },
             "created_at": {"type": "date"},

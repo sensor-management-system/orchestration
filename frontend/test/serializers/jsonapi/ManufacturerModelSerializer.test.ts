@@ -70,7 +70,9 @@ describe('ManufacturerModelSerializer', () => {
             type: 'export_control',
             attributes: {
               dual_use: false,
-              export_control_classification_number: '',
+              eu_export_control_classification_number: '',
+              us_export_control_classification_number: '',
+              us_re_export_control: false,
               customs_tariff_number: '',
               additional_information: 'Nothing to be worried about',
               internal_note: 'Maybe something to be worried about...',
@@ -113,7 +115,9 @@ describe('ManufacturerModelSerializer', () => {
         exportControl: ExportControl.createFromObject({
           id: '124',
           dualUse: false,
-          exportControlClassificationNumber: '',
+          euExportControlClassificationNumber: '',
+          usExportControlClassificationNumber: '',
+          usReExportControl: false,
           customsTariffNumber: '',
           additionalInformation: 'Nothing to be worried about',
           internalNote: 'Maybe something to be worried about...',
