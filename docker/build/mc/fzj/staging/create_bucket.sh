@@ -19,10 +19,10 @@ echo "MinIO is ready! Configuring root alias..."
 /usr/bin/mc alias set minio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} --api S3v4
 
 echo "Creating FZJ bucket..."
-/usr/bin/mc mb --quiet --ignore-existing minio/${MINIO_BUCKET_NAME}
+/usr/bin/mc mb --quiet --ignore-existing "minio/${MINIO_BUCKET_NAME}"
 
 echo "Setting anonymous download policy for FZJ..."
-/usr/bin/mc anonymous set download minio/${MINIO_BUCKET_NAME}
+/usr/bin/mc anonymous set download "minio/${MINIO_BUCKET_NAME}"
 
 echo "FZJ bucket initialization complete!"
 exit 0
