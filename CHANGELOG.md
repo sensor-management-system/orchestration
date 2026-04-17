@@ -9,6 +9,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.27.1 (Unreleased)
 
+Fixed:
 - Resolved the MC make bucket issue for FZJ ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/680)) 
 
 ## 1.27.0 - 2026-04-15
