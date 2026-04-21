@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.27.1 (Unreleased)
 
+Added:
+- [UFZ] Replaced Bitnami-ElasticSearch Images with standard upstream ES-Image (bumped Helm-Chart) ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/687)) 
+
 Fixed:
 - Resolved the MC make bucket issue for FZJ ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/680)) 
 

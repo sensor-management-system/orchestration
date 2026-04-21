@@ -6,15 +6,15 @@
 apiVersion: v2
 name: sms-stage
 description: Umbrella-Chart for SMS-Stage
-version: 0.3.0-alpha1
+version: 0.4.0-alpha0
 
 dependencies:
 - name: sms
   alias: "sms"
-  version: "0.3.0"
+  version: "0.4.0-alpha0"
 
   # Devel-Channel
-#  repository: "https://codebase.helmholtz.cloud/api/v4/projects/7722/packages/helm/devel"
+  repository: "https://codebase.helmholtz.cloud/api/v4/projects/7722/packages/helm/devel"
 
   # Stable-Channel
-  repository: "https://codebase.helmholtz.cloud/api/v4/projects/7722/packages/helm/stable"
+#  repository: "https://codebase.helmholtz.cloud/api/v4/projects/7722/packages/helm/stable"

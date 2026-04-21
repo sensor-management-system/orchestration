@@ -12,6 +12,9 @@
 /docker/cv.dev
 /sql/preset-development-and-test-data.sql
 
+/docker/deployment/ufz/**/Chart.lock
+/docker/deployment/ufz/**/*tgz
+
 # Vim swap files
 .*.swp
 .*.swo
