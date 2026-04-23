@@ -11,7 +11,7 @@ FROM node:20.17.0-bullseye as js-builder
 # First the urls for sms backend and cv backend
 ENV BASE_URL /
 ENV SMS_BACKEND_URL /backend/api/v1
-ENV SMS_FRONTEND_URL https://sms-staging.ibg3jucloud-intern.ibg.kfa-juelich.de/
+ENV SMS_FRONTEND_URL https://sms-staging.ibg3staging.fz-juelich.de/
 ENV CV_BACKEND_URL https://sms-cv.helmholtz.cloud/sms/cv/api/v1
 
 ENV INSTITUTE fzj

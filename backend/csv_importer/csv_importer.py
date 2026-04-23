@@ -22,8 +22,8 @@ RUN_PROFILES = {
     "sandbox": ("https://sensors-sandbox.gfz.de/backend/api/v1/", "live"),
     "kit": ("https://sms.atmohub.kit.edu/backend/api/v1/", "live"),
     "fzj": ("https://sms.earth-data.fz-juelich.de/backend/api/v1/", "live"),
-    "fzj-staging": ("https://sms-staging.ibg3jucloud-intern.ibg.kfa-juelich.de/backend/api/v1/", "live"),
-    "fzj-dev": ("https://sms-dev.ibg3container.ibg.kfa-juelich.de/backend/api/v1/", "live")
+    "fzj-staging": ("https://sms-staging.ibg3staging.fz-juelich.de/backend/api/v1/", "live"),
+    "fzj-dev": ("https://sms-dev.ibg3jucloud-intern.ibg.kfa-juelich.de/backend/api/v1/", "live")
 }
 
 CV_BASE_URLS = {
