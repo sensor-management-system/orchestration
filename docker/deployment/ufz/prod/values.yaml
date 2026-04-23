@@ -72,7 +72,7 @@ sms:
         - name: DOWNLOAD_ENDPOINT
           value: 'https://vip.s3.ufz.de'      
         - name: ELASTICSEARCH_URL
-          value: "http://custom-rdm-sms-prod-elasticsearch.custom-rdm-sms.svc.cluster.local:9200/"
+          value: "http://custom-rdm-sms-prod-elasticsearch:9200/"
         - name: HTTP_ORIGINS
           value: 'https://web.app.ufz.de'
         - name: CV_URL
@@ -99,27 +99,19 @@ sms:
               key: PID_SERVICE_PASSWORD
 
   elasticsearch:
-    global:
-      security:
-        allowInsecureImages: true
-    local:
+    enabled: true
+    image:
+      repository: elasticsearch
+      tag: 8.19.14
+    persistence:
       enabled: true
-    master:
-      masterOnly: false
-      replicaCount: 1
-      resourcesPreset: none
-      persistence:
-        enabled: true
-        storageClass: "tanzu-storage-policy-raid5-ftt1"
-        #        existingClaim: ""
-        #        existingVolume: ""
-        size: 8Gi
-    data:
-      replicaCount: 0
-    coordinating:
-      replicaCount: 0
-    ingest:
-      replicaCount: 0
+      storageClass: "tanzu-storage-policy-raid5-ftt1"
+      size: 8Gi
+    resources:
+      requests:
+        memory: 1Gi
+      limits:
+        memory: 1536Mi
 
   sms-frontend:
     enabled: true
