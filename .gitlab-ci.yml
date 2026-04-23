@@ -898,7 +898,7 @@ deploy-fzj-staging:
   stage: deploy
   environment:
     name: fzj-staging
-    url: https://sms-staging.ibg3jucloud-intern.ibg.kfa-juelich.de
+    url: https://sms-staging.ibg3staging.fz-juelich.de
   tags:
     - fzj
     - staging
