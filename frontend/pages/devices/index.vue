@@ -108,7 +108,10 @@ SPDX-License-Identifier: EUPL-1.2
           dense
         >
           <v-col v-if="$auth.loggedIn" cols="12" md="3">
-            <v-checkbox v-model="onlyOwnDevices" label="Only own devices" />
+            <v-checkbox v-model="onlyOwnDevices" label="Search for devices where you are listed as contact" />
+          </v-col>
+          <v-col v-if="$auth.loggedIn" cols="12" md="3">
+            <v-checkbox v-model="onlySelfCreatedDevices" label="Search for device entries you created in the SMS" />
           </v-col>
           <v-col cols="12" md="3">
             <v-checkbox v-model="includeArchivedDevices" label="Include archived devices" />
@@ -429,6 +432,7 @@ export default class SearchDevicesPage extends Vue {
   private selectedSearchDeviceTypes: DeviceType[] = []
   private selectedSearchPermissionGroups: PermissionGroup[] = []
   private onlyOwnDevices: boolean = false
+  private onlySelfCreatedDevices: boolean = false
   private includeArchivedDevices: boolean = false
   private searchText: string | null = null
 
@@ -542,6 +546,7 @@ export default class SearchDevicesPage extends Vue {
       types: this.selectedSearchDeviceTypes,
       permissionGroups: this.selectedSearchPermissionGroups,
       onlyOwnDevices: this.onlyOwnDevices && this.$auth.loggedIn,
+      onlySelfCreatedDevices: this.onlySelfCreatedDevices && this.$auth.loggedIn,
       includeArchivedDevices: this.includeArchivedDevices,
       manufacturerName: null,
       model: null
@@ -550,6 +555,7 @@ export default class SearchDevicesPage extends Vue {
 
   isExtendedSearch (): boolean {
     return this.onlyOwnDevices === true ||
+      this.onlySelfCreatedDevices === true ||
       !!this.selectedSearchStates.length ||
       !!this.selectedSearchDeviceTypes.length ||
       !!this.selectedSearchManufacturers.length ||
@@ -572,6 +578,7 @@ export default class SearchDevicesPage extends Vue {
     this.selectedSearchDeviceTypes = []
     this.selectedSearchPermissionGroups = []
     this.onlyOwnDevices = false
+    this.onlySelfCreatedDevices = false
     this.includeArchivedDevices = false
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
@@ -595,6 +602,7 @@ export default class SearchDevicesPage extends Vue {
     this.selectedSearchDeviceTypes = []
     this.selectedSearchPermissionGroups = []
     this.onlyOwnDevices = false
+    this.onlySelfCreatedDevices = false
     this.includeArchivedDevices = false
     this.initUrlQueryParams()
   }
@@ -713,6 +721,9 @@ export default class SearchDevicesPage extends Vue {
     }
     if (searchParamsObject.onlyOwnDevices) {
       this.onlyOwnDevices = searchParamsObject.onlyOwnDevices
+    }
+    if (searchParamsObject.onlySelfCreatedDevices) {
+      this.onlySelfCreatedDevices = searchParamsObject.onlySelfCreatedDevices
     }
     if (searchParamsObject.includeArchivedDevices) {
       this.includeArchivedDevices = searchParamsObject.includeArchivedDevices

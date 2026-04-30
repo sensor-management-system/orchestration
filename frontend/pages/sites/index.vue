@@ -91,7 +91,10 @@ SPDX-License-Identifier: EUPL-1.2
           dense
         >
           <v-col v-if="$auth.loggedIn" cols="12" md="3">
-            <v-checkbox v-model="onlyOwnSites" label="Only own sites & labs" />
+            <v-checkbox v-model="onlyOwnSites" label="Search for sites and labs where you are listed as contact" />
+          </v-col>
+          <v-col v-if="$auth.loggedIn" cols="12" md="3">
+            <v-checkbox v-model="onlySelfCreatedSites" label="Search for site and lab entries you created in the SMS" />
           </v-col>
           <v-col cols="12" md="3">
             <v-checkbox v-model="includeArchivedSites" label="Include archived sites & labs" />
@@ -427,6 +430,7 @@ export default class SearchSitesPage extends Vue {
   private selectedSearchSiteTypes: SiteType[] = []
   private selectedSearchPermissionGroups: PermissionGroup[] = []
   private onlyOwnSites: boolean = false
+  private onlySelfCreatedSites: boolean = false
   private includeArchivedSites: boolean = false
   private searchText: string | null = null
   private showDeleteDialog: boolean = false
@@ -530,12 +534,14 @@ export default class SearchSitesPage extends Vue {
       siteUsages: this.selectedSearchSiteUsages,
       siteTypes: this.selectedSearchSiteTypes,
       onlyOwnSites: this.onlyOwnSites && this.$auth.loggedIn,
+      onlySelfCreatedSites: this.onlySelfCreatedSites && this.$auth.loggedIn,
       includeArchivedSites: this.includeArchivedSites
     }
   }
 
   isExtendedSearch (): boolean {
     return this.onlyOwnSites === true ||
+      this.onlySelfCreatedSites === true ||
       !!this.selectedSearchSiteUsages.length ||
       !!this.selectedSearchSiteTypes.length ||
       !!this.selectedSearchPermissionGroups.length ||
@@ -553,6 +559,7 @@ export default class SearchSitesPage extends Vue {
   basicSearch () {
     this.selectedSearchPermissionGroups = []
     this.onlyOwnSites = false
+    this.onlySelfCreatedSites = false
     this.includeArchivedSites = false
     this.page = 1 // Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
@@ -575,6 +582,7 @@ export default class SearchSitesPage extends Vue {
     this.selectedSearchSiteTypes = []
     this.selectedSearchPermissionGroups = []
     this.onlyOwnSites = false
+    this.onlySelfCreatedSites = false
     this.includeArchivedSites = false
     this.initUrlQueryParams()
   }
@@ -681,6 +689,9 @@ export default class SearchSitesPage extends Vue {
     }
     if (searchParamsObject.onlyOwnSites) {
       this.onlyOwnSites = searchParamsObject.onlyOwnSites
+    }
+    if (searchParamsObject.onlySelfCreatedSites) {
+      this.onlySelfCreatedSites = searchParamsObject.onlySelfCreatedSites
     }
     if (searchParamsObject.includeArchivedSites) {
       this.includeArchivedSites = searchParamsObject.includeArchivedSites

@@ -71,6 +71,7 @@ export default class PlatformBasicSearch extends Vue {
         types: [],
         permissionGroups: [],
         onlyOwnPlatforms: false,
+        onlySelfCreatedPlatforms: false,
         includeArchivedPlatforms: false,
         manufacturerName: null,
         model: null

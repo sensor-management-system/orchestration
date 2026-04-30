@@ -370,6 +370,7 @@ export default class MountWizardEntitySelect extends Vue {
         types: [],
         permissionGroups: [],
         onlyOwnDevices: false,
+        onlySelfCreatedDevices: false,
         includeArchivedDevices: false,
         manufacturerName: null,
         model: null
@@ -403,6 +404,7 @@ export default class MountWizardEntitySelect extends Vue {
       this.$store.dispatch('platforms/setSelectedSearchPlatformTypes', [])
       this.$store.dispatch('platforms/setSelectedSearchPermissionGroups', [])
       this.$store.dispatch('platforms/setOnlyOwnPlatforms', false)
+      this.$store.dispatch('platforms/setOnlySelfCreatedPlatforms', false)
       this.$store.dispatch('platforms/setIncludeArchivedPlatforms', false)
 
       await this.searchPlatformsPaginated()

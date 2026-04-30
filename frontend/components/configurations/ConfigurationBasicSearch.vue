@@ -68,6 +68,7 @@ export default class ConfigurationBasicSearch extends Vue {
         states: [],
         permissionGroups: [],
         onlyOwnConfigurations: false,
+        onlySelfCreatedConfigurations: false,
         projects: [],
         campaigns: [],
         sites: [],

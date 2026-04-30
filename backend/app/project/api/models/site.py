@@ -104,6 +104,9 @@ class Site(
             "site_contact_roles": [
                 scr.to_search_entry() for scr in self.site_contact_roles
             ],
+            "site_contact_roles_not_nested": [
+                scr.to_search_entry() for scr in self.site_contact_roles
+            ],
             "site_attachments": [a.to_search_entry() for a in self.site_attachments],
             "website": self.website,
             "updated_at": self.updated_at,
@@ -169,6 +172,25 @@ class Site(
                     "site_usage_name": type_keyword_and_full_searchable,
                     "site_usage_uri": type_keyword,
                     "site_contact_roles": {
+                        "type": "nested",
+                        "properties": {
+                            "role_name": type_keyword_and_full_searchable,
+                            "role_uri": type_keyword,
+                            "contact": {
+                                "type": "nested",
+                                "properties": Contact.get_search_index_properties(),
+                            },
+                        },
+                    },
+                    # The reason for the replication is that there are
+                    # different requirements for the search.
+                    # The nested type is needed in order to search via a specific
+                    # key (say the id of the contact).
+                    # But the nested type doesn't work so nice with the
+                    # text search.
+                    # In order to support both, we store the data with two
+                    # different types.
+                    "site_contact_roles_not_nested": {
                         "properties": {
                             "role_name": type_keyword_and_full_searchable,
                             "role_uri": type_keyword,

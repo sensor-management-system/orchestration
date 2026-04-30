@@ -54,7 +54,10 @@ SPDX-License-Identifier: EUPL-1.2
       dense
     >
       <v-col v-if="$auth.loggedIn" cols="12" md="3">
-        <v-checkbox v-model="onlyOwnPlatforms" label="Only own platforms" />
+        <v-checkbox v-model="onlyOwnPlatforms" label="Search for platforms where you are listed as contact" />
+      </v-col>
+      <v-col v-if="$auth.loggedIn" cols="12" md="3">
+        <v-checkbox v-model="onlySelfCreatedPlatforms" label="Search for platform entries you created in the SMS" />
       </v-col>
       <v-col cols="12" md="3">
         <v-checkbox v-model="includeArchivedPlatforms" label="Include archived platforms" />
@@ -114,6 +117,7 @@ export default class PlatformExtendedSearch extends Vue {
   private selectedPlatformTypes: PlatformType[] = []
   private selectedPermissionGroups: PermissionGroup[] = []
   private onlyOwnPlatforms: boolean = false
+  private onlySelfCreatedPlatforms: boolean = false
   private includeArchivedPlatforms: boolean = false
 
   searchPlatformsPaginated!: SearchPlatformsPaginatedAction
@@ -129,6 +133,7 @@ export default class PlatformExtendedSearch extends Vue {
         types: this.selectedPlatformTypes,
         permissionGroups: this.selectedPermissionGroups,
         onlyOwnPlatforms: this.onlyOwnPlatforms,
+        onlySelfCreatedPlatforms: this.onlySelfCreatedPlatforms,
         includeArchivedPlatforms: this.includeArchivedPlatforms,
         manufacturerName: null,
         model: null
@@ -148,6 +153,7 @@ export default class PlatformExtendedSearch extends Vue {
     this.selectedPlatformTypes = []
     this.selectedPermissionGroups = []
     this.onlyOwnPlatforms = false
+    this.onlySelfCreatedPlatforms = false
     this.includeArchivedPlatforms = false
   }
 }

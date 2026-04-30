@@ -634,6 +634,7 @@ export default class ManufacturerModelDevicesSearchPage extends Vue {
       types: [],
       permissionGroups: [],
       onlyOwnDevices: false,
+      onlySelfCreatedDevices: false,
       includeArchivedDevices: false,
       manufacturerName: this.manufacturerModel!.manufacturerName,
       model: this.manufacturerModel!.model

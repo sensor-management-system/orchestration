@@ -6,7 +6,6 @@
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
 # SPDX-License-Identifier: EUPL-1.2
-
 """Model for contacts & reference tables."""
 
 from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
@@ -73,6 +72,7 @@ class Contact(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
         """Transform the model to an entry to store in the full text search."""
         # to be included in platforms, devices, etc.
         return {
+            "id": self.id,
             "given_name": self.given_name,
             "family_name": self.family_name,
             "website": self.website,
@@ -93,7 +93,9 @@ class Contact(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
                 analyzer="ngram_analyzer"
             )
         )
+        type_keyword = ElasticSearchIndexTypes.keyword()
         return {
+            "id": type_keyword,
             "given_name": type_keyword_and_full_searchable,
             "family_name": type_keyword_and_full_searchable,
             # Not necessary to allow exact search for the personal website.

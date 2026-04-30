@@ -22,6 +22,7 @@ export interface IPlatformSearchParams {
   types: PlatformType[]
   permissionGroups: PermissionGroup[]
   onlyOwnPlatforms: boolean
+  onlySelfCreatedPlatforms: boolean
   includeArchivedPlatforms: boolean
   manufacturerName: string | null
   model: string | null
@@ -69,6 +70,9 @@ export class PlatformSearchParamsSerializer {
     }
     if (params.onlyOwnPlatforms) {
       result.onlyOwnPlatforms = String(params.onlyOwnPlatforms)
+    }
+    if (params.onlySelfCreatedPlatforms) {
+      result.onlySelfCreatedPlatforms = String(params.onlySelfCreatedPlatforms)
     }
     if (params.includeArchivedPlatforms) {
       result.includeArchivedPlatforms = String(params.includeArchivedPlatforms)
@@ -142,6 +146,7 @@ export class PlatformSearchParamsSerializer {
       types,
       permissionGroups,
       onlyOwnPlatforms: typeof params.onlyOwnPlatforms !== 'undefined' && params.onlyOwnPlatforms === 'true',
+      onlySelfCreatedPlatforms: typeof params.onlySelfCreatedPlatforms !== 'undefined' && params.onlySelfCreatedPlatforms === 'true',
       includeArchivedPlatforms: typeof params.includeArchivedPlatforms !== 'undefined' && params.includeArchivedPlatforms === 'true',
       manufacturerName: typeof params.manufacturerName === 'string' && !this.skipManufacturerName ? params.manufacturerName : '',
       model: typeof params.model === 'string' && !this.skipModel ? params.model : ''

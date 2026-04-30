@@ -79,7 +79,10 @@ SPDX-License-Identifier: EUPL-1.2
       dense
     >
       <v-col v-if="$auth.loggedIn" cols="12" md="3">
-        <v-checkbox v-model="onlyOwnConfigurations" label="Only own configurations" />
+        <v-checkbox v-model="onlyOwnConfigurations" label="Search for configurations where you are listed as contact" />
+      </v-col>
+      <v-col v-if="$auth.loggedIn" cols="12" md="3">
+        <v-checkbox v-model="onlySelfCreatedConfigurations" label="Search for configuration entries you created in the SMS" />
       </v-col>
       <v-col cols="12" md="3">
         <v-checkbox v-model="includeArchivedConfigurations" label="Include archived configurations" />
@@ -152,6 +155,7 @@ export default class ConfigurationExtendedSearch extends Vue {
   private selectedCampaigns: string[] = []
   private selectedSites: Site[] = []
   private onlyOwnConfigurations: boolean = false
+  private onlySelfCreatedConfigurations: boolean = false
   private includeArchivedConfigurations: boolean = false
 
   // vuex definition for typescript check
@@ -192,6 +196,7 @@ export default class ConfigurationExtendedSearch extends Vue {
       states: this.selectedConfigurationStates,
       permissionGroups: this.selectedPermissionGroups,
       onlyOwnConfigurations: this.onlyOwnConfigurations && this.$auth.loggedIn,
+      onlySelfCreatedConfigurations: this.onlySelfCreatedConfigurations && this.$auth.loggedIn,
       projects: this.selectedProjects,
       campaigns: this.selectedCampaigns,
       sites: this.selectedSites,
@@ -217,6 +222,7 @@ export default class ConfigurationExtendedSearch extends Vue {
     this.selectedSites = []
     this.selectedPermissionGroups = []
     this.onlyOwnConfigurations = false
+    this.onlySelfCreatedConfigurations = false
     this.includeArchivedConfigurations = false
     this.searchText = null
   }

@@ -89,6 +89,7 @@ export class PlatformApi {
   private _searchedPermissionGroups: PermissionGroup[] = []
   private _searchedUserMail: string | null = null
   private _searchedCreatorId: string | null = null
+  private _searchedContactId: string | null = null
   private _searchedIncludeArchivedPlatforms = false
   private _searchText: string | null = null
   private _searchManufacturerName: string | null = null
@@ -182,6 +183,15 @@ export class PlatformApi {
 
   setSearchedCreatorId (value: string | null) {
     this._searchedCreatorId = value
+    return this
+  }
+
+  get searchedContactId (): string | null {
+    return this._searchedContactId
+  }
+
+  setSearchedContactId (value: string | null) {
+    this._searchedContactId = value
     return this
   }
 
@@ -309,6 +319,7 @@ export class PlatformApi {
     this.preparePermissionGroups()
     this.prepareMail()
     this.prepareCreator()
+    this.prepareContact()
     this.prepareManufacturerName()
     this.prepareModel()
   }
@@ -329,6 +340,16 @@ export class PlatformApi {
         name: 'created_by_id',
         op: 'eq',
         val: this.searchedCreatorId
+      })
+    }
+  }
+
+  prepareContact () {
+    if (this.searchedContactId) {
+      this.filterSettings.push({
+        name: 'platform_contact_roles.contact.id',
+        op: 'eq',
+        val: this.searchedContactId
       })
     }
   }

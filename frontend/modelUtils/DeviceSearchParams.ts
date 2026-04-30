@@ -22,6 +22,7 @@ export interface IDeviceSearchParams {
   types: DeviceType[]
   permissionGroups: PermissionGroup[]
   onlyOwnDevices: boolean
+  onlySelfCreatedDevices: boolean
   includeArchivedDevices: boolean
   manufacturerName: string | null
   model: string | null
@@ -69,6 +70,9 @@ export class DeviceSearchParamsSerializer {
     }
     if (params.onlyOwnDevices) {
       result.onlyOwnDevices = String(params.onlyOwnDevices)
+    }
+    if (params.onlySelfCreatedDevices) {
+      result.onlySelfCreatedDevices = String(params.onlySelfCreatedDevices)
     }
     if (params.includeArchivedDevices) {
       result.includeArchivedDevices = String(params.includeArchivedDevices)
@@ -143,6 +147,7 @@ export class DeviceSearchParamsSerializer {
       types,
       permissionGroups,
       onlyOwnDevices: typeof params.onlyOwnDevices !== 'undefined' && params.onlyOwnDevices === 'true',
+      onlySelfCreatedDevices: typeof params.onlySelfCreatedDevices !== 'undefined' && params.onlySelfCreatedDevices === 'true',
       includeArchivedDevices: typeof params.includeArchivedDevices !== 'undefined' && params.includeArchivedDevices === 'true',
       manufacturerName: typeof params.manufacturerName === 'string' && !this.skipManufacturerName ? params.manufacturerName : '',
       model: typeof params.model === 'string' && !this.skipModel ? params.model : ''

@@ -24,6 +24,7 @@ export interface IConfigurationSearchParams extends IConfigurationBasicSearchPar
   sites: Site[]
   permissionGroups: PermissionGroup[]
   onlyOwnConfigurations: boolean
+  onlySelfCreatedConfigurations: boolean
   includeArchivedConfigurations: boolean
 }
 
@@ -81,6 +82,9 @@ export class ConfigurationSearchParamsSerializer {
     }
     if (params.onlyOwnConfigurations) {
       result.onlyOwnConfigurations = String(params.onlyOwnConfigurations)
+    }
+    if (params.onlySelfCreatedConfigurations) {
+      result.onlySelfCreatedConfigurations = String(params.onlySelfCreatedConfigurations)
     }
     if (params.permissionGroups) {
       result.permissionGroups = params.permissionGroups.map(p => p.id)
@@ -146,6 +150,7 @@ export class ConfigurationSearchParamsSerializer {
       sites,
       permissionGroups,
       onlyOwnConfigurations: typeof params.onlyOwnConfigurations !== 'undefined' && params.onlyOwnConfigurations === 'true',
+      onlySelfCreatedConfigurations: typeof params.onlySelfCreatedConfigurations !== 'undefined' && params.onlySelfCreatedConfigurations === 'true',
       includeArchivedConfigurations: typeof params.includeArchivedConfigurations !== 'undefined' && params.includeArchivedConfigurations === 'true'
     }
   }
