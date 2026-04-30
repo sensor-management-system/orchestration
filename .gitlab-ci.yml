@@ -546,6 +546,20 @@ build-deploy-image-mc-fzj-dev:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
 
+build-deploy-image-mc-fzj-prod:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE/mc:fzj-prod-latest" -f docker/build/mc/fzj/prod/Dockerfile \
+          docker/build/mc/fzj/dev
+    - docker push "$CI_REGISTRY_IMAGE/mc:fzj-prod-latest"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+      when: always
+
 build-deploy-image-mc-gfz-prod:
   stage: build
   extends: .docker_build

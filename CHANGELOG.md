@@ -11,7 +11,8 @@ SPDX-License-Identifier: EUPL-1.2
 
 Added:
 - [UFZ] Replaced Bitnami-ElasticSearch Images with standard upstream ES-Image (bumped Helm-Chart) ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/687))
-- Deploy the FZJ SMS staging instance on the new VM ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/684)) 
+- Deploy the FZJ SMS staging instance on the new VM ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/684))
+- Minio bucket and MC has been configured for the FZJ prod instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/689))
 
 Changed:
 - Extended search seperates between entries where the user was the creator and those where the user is a contact for ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/orchestration/-/merge_requests/690))
