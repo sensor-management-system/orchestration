@@ -71,6 +71,7 @@ export default class DeviceBasicSearch extends Vue {
         types: [],
         permissionGroups: [],
         onlyOwnDevices: false,
+        onlySelfCreatedDevices: false,
         includeArchivedDevices: false,
         manufacturerName: null,
         model: null

@@ -62,6 +62,7 @@ export interface PlatformsState {
   chosenKindOfPlatformAction: IOptionsForActionType | null
   includeArchivedPlatforms: boolean
   onlyOwnPlatforms: boolean
+  onlySelfCreatedPlatforms: boolean
   pageNumber: number
   pageSize: number
   platform: Platform | null
@@ -95,6 +96,7 @@ const state = (): PlatformsState => ({
   chosenKindOfPlatformAction: null,
   includeArchivedPlatforms: false,
   onlyOwnPlatforms: false,
+  onlySelfCreatedPlatforms: false,
   pageNumber: 1,
   pageSize: PAGE_SIZES[0],
   platform: null,
@@ -151,6 +153,7 @@ const getters: GetterTree<PlatformsState, RootState> = {
       types: state.selectedSearchPlatformTypes,
       permissionGroups: state.selectedSearchPermissionGroups,
       onlyOwnPlatforms: state.onlyOwnPlatforms && isLoggedIn,
+      onlySelfCreatedPlatforms: state.onlySelfCreatedPlatforms && isLoggedIn,
       includeArchivedPlatforms: state.includeArchivedPlatforms,
       // We don't have it in the store.
       manufacturerName: null,
@@ -287,6 +290,7 @@ export type SearchPlatformsPaginatedAction = (searchParams?: IPlatformSearchPara
 export type SetChosenKindOfPlatformActionAction = (newval: IOptionsForActionType | null) => void
 export type SetIncludeArchivedPlatformsAction = (includeArchivedPlatforms: boolean) => void
 export type SetOnlyOwnPlatformsAction = (onlyOwnPlatforms: boolean) => void
+export type SetOnlySelfCreatedPlatformsAction = (onlySelfCreatedPlatforms: boolean) => void
 export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void
 export type SetSearchTextAction = (searchText: string | null) => void
@@ -324,8 +328,12 @@ const actions: ActionTree<PlatformsState, RootState> = {
     if (!searchParams) {
       searchParams = searchParamsFromStore
     }
-    let userId = null
+    let contactId = null
     if (searchParams!.onlyOwnPlatforms) {
+      contactId = this.getters['permissions/contactId']
+    }
+    let userId = null
+    if (searchParams!.onlySelfCreatedPlatforms) {
       userId = this.getters['permissions/userId']
     }
 
@@ -339,6 +347,7 @@ const actions: ActionTree<PlatformsState, RootState> = {
       .setSearchedPlatformTypes(searchParams!.types)
       .setSearchedPermissionGroups(searchParams!.permissionGroups)
       .setSearchedCreatorId(userId)
+      .setSearchedContactId(contactId)
       .setSearchIncludeArchivedPlatforms(searchParams!.includeArchivedPlatforms)
       .setSearchManufacturerName(searchParams!.manufacturerName)
       .setSearchModel(searchParams!.model)
@@ -676,11 +685,15 @@ const actions: ActionTree<PlatformsState, RootState> = {
   },
   async exportAsCsv ({ getters }: { getters: any }, searchParams?: IPlatformSearchParams): Promise<Blob> {
     let userId = null
+    let contactId = null
     const searchParamsFromStore = getters.searchParams(this.$auth.loggedIn)
     if (!searchParams) {
       searchParams = searchParamsFromStore
     }
     if (searchParams!.onlyOwnPlatforms) {
+      contactId = this.getters['permissions/contactId']
+    }
+    if (searchParams!.onlySelfCreatedPlatforms) {
       userId = this.getters['permissions/userId']
     }
     // @ts-ignore
@@ -691,6 +704,7 @@ const actions: ActionTree<PlatformsState, RootState> = {
       .setSearchedPlatformTypes(searchParams!.types)
       .setSearchedPermissionGroups(searchParams!.permissionGroups)
       .setSearchedCreatorId(userId)
+      .setSearchedContactId(contactId)
       .setSearchIncludeArchivedPlatforms(searchParams!.includeArchivedPlatforms)
       .setSearchManufacturerName(searchParams!.manufacturerName)
       .setSearchModel(searchParams!.model)
@@ -733,6 +747,9 @@ const actions: ActionTree<PlatformsState, RootState> = {
   },
   setOnlyOwnPlatforms ({ commit }: { commit: Commit }, onlyOwnPlatforms: boolean) {
     commit('setOnlyOwnPlatforms', onlyOwnPlatforms)
+  },
+  setOnlySelfCreatedPlatforms ({ commit }: { commit: Commit }, onlySelfCreatedPlatforms: boolean) {
+    commit('setOnlySelfCreatedPlatforms', onlySelfCreatedPlatforms)
   },
   setIncludeArchivedPlatforms ({ commit }: { commit: Commit }, includeArchivedPlatforms: boolean) {
     commit('setIncludeArchivedPlatforms', includeArchivedPlatforms)
@@ -823,6 +840,9 @@ const mutations = {
   },
   setOnlyOwnPlatforms (state: PlatformsState, onlyOwnPlatforms: boolean) {
     state.onlyOwnPlatforms = onlyOwnPlatforms
+  },
+  setOnlySelfCreatedPlatforms (state: PlatformsState, onlySelfCreatedPlatforms: boolean) {
+    state.onlySelfCreatedPlatforms = onlySelfCreatedPlatforms
   },
   setIncludeArchivedPlatforms (state: PlatformsState, includeArchivedPlatforms: boolean) {
     state.includeArchivedPlatforms = includeArchivedPlatforms

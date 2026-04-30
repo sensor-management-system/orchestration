@@ -117,7 +117,11 @@ const actions: ActionTree<SitesState, RootState> = {
     state
   }: { commit: Commit, state: SitesState }, searchParams: ISiteSearchParams): Promise<void> {
     let userId = null
+    let contactId = null
     if (searchParams.onlyOwnSites) {
+      contactId = this.getters['permissions/contactId']
+    }
+    if (searchParams.onlySelfCreatedSites) {
       userId = this.getters['permissions/userId']
     }
 
@@ -128,6 +132,7 @@ const actions: ActionTree<SitesState, RootState> = {
       .setSearchText(searchParams.searchText)
       .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedCreatorId(userId)
+      .setSearchedContactId(contactId)
       .setSearchedSiteUsages(searchParams.siteUsages)
       .setSearchedSiteTypes(searchParams.siteTypes)
       .setSearchIncludeArchivedSites(searchParams.includeArchivedSites)
@@ -150,6 +155,7 @@ const actions: ActionTree<SitesState, RootState> = {
       // In order to not use pre-assigned filters, we need to remove them.
       .setSearchedPermissionGroups([])
       .setSearchedCreatorId(null)
+      .setSearchedContactId(null)
       .setSearchedSiteUsages([])
       .setSearchedSiteTypes([])
       .setSearchIncludeArchivedSites(false)

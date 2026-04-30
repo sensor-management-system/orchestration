@@ -66,6 +66,7 @@ export class SiteApi {
   private _searchedSiteTypes: SiteType[] = []
   private _searchedUserMail: string | null = null
   private _searchedCreatorId: string | null = null
+  private _searchedContactId: string | null = null
   private _searchedIncludeArchivedSites: boolean = false
   private _searchText: string | null = null
   private filterSettings: any[] = []
@@ -141,6 +142,15 @@ export class SiteApi {
 
   setSearchedCreatorId (value: string | null) {
     this._searchedCreatorId = value
+    return this
+  }
+
+  get searchedContactId (): string | null {
+    return this._searchedContactId
+  }
+
+  setSearchedContactId (value: string | null) {
+    this._searchedContactId = value
     return this
   }
 
@@ -276,6 +286,7 @@ export class SiteApi {
     this.prepareSiteTypes()
     this.prepareMail()
     this.prepareCreator()
+    this.prepareContact()
   }
 
   prepareMail () {
@@ -294,6 +305,16 @@ export class SiteApi {
         name: 'created_by_id',
         op: 'eq',
         val: this.searchedCreatorId
+      })
+    }
+  }
+
+  prepareContact () {
+    if (this.searchedContactId) {
+      this.filterSettings.push({
+        name: 'site_contact_roles.contact.id',
+        op: 'eq',
+        val: this.searchedContactId
       })
     }
   }

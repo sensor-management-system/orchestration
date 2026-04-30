@@ -103,6 +103,7 @@ export class ConfigurationApi {
   private _searchText: string | null = null
   private _searchedUserMail: string | null = null
   private _searchedCreatorId: string | null = null
+  private _searchedContactId: string | null = null
   private _searchedIncludeArchivedConfigurations: boolean = false
   private filterSettings: any[] = []
 
@@ -241,6 +242,15 @@ export class ConfigurationApi {
     return this
   }
 
+  get searchedContactId (): string | null {
+    return this._searchedContactId
+  }
+
+  setSearchedContactId (value: string | null) {
+    this._searchedContactId = value
+    return this
+  }
+
   get searchIncludeArchivedConfigurations (): boolean {
     return this._searchedIncludeArchivedConfigurations
   }
@@ -334,6 +344,7 @@ export class ConfigurationApi {
     this.preparePermissionGroups()
     this.prepareMail()
     this.prepareCreator()
+    this.prepareContact()
   }
 
   async getSensorML (configurationId: string): Promise<Blob> {
@@ -420,6 +431,16 @@ export class ConfigurationApi {
         name: 'created_by_id',
         op: 'eq',
         val: this.searchedCreatorId
+      })
+    }
+  }
+
+  prepareContact () {
+    if (this.searchedContactId) {
+      this.filterSettings.push({
+        name: 'configuration_contact_roles.contact.id',
+        op: 'eq',
+        val: this.searchedContactId
       })
     }
   }

@@ -520,8 +520,12 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
     state
   }: { commit: Commit, state: ConfigurationsState }, searchParams: IConfigurationSearchParams) {
     let userId = null
-    if (searchParams.onlyOwnConfigurations) {
+    let contactId = null
+    if (searchParams.onlySelfCreatedConfigurations) {
       userId = this.getters['permissions/userId']
+    }
+    if (searchParams.onlyOwnConfigurations) {
+      contactId = this.getters['permissions/contactId']
     }
 
     const {
@@ -534,6 +538,7 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
       .setSearchedCampaigns(searchParams.campaigns)
       .setSearchPermissionGroups(searchParams.permissionGroups)
       .setSearchedCreatorId(userId)
+      .setSearchedContactId(contactId)
       .setSearchedSites(searchParams.sites)
       .setSearchIncludeArchivedConfigurations(searchParams.includeArchivedConfigurations)
       .searchPaginated(

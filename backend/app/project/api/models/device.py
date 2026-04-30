@@ -90,6 +90,9 @@ class Device(
                     "device_contact_roles": [
                         dcr.to_search_entry() for dcr in self.device_contact_roles
                     ],
+                    "device_contact_roles_not_nested": [
+                        dcr.to_search_entry() for dcr in self.device_contact_roles
+                    ],
                     "properties": [p.to_search_entry() for p in self.device_properties],
                     "customfields": [c.to_search_entry() for c in self.customfields],
                     "generic_actions": [
@@ -195,6 +198,25 @@ class Device(
                 },
             },
             "device_contact_roles": {
+                "type": "nested",
+                "properties": {
+                    "role_name": type_keyword_and_full_searchable,
+                    "role_uri": type_keyword,
+                    "contact": {
+                        "type": "nested",
+                        "properties": Contact.get_search_index_properties(),
+                    },
+                },
+            },
+            # The reason for the replication is that there are
+            # different requirements for the search.
+            # The nested type is needed in order to search via a specific
+            # key (say the id of the contact).
+            # But the nested type doesn't work so nice with the
+            # text search.
+            # In order to support both, we store the data with two
+            # different types.
+            "device_contact_roles_not_nested": {
                 "properties": {
                     "role_name": type_keyword_and_full_searchable,
                     "role_uri": type_keyword,

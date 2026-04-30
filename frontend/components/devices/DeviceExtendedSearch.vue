@@ -54,7 +54,10 @@ SPDX-License-Identifier: EUPL-1.2
       dense
     >
       <v-col v-if="$auth.loggedIn" cols="12" md="3">
-        <v-checkbox v-model="onlyOwnDevices" label="Only own devices" />
+        <v-checkbox v-model="onlyOwnDevices" label="Search for devices where you are listed as contact" />
+      </v-col>
+      <v-col v-if="$auth.loggedIn" cols="12" md="3">
+        <v-checkbox v-model="onlySelfCreatedDevices" label="Search for device entries you created in the SMS" />
       </v-col>
       <v-col cols="12" md="3">
         <v-checkbox v-model="includeArchivedDevices" label="Include archived devices" />
@@ -114,6 +117,7 @@ export default class DeviceExtendedSearch extends Vue {
   private selectedSearchDeviceTypes: DeviceType[] = []
   private selectedSearchPermissionGroups: PermissionGroup[] = []
   private onlyOwnDevices: boolean = false
+  private onlySelfCreatedDevices: boolean = false
   private includeArchivedDevices: boolean = false
 
   // vuex
@@ -130,6 +134,7 @@ export default class DeviceExtendedSearch extends Vue {
         types: this.selectedSearchDeviceTypes,
         permissionGroups: this.selectedSearchPermissionGroups,
         onlyOwnDevices: this.onlyOwnDevices,
+        onlySelfCreatedDevices: this.onlySelfCreatedDevices,
         includeArchivedDevices: this.includeArchivedDevices,
         manufacturerName: null,
         model: null
@@ -149,6 +154,7 @@ export default class DeviceExtendedSearch extends Vue {
     this.selectedSearchDeviceTypes = []
     this.selectedSearchPermissionGroups = []
     this.onlyOwnDevices = false
+    this.onlySelfCreatedDevices = false
     this.includeArchivedDevices = false
   }
 }

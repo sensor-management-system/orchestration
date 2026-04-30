@@ -74,6 +74,9 @@ class Configuration(
             "configuration_contact_roles": [
                 ccr.to_search_entry() for ccr in self.configuration_contact_roles
             ],
+            "configuration_contact_roles_not_nested": [
+                ccr.to_search_entry() for ccr in self.configuration_contact_roles
+            ],
             "attachments": [
                 a.to_search_entry() for a in self.configuration_attachments
             ],
@@ -163,6 +166,25 @@ class Configuration(
                     },
                     "keywords": type_keyword_and_full_searchable,
                     "configuration_contact_roles": {
+                        "type": "nested",
+                        "properties": {
+                            "role_name": type_keyword_and_full_searchable,
+                            "role_uri": type_keyword,
+                            "contact": {
+                                "type": "nested",
+                                "properties": Contact.get_search_index_properties(),
+                            },
+                        },
+                    },
+                    # The reason for the replication is that there are
+                    # different requirements for the search.
+                    # The nested type is needed in order to search via a specific
+                    # key (say the id of the contact).
+                    # But the nested type doesn't work so nice with the
+                    # text search.
+                    # In order to support both, we store the data with two
+                    # different types.
+                    "configuration_contact_roles_not_nested": {
                         "properties": {
                             "role_name": type_keyword_and_full_searchable,
                             "role_uri": type_keyword,

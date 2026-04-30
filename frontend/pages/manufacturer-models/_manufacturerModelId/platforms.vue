@@ -633,6 +633,7 @@ export default class ManufacturerModelPlatformsSearchPage extends Vue {
       types: [],
       permissionGroups: [],
       onlyOwnPlatforms: false,
+      onlySelfCreatedPlatforms: false,
       includeArchivedPlatforms: false,
       manufacturerName: this.manufacturerModel!.manufacturerName,
       model: this.manufacturerModel!.model

@@ -19,6 +19,7 @@ export interface ISiteSearchParams {
   searchText: string | null
   permissionGroups: PermissionGroup[]
   onlyOwnSites: boolean
+  onlySelfCreatedSites: boolean
   includeArchivedSites: boolean
   siteUsages: SiteUsage[]
   siteTypes: SiteType[]
@@ -58,6 +59,9 @@ export class SiteSearchParamsSerializer {
     }
     if (params.onlyOwnSites) {
       result.onlyOwnSites = String(params.onlyOwnSites)
+    }
+    if (params.onlySelfCreatedSites) {
+      result.onlySelfCreatedSites = String(params.onlySelfCreatedSites)
     }
     if (params.includeArchivedSites) {
       result.includeArchivedSites = String(params.includeArchivedSites)
@@ -113,6 +117,7 @@ export class SiteSearchParamsSerializer {
       siteUsages,
       siteTypes,
       onlyOwnSites: typeof params.onlyOwnSites !== 'undefined' && params.onlyOwnSites === 'true',
+      onlySelfCreatedSites: typeof params.onlySelfCreatedSites !== 'undefined' && params.onlySelfCreatedSites === 'true',
       includeArchivedSites: typeof params.includeArchivedSites !== 'undefined' && params.includeArchivedSites === 'true'
     }
   }

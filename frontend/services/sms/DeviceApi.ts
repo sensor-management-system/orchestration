@@ -100,6 +100,7 @@ export class DeviceApi {
   private _searchedPermissionGroups: PermissionGroup[] = []
   private _searchedUserMail: string | null = null
   private _searchedCreatorId: string | null = null
+  private _searchedContactId: string | null = null
   private _searchedIncludeArchivedDevices: boolean = false
   private _searchText: string | null = null
   private _searchManufacturerName: string | null = null
@@ -166,6 +167,15 @@ export class DeviceApi {
 
   setSearchedCreatorId (value: string | null) {
     this._searchedCreatorId = value
+    return this
+  }
+
+  get searchedContactId (): string | null {
+    return this._searchedContactId
+  }
+
+  setSearchedContactId (value: string | null) {
+    this._searchedContactId = value
     return this
   }
 
@@ -320,6 +330,7 @@ export class DeviceApi {
     this.preparePermissionGroups()
     this.prepareMail()
     this.prepareCreator()
+    this.prepareContact()
     this.prepareManufacturerName()
     this.prepareModel()
   }
@@ -340,6 +351,16 @@ export class DeviceApi {
         name: 'created_by_id',
         op: 'eq',
         val: this.searchedCreatorId
+      })
+    }
+  }
+
+  prepareContact () {
+    if (this.searchedContactId) {
+      this.filterSettings.push({
+        name: 'device_contact_roles.contact.id',
+        op: 'eq',
+        val: this.searchedContactId
       })
     }
   }

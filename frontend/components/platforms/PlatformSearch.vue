@@ -99,7 +99,10 @@ SPDX-License-Identifier: EUPL-1.2
           dense
         >
           <v-col v-if="$auth.loggedIn" cols="12" md="3">
-            <v-checkbox v-model="selectOnlyOwnPlatforms" label="Only own platforms" />
+            <v-checkbox v-model="selectOnlyOwnPlatforms" label="Search for platforms where you are listed as contact" />
+          </v-col>
+          <v-col v-if="$auth.loggedIn" cols="12" md="3">
+            <v-checkbox v-model="selectOnlySelfCreatedPlatforms" label="Search for platform entries you created in the SMS" />
           </v-col>
           <v-col cols="12" md="3">
             <v-checkbox v-model="selectIncludeArchivedPlatforms" label="Include archived platforms" />
@@ -161,6 +164,7 @@ import {
   SetSelectedSearchPlatformTypesAction,
   SetSelectedSearchPermissionGroupsAction,
   SetOnlyOwnPlatformsAction,
+  SetOnlySelfCreatedPlatformsAction,
   SetSearchTextAction,
   SetIncludeArchivedPlatformsAction
 } from '@/store/platforms'
@@ -185,6 +189,7 @@ import { SetActiveTabAction, SetBackToAction } from '@/store/appbar'
       'selectedSearchPlatformTypes',
       'selectedSearchPermissionGroups',
       'onlyOwnPlatforms',
+      'onlySelfCreatedPlatforms',
       'includeArchivedPlatforms',
       'searchText'
     ]),
@@ -203,6 +208,7 @@ import { SetActiveTabAction, SetBackToAction } from '@/store/appbar'
       'setSelectedSearchPlatformTypes',
       'setSelectedSearchPermissionGroups',
       'setOnlyOwnPlatforms',
+      'setOnlySelfCreatedPlatforms',
       'setIncludeArchivedPlatforms',
       'setSearchText'
     ]),
@@ -217,6 +223,7 @@ export default class PlatformSearch extends Vue {
   selectedSearchPlatformTypes!: PlatformsState['selectedSearchPlatformTypes']
   selectedSearchPermissionGroups!: PlatformsState['selectedSearchPermissionGroups']
   onlyOwnPlatforms!: PlatformsState['onlyOwnPlatforms']
+  onlySelfCreatedPlatforms!: PlatformsState['onlySelfCreatedPlatforms']
   searchText!: PlatformsState['searchText']
   includeArchivedPlatforms!: PlatformsState['includeArchivedPlatforms']
   setSelectedSearchManufacturers!: SetSelectedSearchManufacturersAction
@@ -224,6 +231,7 @@ export default class PlatformSearch extends Vue {
   setSelectedSearchPlatformTypes!: SetSelectedSearchPlatformTypesAction
   setSelectedSearchPermissionGroups!: SetSelectedSearchPermissionGroupsAction
   setOnlyOwnPlatforms!: SetOnlyOwnPlatformsAction
+  setOnlySelfCreatedPlatforms !: SetOnlySelfCreatedPlatformsAction
   setIncludeArchivedPlatforms!: SetIncludeArchivedPlatformsAction
   setSearchText!: SetSearchTextAction
   loadEquipmentstatus!: LoadEquipmentstatusAction
@@ -286,6 +294,14 @@ export default class PlatformSearch extends Vue {
     this.setOnlyOwnPlatforms(newVal)
   }
 
+  get selectOnlySelfCreatedPlatforms () {
+    return this.onlySelfCreatedPlatforms
+  }
+
+  set selectOnlySelfCreatedPlatforms (newval) {
+    this.setOnlySelfCreatedPlatforms(newval)
+  }
+
   get selectIncludeArchivedPlatforms () {
     return this.includeArchivedPlatforms
   }
@@ -308,6 +324,7 @@ export default class PlatformSearch extends Vue {
     this.selectedPlatformTypes = []
     this.selectedPermissionGroups = []
     this.selectOnlyOwnPlatforms = false
+    this.selectOnlySelfCreatedPlatforms = false
     this.selectIncludeArchivedPlatforms = false
     this.searchedText = ''
   }
@@ -332,6 +349,7 @@ export default class PlatformSearch extends Vue {
 
   isExtendedSearch (): boolean {
     return this.onlyOwnPlatforms === true ||
+    this.onlySelfCreatedPlatforms === true ||
       !!this.selectedSearchStates.length ||
       !!this.selectedSearchPlatformTypes.length ||
       !!this.selectedSearchManufacturers.length ||
@@ -350,6 +368,7 @@ export default class PlatformSearch extends Vue {
     this.selectedStates = []
     this.selectedPlatformTypes = []
     this.selectOnlyOwnPlatforms = false
+    this.selectOnlySelfCreatedPlatforms = false
     this.selectIncludeArchivedPlatforms = false
     this.$emit('basic-search')
     this.runSearch()
@@ -404,6 +423,9 @@ export default class PlatformSearch extends Vue {
     }
     if (searchParamsObject.onlyOwnPlatforms) {
       this.selectOnlyOwnPlatforms = searchParamsObject.onlyOwnPlatforms
+    }
+    if (searchParamsObject.onlySelfCreatedPlatforms) {
+      this.selectOnlySelfCreatedPlatforms = searchParamsObject.onlySelfCreatedPlatforms
     }
     if (searchParamsObject.includeArchivedPlatforms) {
       this.selectIncludeArchivedPlatforms = searchParamsObject.includeArchivedPlatforms

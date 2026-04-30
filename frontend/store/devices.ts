@@ -274,8 +274,12 @@ const actions: ActionTree<DevicesState, RootState> = {
     state
   }: { commit: Commit, state: DevicesState }, searchParams: IDeviceSearchParams): Promise<void> {
     let userId = null
-    if (searchParams.onlyOwnDevices) {
+    let contactId = null
+    if (searchParams.onlySelfCreatedDevices) {
       userId = this.getters['permissions/userId']
+    }
+    if (searchParams.onlyOwnDevices) {
+      contactId = this.getters['permissions/contactId']
     }
 
     const {
@@ -288,6 +292,7 @@ const actions: ActionTree<DevicesState, RootState> = {
       .setSearchedDeviceTypes(searchParams.types)
       .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedCreatorId(userId)
+      .setSearchedContactId(contactId)
       .setSearchIncludeArchivedDevices(searchParams.includeArchivedDevices)
       .setSearchManufacturerName(searchParams.manufacturerName)
       .setSearchModel(searchParams.model)
