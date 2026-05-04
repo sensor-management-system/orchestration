@@ -15,6 +15,7 @@ Added:
 
 Fixed:
 - Resolved the MC make bucket issue for FZJ ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/680)) 
+- Fixed a bug in the function to update the cv names in the backend with their current value in the cv ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/691))
 
 ## 1.27.0 - 2026-04-15
 
