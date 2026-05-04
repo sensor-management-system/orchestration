@@ -629,7 +629,7 @@ def cv_group(ctx):
             {
                 "device_type_uri": "device_type_name",
                 "manufacturer_uri": "manufacturer_name",
-                "status_uri": "status_uri",
+                "status_uri": "status_name",
             },
         ),
         (models.DeviceContactRole, {"role_uri": "role_name"}),
@@ -700,7 +700,7 @@ def cv_group(ctx):
             models.Site,
             {
                 "site_type_uri": "site_type_name",
-                "site_usage_uri": "site_usage_uri",
+                "site_usage_uri": "site_usage_name",
             },
         ),
         (models.SiteContactRole, {"role_uri": "role_name"}),
