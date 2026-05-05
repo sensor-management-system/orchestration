@@ -127,7 +127,7 @@ class PlatformSchema(Schema):
         include_resource_linkage=True,
         many=True,
         schema="PlatformMountActionSchema",
-        type_="platform_mount_actions",
+        type_="platform_mount_action",
         id_field="id",
     )
     platform_software_update_actions = Relationship(
@@ -145,7 +145,7 @@ class PlatformSchema(Schema):
         include_resource_linkage=True,
         many=True,
         schema="PlatformMountActionSchema",
-        type_="platform_mount_actions",
+        type_="platform_mount_action",
         id_field="id",
     )
     outer_device_mount_actions = Relationship(
