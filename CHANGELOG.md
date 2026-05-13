@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.27.1 (Unreleased)
+## 1.27.2 (Unreleased)
+
+## 1.27.1 - 2026-05-13
 
 Added:
 - [UFZ] Replaced Bitnami-ElasticSearch Images with standard upstream ES-Image (bumped Helm-Chart) ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/687))
