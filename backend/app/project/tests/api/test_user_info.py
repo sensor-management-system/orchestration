@@ -192,7 +192,7 @@ class TestUserinfo(BaseTestCase):
                 self.url,
             )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json["data"]["attributes"]["subject"], "dummy")
+        self.assertEqual(response.json["data"]["attributes"]["subject"], user1.subject)
 
     @fixtures.use
     def test_get_includes_terms_of_use_agreement_date(self, user1):
@@ -225,4 +225,31 @@ class TestUserinfo(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.json["data"]["attributes"]["terms_of_use_agreement_date"], None
+        )
+
+    @fixtures.use
+    def test_get_includes_all_permission_groups_for_superuser(
+        self, user1, group1, group2
+    ):
+        """Ensure that all the existing permission groups are included for a super user."""
+        # First if we run it as a normal user, the member array is empty.
+        with self.run_requests_as(user1):
+            response = self.client.get(
+                self.url,
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["data"]["attributes"]["member"], [])
+        # Then we promote the user to be a super user.
+        user1.is_superuser = True
+        db.session.add(user1)
+        db.session.commit()
+
+        with self.run_requests_as(user1):
+            response = self.client.get(
+                self.url,
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            set(response.json["data"]["attributes"]["member"]),
+            set([str(group1.id), str(group2.id)]),
         )

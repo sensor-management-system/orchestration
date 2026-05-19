@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.27.2 (Unreleased)
 
+Fixed:
+- Include now all the permission groups as membered for super users ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/697))
+
 ## 1.27.1 - 2026-05-13
 
 Added:

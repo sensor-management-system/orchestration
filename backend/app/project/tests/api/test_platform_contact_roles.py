@@ -79,6 +79,18 @@ def create_platform_contact(public_platform1_in_group1, super_user_contact):
     return result
 
 
+@fixtures.register("user1", scope=lambda: db.session)
+@fixtures.use(["platform_contact"])
+def create_user1(platform_contact):
+    """Create normal user to use it in the tests."""
+    result = User(
+        contact=platform_contact.contact, subject=platform_contact.contact.email
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
 @fixtures.register("membership_of_user1_in_group1", scope=lambda: db.session)
 @fixtures.use(["user1", "group1"])
 def create_membership_of_user1_in_group1(user1, group1):

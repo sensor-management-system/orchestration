@@ -12,7 +12,7 @@ from flask import g
 from flask_rest_jsonapi import ResourceList
 
 from ..helpers.errors import MethodNotAllowed, UnauthorizedError
-from ..models import User
+from ..models import PermissionGroup, User
 from ..models.base_model import db
 
 
@@ -41,12 +41,17 @@ class UserInfo(ResourceList):
             db.session.add(g.user)
             db.session.commit()
 
+        if g.user.is_superuser:
+            member = [str(p.id) for p in db.session.query(PermissionGroup).all()]
+        else:
+            member = [str(m.permission_group.id) for m in g.user.memberships]
+
         data = {
             "data": {
                 "type": "user",
                 "id": str(g.user.id),
                 "attributes": {
-                    "member": [str(m.permission_group.id) for m in g.user.memberships],
+                    "member": member,
                     "active": g.user.active,
                     "is_superuser": g.user.is_superuser,
                     "is_export_control": g.user.is_export_control,

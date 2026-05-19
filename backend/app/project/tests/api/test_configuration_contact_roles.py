@@ -79,8 +79,8 @@ def create_super_user(super_user_contact):
 def create_normal_user(configuration_contact):
     """Create a normal user to use it in the tests."""
     result = User(
-        contact=configuration_contact,
-        subject=configuration_contact.email,
+        contact=configuration_contact.contact,
+        subject=configuration_contact.contact.email,
     )
     db.session.add(result)
     db.session.commit()

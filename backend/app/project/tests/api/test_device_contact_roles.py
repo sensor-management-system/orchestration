@@ -83,7 +83,7 @@ def create_device_contact(public_device1_in_group1, super_user_contact):
 @fixtures.use(["device_contact"])
 def create_user1(device_contact):
     """Create normal user to use it in the tests."""
-    result = User(contact=device_contact, subject=device_contact.email)
+    result = User(contact=device_contact.contact, subject=device_contact.contact.email)
     db.session.add(result)
     db.session.commit()
     return result
