@@ -1373,11 +1373,12 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         )
         self.ensure_device_mount_action_exists(data1, x_property1)
 
-        _ = super().add_object(
-            url=self.url,
-            data_object=data1,
-            object_type=self.object_type,
-        )
+        with self.run_requests_as(super_user):
+            _ = super().add_object(
+                url=self.url,
+                data_object=data1,
+                object_type=self.object_type,
+            )
         data2, x_property2 = self.prepare_request_data_with_x_property(
             "test dynamic_location_begin_action2"
         )

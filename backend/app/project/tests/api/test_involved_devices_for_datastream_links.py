@@ -104,8 +104,18 @@ def create_user1(contact1):
 @fixtures.register("membership_of_user1_in_right_group", scope=lambda: db.session)
 @fixtures.use(["right_group", "user1"])
 def create_membership_of_user1_in_group1(right_group, user1):
-    """Create a normal user to use it in the tests."""
+    """Create a normal user membership to use it in the tests."""
     result = PermissionGroupMembership(permission_group=right_group, user=user1)
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("membership_of_user1_in_wrong_group", scope=lambda: db.session)
+@fixtures.use(["wrong_group", "user1"])
+def create_membership_of_user1_in_group2(wrong_group, user1):
+    """Create a memership for the normal user in the other group."""
+    result = PermissionGroupMembership(permission_group=wrong_group, user=user1)
     db.session.add(result)
     db.session.commit()
     return result
@@ -812,7 +822,7 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             label="Other configuration",
             is_public=True,
             is_internal=False,
-            cfg_permission_group=right_group,
+            cfg_permission_group=str(right_group.id),
         )
         public_cr_1000 = cr_1000_mount.device
         cr_1000_mount.configuration = other_configuration
@@ -1203,6 +1213,8 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
         tsm_endpoint,
         user1,
         cr_1000_involvement_for_soil_moisture_datastream_link,
+        membership_of_user1_in_right_group,
+        membership_of_user1_in_wrong_group,
     ):
         """Ensure we can change to a device we are allowed to edit."""
         other_smt_100 = Device(

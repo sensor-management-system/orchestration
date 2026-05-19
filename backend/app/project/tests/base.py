@@ -10,6 +10,7 @@
 
 import datetime
 import functools
+import inspect
 import json
 import os
 import re
@@ -233,7 +234,17 @@ class Fixtures:
 
         return inner
 
-    def use(self, requested_fixtures, name_mappings=None):
+    def use(self, *args, **kwargs):
+        """Make use of the fixtures in a test function."""
+        if len(args) == 1 and not kwargs and callable(args[0]):
+            # This is the case that we just got a function to wrap.
+            # We will try to read the names from the signature.
+            return self.use_implicitly(*args, **kwargs)
+        # Otherwise, we can expect that we got some explicit names
+        # of the registered fixtures.
+        return self.use_explicitly(*args, **kwargs)
+
+    def use_explicitly(self, requested_fixtures, name_mappings=None):
         """
         Inject the fixture results in the parameters of the called function.
 
@@ -262,6 +273,25 @@ class Fixtures:
             return wrapper
 
         return inner
+
+    def use_implicitly(self, f):
+        """Provide the fixture data implicitly.
+
+        This will extract the names from the test function signature (instead
+        of expecting a list of registered fixture entries).
+        """
+
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            signature = inspect.signature(f)
+            parameters = [x for x in signature.parameters if x != "self"]
+            for name in parameters:
+                if name in self.functions.keys():
+                    value = self.functions[name]()
+                    kwargs[name] = value
+            return f(*args, **kwargs)
+
+        return wrapper
 
 
 class Expectation:

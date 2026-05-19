@@ -1191,7 +1191,7 @@ class TestPlatformImageServices(BaseTestCase):
         self,
         user1,
         image1_of_attachment1_of_public_platform1_in_group1,
-        membered_permission_groups,
+        membership_of_user1_in_group1,
     ):
         """Ensure we can patch if we are a member of one of the groups."""
         payload = {
