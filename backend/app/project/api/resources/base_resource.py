@@ -21,6 +21,7 @@ from ..models import (
     Contact,
     Device,
     DeviceAttachment,
+    ExportControlAttachment,
     Platform,
     PlatformAttachment,
     Site,
@@ -59,7 +60,12 @@ def delete_attachments_in_minio_by_url(internal_url):
     """
     still_in_use = False
     if internal_url:
-        for model in [DeviceAttachment, PlatformAttachment, ConfigurationAttachment]:
+        for model in [
+            DeviceAttachment,
+            ExportControlAttachment,
+            PlatformAttachment,
+            ConfigurationAttachment,
+        ]:
             possible_entry = (
                 db.session.query(model).filter_by(internal_url=internal_url).first()
             )
