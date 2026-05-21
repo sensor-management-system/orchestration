@@ -552,7 +552,7 @@ build-deploy-image-mc-fzj-prod:
   script:
     - |
         docker build --tag "$CI_REGISTRY_IMAGE/mc:fzj-prod-latest" -f docker/build/mc/fzj/prod/Dockerfile \
-          docker/build/mc/fzj/dev
+          docker/build/mc/fzj/prod
     - docker push "$CI_REGISTRY_IMAGE/mc:fzj-prod-latest"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'

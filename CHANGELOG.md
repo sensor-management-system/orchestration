@@ -12,6 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 Fixed:
 - Include now all the permission groups as membered for super users ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/697))
 - Also check export control attachments when deleting files on minio side ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/699))
+- The directory of the MC image Dockerfile has been updated for the FZJ prod instance. ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/698))
 
 ## 1.27.1 - 2026-05-13
 
