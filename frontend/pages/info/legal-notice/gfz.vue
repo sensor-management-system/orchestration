@@ -59,9 +59,9 @@ SPDX-License-Identifier: EUPL-1.2
       </h2>
       <p>
         Editorial responsibility for this website in accordance with § 18 (2) of the State Media Treaty:<br>
-        Dr. Claire Donnelly (Head of <a href="https://www.gfz.de/en/section/escience-centre" target="_blank">eScience-Centre</a>)<br>
-        Phone: +49 331 6264-3557<br>
-        E-Mail: <a href="mailto:claire.barbara.donnelly@gfz.de">claire.barbara.donnelly@gfz.de</a>
+        Marc Hanisch (Head of <a href="https://www.gfz.de/en/section/escience-centre" target="_blank">eScience-Centre</a>)<br>
+        Phone: +49 331 6264-28929<br>
+        E-Mail: <a href="mailto:marc.hanisch@gfz.de">marc.hanisch@gfz.de</a>
       </p>
       <p>
         Editor, conception, coordination (<a href="https://sensors.gfz.de">sensors.gfz.de</a>)<br>

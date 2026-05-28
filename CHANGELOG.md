@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.27.3 (Unreleased)
 
+Changed:
+- Section head for GFZ escience centre is M. Hanisch at the moment ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/701))
+
 ## 1.27.2 - 2026-05-21
 
 Fixed:
