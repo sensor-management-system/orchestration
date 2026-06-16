@@ -27,7 +27,7 @@ Added:
 - Minio bucket and MC has been configured for the FZJ prod instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/689))
 
 Changed:
-- Extended search seperates between entries where the user was the creator and those where the user is a contact for ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/orchestration/-/merge_requests/690))
+- Extended search seperates between entries where the user was the creator and those where the user is a contact for ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/690))
 
 Fixed:
 - Resolved the MC make bucket issue for FZJ ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/680)) 
