@@ -1,10 +1,10 @@
-# SPDX-FileCopyrightText: 2022 - 2024
+# SPDX-FileCopyrightText: 2022 - 2026
 # - Hannes Bohring <hannes.bohring@ufz.de>
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-FROM nginx:1.25-alpine
+FROM nginx:1.31-alpine
 
 COPY ./backend/docker/build/nginx/ufz/nginx.conf /etc/nginx/nginx.conf
 COPY ./backend/docker/build/nginx/ufz/default.conf /etc/nginx/conf.d/default.conf
