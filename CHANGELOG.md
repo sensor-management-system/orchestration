@@ -12,6 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 Changed:
 - Section head for GFZ escience centre is M. Hanisch at the moment ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/701))
 - Patch Nginx in Dockerimages for UFZ due to security-issues ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/703))
+- KIT docker deployment: bump base images / versions for backend, frontend and nginx ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/705))
 
 ## 1.27.2 - 2026-05-21
 
