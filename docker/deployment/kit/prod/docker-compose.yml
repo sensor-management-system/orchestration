@@ -25,7 +25,7 @@ services:
             - sms
 
     backend:
-        image: python:3.11-slim-bookworm
+        image: python:3.11-slim-trixie
         restart: unless-stopped
         container_name: sms_backend
         working_dir: /usr/src/app
@@ -112,7 +112,7 @@ services:
         command: -p 5433
 
     frontend:
-        image: node:22.17-bookworm-slim
+        image: node:22.23-bookworm-slim
         container_name: sms_frontend
         working_dir: /home/node/
         user: "node"
@@ -185,7 +185,7 @@ services:
             "
 
     nginx:
-        image: nginx:1.29-alpine
+        image: nginx:1.31.2-alpine
         container_name: sms_web
         ports:
             - 80:80
