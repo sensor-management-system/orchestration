@@ -838,7 +838,6 @@ deploy-gfz-prod:
     PID_SERVICE_USER: ${GFZ_PID_SERVICE_USER}
     PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
     SMS_VERSION: ${CI_COMMIT_TAG}
-    MATTERMOST_RELEASE_NOTIFICATION_HOOK: ${MATTERMOST_RELEASE_NOTIFICATION_HOOK}
     MQTT_USERNAME: ${GFZ_PROD_MQTT_USERNAME}
     MQTT_PASSWORD: ${GFZ_PROD_MQTT_PASSWORD}
     MQTT_AUTH_DB: ${GFZ_PROD_MQTT_AUTH_DB}
@@ -856,12 +855,6 @@ deploy-gfz-prod:
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml up -d
     - docker image prune --all --force
-    # Curl is already installed on the deployment machine
-    - >
-      curl \
-        -X POST ${MATTERMOST_RELEASE_NOTIFICATION_HOOK} \
-        -H "Content-Type: application/json" \
-        -d "{\"text\":\"@here SMS version $SMS_VERSION released on https://sensors.gfz.de\"}"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
