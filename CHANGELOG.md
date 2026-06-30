@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.27.4 (Unreleased)
 
+Changed:
+- Removed mattermost release notification ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/710))
+
 ## 1.27.3 - 2026-06-23
 
 Changed:
