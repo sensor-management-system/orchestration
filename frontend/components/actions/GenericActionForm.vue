@@ -1,9 +1,11 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2024
+SPDX-FileCopyrightText: 2020 - 2026
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
+- Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -117,6 +119,10 @@ export default class GenericActionForm extends Vue {
     this.createActionCopy(this.value)
   }
 
+  mounted () {
+    this.defaultUpdateDate()
+  }
+
   /**
    * sets the start date and validates start- and enddate
    *
@@ -155,7 +161,8 @@ export default class GenericActionForm extends Vue {
    *
    */
   checkValidationOfDates () {
-    return (this.$refs.datesForm as Vue & { validate: () => boolean }).validate()
+    const formRef = this.$refs.datesForm as (Vue & { validate: () => boolean }) | undefined
+    return formRef ? formRef.validate() : true
   }
 
   /**
@@ -222,10 +229,27 @@ export default class GenericActionForm extends Vue {
     this.actionCopy = GenericAction.createFromObject(action)
   }
 
-  @Watch('value', { immediate: true, deep: true })
+  @Watch('value')
   // @ts-ignore
   onValueChanged (val: GenericAction) {
     this.createActionCopy(val)
+  }
+
+  /**
+   * Ensure Start date has a default (UTC, minute precision) and emit the change.
+   */
+  private defaultUpdateDate () {
+    if (!this.actionCopy.beginDate) {
+      this.actionCopy.beginDate = DateTime.utc().startOf('minute')
+      this.$emit('input', this.actionCopy)
+      this.$nextTick(() => {
+        const formRef = this.$refs.datesForm as (Vue & { resetValidation: () => void }) | undefined
+        if (formRef && (formRef as any).resetValidation) {
+          formRef.resetValidation()
+        }
+        this.datesAreValid = true
+      })
+    }
   }
 }
 </script>

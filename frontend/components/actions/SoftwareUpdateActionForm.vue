@@ -1,8 +1,10 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2024
+SPDX-FileCopyrightText: 2020 - 2026
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -219,6 +221,10 @@ export default class SoftwareUpdateActionForm extends Vue {
     this.createActionCopy(this.value)
   }
 
+  mounted () {
+    this.defaultUpdateDate()
+  }
+
   /**
    * sets the update date and validates
    *
@@ -270,7 +276,8 @@ export default class SoftwareUpdateActionForm extends Vue {
    *
    */
   checkValidationOfDates () {
-    return (this.$refs.datesForm as Vue & { validate: () => boolean }).validate()
+    const formRef = this.$refs.datesForm as (Vue & { validate: () => boolean }) | undefined
+    return formRef ? formRef.validate() : true
   }
 
   /**
@@ -319,10 +326,27 @@ export default class SoftwareUpdateActionForm extends Vue {
     this.actionCopy = SoftwareUpdateAction.createFromObject(action)
   }
 
-  @Watch('value', { immediate: true, deep: true })
+  @Watch('value')
   // @ts-ignore
   onValueChanged (val: SoftwareUpdateAction) {
     this.createActionCopy(val)
+  }
+
+  /**
+   * Ensure Update date has a default (today, UTC) and emit the change.
+   */
+  private defaultUpdateDate () {
+    if (!this.actionCopy.updateDate) {
+      this.actionCopy.updateDate = DateTime.utc().startOf('minute')
+      this.$emit('input', this.actionCopy)
+      this.$nextTick(() => {
+        const formRef = this.$refs.datesForm as (Vue & { resetValidation: () => void }) | undefined
+        if (formRef && (formRef as any).resetValidation) {
+          formRef.resetValidation()
+        }
+        this.datesAreValid = true
+      })
+    }
   }
 }
 </script>

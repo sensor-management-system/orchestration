@@ -1,8 +1,10 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2026
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -122,6 +124,10 @@ export default class ParameterChangeActionForm extends Vue {
     this.createActionCopy(this.value)
   }
 
+  mounted () {
+    this.updateCurrentDate()
+  }
+
   setDate (aDate: DateTime | null) {
     this.actionCopy.date = aDate
     this.$emit('input', this.actionCopy)
@@ -184,10 +190,24 @@ export default class ParameterChangeActionForm extends Vue {
     this.actionCopy = ParameterChangeAction.createFromObject(action)
   }
 
-  @Watch('value', { immediate: true, deep: true })
+  @Watch('value')
   onValueChanged (val: ParameterChangeAction) {
     if (val) {
       this.createActionCopy(val)
+    }
+  }
+
+  /**
+   * Ensure Update current date has a default (today, UTC) and emit the change.
+   */
+  private updateCurrentDate () {
+    if (!this.actionCopy.date) {
+      this.actionCopy.date = DateTime.utc().startOf('minute')
+      this.$emit('input', this.actionCopy)
+      this.$nextTick(() => {
+        const formRef = this.$refs.actionForm as (Vue & { resetValidation?: () => void }) | undefined
+        formRef?.resetValidation?.()
+      })
     }
   }
 }
