@@ -143,6 +143,9 @@ SPDX-License-Identifier: EUPL-1.2
     <v-row>
       <v-col cols="12" md="3">
         <label>Accuracy</label>
+        <template v-if="value.accuracy && value.accuracy !== 0">
+          ±
+        </template>
         {{ value.accuracy | orDefault }}
       </v-col>
       <v-col cols="12" md="3">

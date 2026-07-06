@@ -416,7 +416,7 @@ SPDX-License-Identifier: EUPL-1.2
       <v-row>
         <v-col cols="12" md="3">
           <v-text-field
-            label="Accuracy"
+            label="Accuracy (±)"
             :value="value.accuracy"
             :readonly="readonly"
             :disabled="readonly"

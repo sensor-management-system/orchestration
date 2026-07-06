@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.27.4 (Unreleased)
 
+Added:
+- Added ± symbol for the accuracy fields ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/713))
+
 Changed:
 - Removed mattermost release notification ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/710))
 
