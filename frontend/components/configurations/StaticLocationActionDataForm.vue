@@ -1,11 +1,13 @@
 <!--
-SPDX-FileCopyrightText: 2022 - 2023
+SPDX-FileCopyrightText: 2022 - 2026
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tim Eder <tim.eder@ufz.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
+- Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+- Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -145,11 +147,6 @@ SPDX-License-Identifier: EUPL-1.2
               @change="update('beginContact', $event)"
             />
           </v-col>
-          <v-col v-if="currentUserContactId" cols="12" md="1" align-self="center">
-            <v-btn small @click="selectCurrentUserAsContact(typeBeginContact)">
-              {{ labelForSelectMeButton }}
-            </v-btn>
-          </v-col>
         </v-row>
       </v-card-text>
       <v-divider class="mx-4 mt-4" />
@@ -244,6 +241,7 @@ import { PermissionsState } from '@/store/permissions'
 })
 export default class StaticLocationActionDataForm extends mixins(Rules) {
   private readonly labelForSelectMeButton = 'Add current user'
+
   @Prop({
     default: () => new StaticLocationAction(),
     required: true,
@@ -251,7 +249,6 @@ export default class StaticLocationActionDataForm extends mixins(Rules) {
   })
   readonly value!: StaticLocationAction
 
-  private readonly typeBeginContact = 'beginContact'
   private readonly typeEndContact = 'endContact'
 
   // vuex definition for typescript check
@@ -261,6 +258,10 @@ export default class StaticLocationActionDataForm extends mixins(Rules) {
   configuration!: ConfigurationsState['configuration']
   locationActionTimepointsExceptPassedIdAndType!: LocationActionTimepointsExceptPassedIdAndTypeTypeGetter
   userInfo!: PermissionsState['userInfo']
+
+  mounted () {
+    this.prefillDefaults()
+  }
 
   get currentUserContactId (): string | null {
     return this.userInfo?.contactId as string | null
@@ -339,14 +340,19 @@ export default class StaticLocationActionDataForm extends mixins(Rules) {
   }
 
   selectCurrentUserAsContact (type: string) {
-    if (this.currentUserContactId) {
-      const foundUser = this.contacts.find((c: Contact) => c.id === this.currentUserContactId)
-      if (foundUser) {
-        this.update(type, foundUser)
-        return
-      }
+    const currentUserContact = this.findCurrentUserContact()
+    if (currentUserContact) {
+      this.update(type, currentUserContact)
+      return
     }
     this.$store.commit('snackbar/setError', 'No contact found with your data')
+  }
+
+  findCurrentUserContact (): Contact | null {
+    if (!this.currentUserContactId || !this.contacts?.length) {
+      return null
+    }
+    return this.contacts.find((c: Contact) => c.id === this.currentUserContactId) ?? null
   }
 
   get timepointsExceptCurrentlyEdited () {
@@ -370,6 +376,31 @@ export default class StaticLocationActionDataForm extends mixins(Rules) {
       Validator.endDateMustBeBeforeNextAction(this.value.beginDate, this.value.endDate, this.timepointsExceptCurrentlyEdited),
       Validator.dateMustBeInRangeOfConfigurationDates(this.configuration, this.value.endDate)
     ]
+  }
+
+  /**
+   * Prefill begin date and begin contact when possible.
+  */
+  prefillDefaults () {
+    const copy = StaticLocationAction.createFromObject(this.value)
+    let hasChanges = false
+
+    if (!copy.beginDate) {
+      copy.beginDate = DateTime.utc()
+      hasChanges = true
+    }
+
+    const currentUserContact = this.findCurrentUserContact()
+    if (currentUserContact && !copy.beginContact) {
+      copy.beginContact = currentUserContact
+      hasChanges = true
+    } else if (this.currentUserContactId && this.contacts?.length && !currentUserContact) {
+      this.$store.commit('snackbar/setError', 'No contact found with your data')
+    }
+
+    if (hasChanges) {
+      this.$emit('input', copy)
+    }
   }
 }
 </script>

@@ -1,8 +1,10 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2026
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -36,11 +38,6 @@ SPDX-License-Identifier: EUPL-1.2
             :rules="rules"
           />
         </v-form>
-      </v-col>
-      <v-col cols="12" md="1" align-self="center">
-        <v-btn small @click="selectCurrentUserAsContact">
-          {{ labelForSelectMeButton }}
-        </v-btn>
       </v-col>
     </v-row>
     <v-row
@@ -108,7 +105,6 @@ import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 })
 export default class CommonActionForm extends Vue {
   private contacts: Contact[] = []
-  private readonly labelForSelectMeButton = 'Add current user'
   private contactIsValid = true
 
   /**
@@ -158,9 +154,14 @@ export default class CommonActionForm extends Vue {
   async fetch () {
     try {
       this.contacts = await this.$api.contacts.findAll()
+      this.autoSelectCurrentUser()
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
     }
+  }
+
+  mounted () {
+    this.autoSelectCurrentUser()
   }
 
   get description (): string {
@@ -227,19 +228,19 @@ export default class CommonActionForm extends Vue {
   }
 
   /**
-   * selects the current (loggined) user from the list of users and adds the
-   * user to the action
-   *
+   * Auto-select the current user as contact.
+   * Runs after contacts load (fetch) and once on mount.
    */
-  selectCurrentUserAsContact () {
-    if (this.currentUserContactId) {
-      const userIndex = this.contacts.findIndex(c => c.id === this.currentUserContactId)
-      if (userIndex > -1) {
-        this.contact = this.contacts[userIndex]
-        return
-      }
+  autoSelectCurrentUser () {
+    if (this.contact) { return }
+    if (!this.currentUserContactId || !this.contacts.length) { return }
+
+    const idx = this.contacts.findIndex(c => c.id === this.currentUserContactId)
+    if (idx > -1) {
+      this.contact = this.contacts[idx]
+    } else {
+      this.$store.commit('snackbar/setError', 'No contact found with your data')
     }
-    this.$store.commit('snackbar/setError', 'No contact found with your data')
   }
 
   /**

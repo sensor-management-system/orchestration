@@ -1,10 +1,12 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2026
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
 - Tim Eder <tim.eder@ufz.de>
+- Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -69,11 +71,6 @@ SPDX-License-Identifier: EUPL-1.2
                   @change="update(constList.beginContact, $event)"
                 />
               </v-col>
-              <v-col v-if="currentUserContactId" align-self="center">
-                <v-btn small @click="selectCurrentUserAsContact(constList.typeBeginContact)">
-                  {{ labelForSelectMeButton }}
-                </v-btn>
-              </v-col>
             </v-row>
             <v-row>
               <v-col>
@@ -110,11 +107,6 @@ SPDX-License-Identifier: EUPL-1.2
                   :rules="[rules.required]"
                   @change="update(constList.endContact, $event)"
                 />
-              </v-col>
-              <v-col v-if="currentUserContactId" align-self="center">
-                <v-btn small @click="selectCurrentUserAsContact(constList.typeEndContact)">
-                  {{ labelForSelectMeButton }}
-                </v-btn>
               </v-col>
             </v-row>
             <v-row>
@@ -160,10 +152,7 @@ export default class DynamicLocationActionInfoForm extends mixins(Rules) {
   })
   readonly value!: DynamicLocationAction
 
-  private readonly labelForSelectMeButton = 'Add current user'
   private constList = {
-    typeBeginContact: 'beginContact',
-    typeEndContact: 'endContact',
     epsgCode: 'epsgCode',
     elevationDatum: 'elevationDatum',
     beginContact: 'beginContact',
@@ -228,19 +217,39 @@ export default class DynamicLocationActionInfoForm extends mixins(Rules) {
     this.$emit('input', newObj)
   }
 
-  selectCurrentUserAsContact (type: string) {
-    if (this.currentUserContactId) {
-      const foundUser = this.contacts.find((c: Contact) => c.id === this.currentUserContactId)
-      if (foundUser) {
-        this.update(type, foundUser)
-        return
-      }
-    }
-    this.$store.commit('snackbar/setError', 'No contact found with your data')
-  }
-
   public validateForm (): boolean {
     return (this.$refs.DynamicLocationActionInfoForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  /**
+   * Try to auto-select current user as beginContact / endContact (if empty).
+   * Shows a snackbar if we do have an id + contacts list but can’t find a match.
+   */
+  autoSelectContacts () {
+    if (!this.currentUserContactId || !this.contacts?.length) {
+      return
+    }
+    const found = this.contacts.find((c: Contact) => c.id === this.currentUserContactId)
+    if (!found) {
+      this.$store.commit('snackbar/setError', 'No contact found with your data')
+      return
+    }
+    const patch: Partial<DynamicLocationAction> = {}
+
+    // Don’t overwrite if user already picked someone
+    if (!this.value.beginContact) {
+      patch.beginContact = found
+    }
+    // Only set endContact if an endDate exists (end section is shown)
+    if (this.value.endDate && !this.value.endContact) {
+      patch.endContact = found
+    }
+
+    if (Object.keys(patch).length) {
+      const newObj = DynamicLocationAction.createFromObject(this.value)
+      Object.assign(newObj, patch)
+      this.$emit('input', newObj)
+    }
   }
 }
 </script>

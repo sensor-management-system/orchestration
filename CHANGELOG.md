@@ -14,6 +14,7 @@ Added:
 
 Changed:
 - Removed mattermost release notification ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/710))
+- Automatically set the current user and the current date when creating actions ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/567))
 
 ## 1.27.3 - 2026-06-23
 
