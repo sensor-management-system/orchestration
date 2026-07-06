@@ -12,6 +12,9 @@ SPDX-License-Identifier: EUPL-1.2
 Changed:
 - Removed mattermost release notification ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/710))
 
+Fixed:
+- The sql/preset-development-and-test-data.sql.example script was fixed with respect to the fields for dual use, identifier type and schema version ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/708))
+
 ## 1.27.3 - 2026-06-23
 
 Changed:
