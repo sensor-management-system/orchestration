@@ -7,7 +7,6 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-version: '3.9'
 services:
 
   elastic-search:

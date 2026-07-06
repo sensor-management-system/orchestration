@@ -5,8 +5,6 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-version : '3.3'
-
 services:
   nginx:
     image: ${CI_REGISTRY_IMAGE}/nginx:${NGINX_IMAGE_TAG:-gfz-latest}
