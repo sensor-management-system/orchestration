@@ -51,8 +51,6 @@ class DeviceSchema(Schema):
     model = fields.Str(allow_none=True)
     inventory_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
-    schema_version = fields.Str(allow_none=True)
-    identifier_type = fields.Str(allow_none=True)
     website = fields.Str(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)

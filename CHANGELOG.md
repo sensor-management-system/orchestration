@@ -15,6 +15,7 @@ Added:
 Changed:
 - Removed mattermost release notification ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/710))
 - Automatically set the current user and the current date when creating actions ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/567))
+- Removed the unused schema version and identifier type fields from the device and platform schema ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/716))
 
 Fixed:
 - The sql/preset-development-and-test-data.sql.example script was fixed with respect to the fields for dual use, identifier type and schema version ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/708))
