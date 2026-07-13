@@ -76,7 +76,7 @@ class PidList(ResourceList):
 
         instrument.persistent_identifier = persistent_identifier
         instrument.update_description = "create;persistent identifier"
-        instrument.updated_at = datetime.datetime.utcnow()
+        instrument.updated_at = datetime.datetime.now(datetime.timezone.utc)
         instrument.updated_by = g.user
 
         db.session.add(instrument)

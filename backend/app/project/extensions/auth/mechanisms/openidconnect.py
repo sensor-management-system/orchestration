@@ -88,7 +88,7 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             exp = jwt_attributes["exp"]
         except Exception:
             exp = (
-                datetime.datetime.utcnow()
+                datetime.datetime.now(datetime.timezone.utc)
                 + datetime.timedelta(
                     seconds=current_app.config.get("OIDC_TOKEN_CACHING_SECONDS", 600)
                 )
@@ -110,7 +110,11 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
                 user_info = self.get_userinfo(authorization)
             else:
                 user_info = self.cache.get(authorization)
-                if user_info and user_info.exp > datetime.datetime.utcnow().timestamp():
+                if (
+                    user_info
+                    and user_info.exp
+                    > datetime.datetime.now(datetime.timezone.utc).timestamp()
+                ):
                     logger.debug("Used the cache")
                     cache_used = True
                 else:
