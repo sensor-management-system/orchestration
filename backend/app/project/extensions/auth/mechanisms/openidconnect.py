@@ -8,9 +8,12 @@
 
 """OpenIDConnect authentication mechanism."""
 
+import collections
+import datetime
 import fnmatch
 import logging
 
+import jwt
 import requests
 from cachetools import TTLCache
 from flask import current_app, request
@@ -21,6 +24,8 @@ from ....api.models.base_model import db
 from .mixins import CreateNewUserByUserinfoMixin
 
 logger = logging.getLogger(__name__)
+
+UserInfo = collections.namedtuple("UserInfo", ["attributes", "exp"])
 
 
 class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
@@ -66,7 +71,30 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             # However, those should not affect our get userinfo endpoint.
             # So if we can't authenticate here, we let another mechanism
             # do its try.
-        return resp_userinfo.json()
+        attributes = resp_userinfo.json()
+        try:
+            # As long as the user-info endpoint accepts the token, we do it too.
+            # (So we use the IDP there as the source of truth).
+            # We still want to get some additional information that might be stored in the
+            # token (but also might not be, the token could just be a value without any inner data).
+            javascript_web_token = authorization.replace("Bearer ", "")
+            jwt_attributes = jwt.decode(
+                javascript_web_token, options={"verify_signature": False}
+            )
+            # This here might be further in the future then our default caching times.
+            # However, due to the ttl of our cache, the data structures revokes everything
+            # that is older then its own fixed ttl setting.
+            # So the maximum setting is still the OIDC_TOKEN_CACHING_SECONDS variable.
+            exp = jwt_attributes["exp"]
+        except Exception:
+            exp = (
+                datetime.datetime.utcnow()
+                + datetime.timedelta(
+                    seconds=current_app.config.get("OIDC_TOKEN_CACHING_SECONDS", 600)
+                )
+            ).timestamp()
+
+        return UserInfo(attributes=attributes, exp=exp)
 
     def authenticate(self):
         """Return a user object for our current request."""
@@ -79,16 +107,16 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             cache_used = False
             if request.headers.get("Cache-Control") == "no-cache":
                 logger.debug("Skip the chache")
-                attributes = self.get_userinfo(authorization)
+                user_info = self.get_userinfo(authorization)
             else:
-                attributes = self.cache.get(authorization)
-                if attributes:
+                user_info = self.cache.get(authorization)
+                if user_info and user_info.exp > datetime.datetime.utcnow().timestamp():
                     logger.debug("Used the cache")
                     cache_used = True
                 else:
-                    logger.debug("No cache - need to do the query")
-                    attributes = self.get_userinfo(authorization)
-            self.cache[authorization] = attributes
+                    logger.debug("No valid cache entry - need to do the query")
+                    user_info = self.get_userinfo(authorization)
+            self.cache[authorization] = user_info
 
         except AuthenticationFailedError:
             # It can be that there are changes on the IDP config.
@@ -98,17 +126,17 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             return None
 
         # Now we can be sure that we have some userinformation.
-        identity = attributes.get(
+        identity = user_info.attributes.get(
             current_app.config.get("OIDC_USERDATA_IDENTITY_CLAIM", "sub"),
             # Fallback in case we try to use a different claim,
             # but only have the sub included.
             # Could be the case for github logins for example.
-            attributes.get("sub"),
+            user_info.attributes.get("sub"),
         )
-        user = self.get_user_or_create_new(identity, attributes)
+        user = self.get_user_or_create_new(identity, user_info.attributes)
         if not cache_used:
             logger.debug("As no cache was used, we sync the permission groups")
-            self.sync_permission_groups_by_entitlements(user, attributes)
+            self.sync_permission_groups_by_entitlements(user, user_info.attributes)
 
         return user
 
