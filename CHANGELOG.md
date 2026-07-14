@@ -21,6 +21,7 @@ Changed:
 Fixed:
 - The sql/preset-development-and-test-data.sql.example script was fixed with respect to the fields for dual use, identifier type and schema version ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/708))
 - Replaced utcnow calls with datetime objects with timezone utc setting ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/717))
+- Fixed the query parameter for the Helmholtz AAI login so that refresh tokens work ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/719))
 
 ## 1.27.3 - 2026-06-23
 
