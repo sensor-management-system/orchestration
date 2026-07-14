@@ -20,6 +20,11 @@ export default class CustomOIDCScheme extends OpenIDConnectScheme {
     // added split here as the scope is passed via new env replacement method
     // the scope is passed as a white-space separated string in NUXT_ENV_SCOPE_ENV_PLACEHOLDER
     this.options.scope = options.scope.split(' ')
+    // The prompt consent is needed so that the Helmholtz AAI can make use
+    // of the refresh tokens.
+    this.additionalLoginParams = {
+      prompt: 'consent'
+    }
   }
 
   // Fetch the userInfo from the user-info endpoint
@@ -59,5 +64,16 @@ export default class CustomOIDCScheme extends OpenIDConnectScheme {
 
     // Fetch all permission groups
     this.$auth.ctx.store.dispatch('permissions/loadPermissionGroups')
+  }
+
+  login (_opts = {}) {
+    if (!_opts.params) {
+      _opts.params = {}
+    }
+    Object.keys(this.additionalLoginParams).forEach((k) => {
+      _opts.params[k] = this.additionalLoginParams[k]
+    })
+
+    return super.login(_opts)
   }
 }
