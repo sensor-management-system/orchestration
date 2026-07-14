@@ -22,7 +22,7 @@ ENV NUXT_ENV_CLIENT_ID $CLIENT_ID_ARG
 ENV NUXT_ENV_OIDC_WELL_KNOWN https://login.helmholtz.de/oauth2/.well-known/openid-configuration
 ENV NUXT_ENV_OIDC_SCHEME true
 
-ENV NUXT_ENV_SCOPE profile openid email eduperson_principal_name
+ENV NUXT_ENV_SCOPE profile openid email eduperson_principal_name offline_access
 
 # The allowed mime types
 ARG ALLOWED_MIME_TYPES_ARG
