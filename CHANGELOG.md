@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.27.4 (Unreleased)
+## 1.27.5 (Unreleased)
+
+## 1.27.4 - 2026-07-15
 
 Added:
 - Added ± symbol for the accuracy fields ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/713))
