@@ -103,6 +103,8 @@ import { TsmdlDatasourceApi } from '@/services/tsmdl/DatasourceApi'
 import { TsmdlThingApi } from '@/services/tsmdl/ThingApi'
 import { StaDatastreamApi, StaThingApi } from '@/services/sta/StaApi'
 import { ReleaseNotesApi } from '@/services/sms/ReleaseNotesApi'
+import { GeneratorApi } from '@/services/sms/GeneratorApi'
+import { OrganizationApi } from '@/services/sms/OrganizationApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -180,6 +182,8 @@ export class Api {
   private readonly _aggregationTypeApi: AggregationTypeApi
   private readonly _actionCategoryApi: ActionCategoryApi
   private readonly _autocompleteApi: AutocompleteApi
+  private readonly _generateApi: GeneratorApi
+  private readonly _organizationsApi: OrganizationApi
   private readonly _activityApi: ActivityApi
   private readonly _siteUsageApi: SiteUsageApi
   private readonly _siteTypeApi: SiteTypeApi
@@ -493,6 +497,16 @@ export class Api {
     this._autocompleteApi = new AutocompleteApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/controller'
+    )
+
+    this._generateApi = new GeneratorApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/controller/generators'
+    )
+
+    this._organizationsApi = new OrganizationApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/organizations'
     )
 
     this._activityApi = new ActivityApi(
@@ -822,6 +836,14 @@ export class Api {
 
   get autocomplete (): AutocompleteApi {
     return this._autocompleteApi
+  }
+
+  get generators (): GeneratorApi {
+    return this._generateApi
+  }
+
+  get organizations (): OrganizationApi {
+    return this._organizationsApi
   }
 
   get activities (): ActivityApi {

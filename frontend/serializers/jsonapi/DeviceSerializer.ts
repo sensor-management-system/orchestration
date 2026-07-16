@@ -101,6 +101,7 @@ export class DeviceSerializer {
       result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
       result.updateDescription = attributes.update_description || ''
       result.country = attributes.country || ''
+      result.hasSystemGeneratedSerialNumber = attributes.has_system_generated_serial_number || false
       if (attributes.is_private) {
         result.visibility = Visibility.Private
       }
@@ -238,7 +239,8 @@ export class DeviceSerializer {
         is_public: device.isPublic,
         group_ids: device.permissionGroups.filter(i => i.id !== null).map(i => i.id),
         keywords: device.keywords,
-        country: device.country
+        country: device.country,
+        has_system_generated_serial_number: device.hasSystemGeneratedSerialNumber
         // these properties are set by the db, so we wont send anything related here:
         // createdAt
         // createdBy

@@ -267,7 +267,8 @@ function getDummyDeviceMountAction (): DeviceMountAction {
       parameters: [],
       archived: false,
       keywords: [],
-      country: ''
+      country: '',
+      hasSystemGeneratedSerialNumber: false
     }),
     parentPlatform: null,
     parentDevice: null

@@ -664,3 +664,13 @@ api.route(
     "involved_device_for_datastream_link_detail",
     "/involved-devices-for-datastream-links/<int:id>",
 )
+api.route(
+    OrganizationList,
+    "organization_list",
+    "/organizations",
+)
+api.route(
+    OrganizationDetail,
+    "organization_detail",
+    "/organizations/<int:id>",
+)

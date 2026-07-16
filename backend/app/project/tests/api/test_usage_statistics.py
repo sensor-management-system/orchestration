@@ -19,6 +19,7 @@ from project.api.models import (
     DeviceAttachment,
     DeviceMountAction,
     DeviceProperty,
+    Organization,
     Platform,
     PlatformAttachment,
     Site,
@@ -249,6 +250,7 @@ class TestUsageStatistics(BaseTestCase):
                 "users": 0,
                 "sites": 0,
                 "organizations": 0,
+                "organization_ror_ids": 0,
                 "device_pids": 0,
                 "platform_pids": 0,
                 "configuration_pids": 0,
@@ -277,6 +279,7 @@ class TestUsageStatistics(BaseTestCase):
                 "users": 0,
                 "sites": 0,
                 "organizations": 0,
+                "organization_ror_ids": 0,
                 "device_pids": 0,
                 "platform_pids": 0,
                 "configuration_pids": 0,
@@ -288,72 +291,21 @@ class TestUsageStatistics(BaseTestCase):
             },
         )
 
-    def test_organization_count_is_bound_to_active_users(self):
-        """Ensure we use organizations only if we have an active user."""
-        contact1 = Contact(
-            given_name="giv",
-            family_name="fam",
-            email="giv.gfam@abc.corp",
-            organization="ABC Corp",
+    def test_organization_and_ror_id_count(self):
+        """Ensure we use organizations and their ror ids."""
+        organization1 = Organization(
+            name="ABC Corp",
+            ror="",
         )
-        db.session.add(contact1)
+        organization2 = Organization(name="Boo Corp", ror="https://ror.org/boo-corp")
+        db.session.add_all([organization1, organization2])
         db.session.commit()
 
         response1 = self.client.get(self.url + "?extended=true")
         self.assertEqual(response1.status_code, 200)
         data1 = response1.json
-        self.assertEqual(data1["counts"]["organizations"], 0)
-
-        user1 = User(subject=contact1.email, contact=contact1)
-        db.session.add(user1)
-        db.session.commit()
-
-        response2 = self.client.get(self.url + "?extended=true")
-        self.assertEqual(response2.status_code, 200)
-        data2 = response2.json
-        self.assertEqual(data2["counts"]["organizations"], 1)
-
-        user1.active = False
-        db.session.add(user1)
-        db.session.commit()
-
-        response3 = self.client.get(self.url + "?extended=true")
-        self.assertEqual(response3.status_code, 200)
-        data3 = response3.json
-        self.assertEqual(data3["counts"]["organizations"], 0)
-
-    def test_distinct_organizations(self):
-        """Ensure that we count only how many distinct organizations there are."""
-        contact1 = Contact(
-            given_name="giv",
-            family_name="fam",
-            email="giv.gfam@abc.corp",
-            organization="ABC Corp",
-        )
-        contact2 = Contact(
-            given_name="giv",
-            family_name="fam",
-            email="giv.gfam@boo.corp",
-            organization="Boo Corp",
-        )
-        contact3 = Contact(
-            given_name="next",
-            family_name="fam",
-            email="next.gfam@boo.corp",
-            organization="Boo Corp",
-        )
-
-        user1 = User(subject=contact1.email, contact=contact1)
-        user2 = User(subject=contact2.email, contact=contact2)
-        user3 = User(subject=contact3.email, contact=contact3)
-
-        db.session.add_all([contact1, contact2, contact3, user1, user2, user3])
-        db.session.commit()
-
-        response = self.client.get(self.url + "?extended=true")
-        self.assertEqual(response.status_code, 200)
-        data = response.json
-        self.assertEqual(data["counts"]["organizations"], 2)
+        self.assertEqual(data1["counts"]["organizations"], 2)
+        self.assertEqual(data1["counts"]["organization_ror_ids"], 1)
 
     def test_pids_are_added(self):
         """Ensure we include devices, platforms and configs for the pid count."""

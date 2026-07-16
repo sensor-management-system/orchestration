@@ -246,7 +246,8 @@ describe('MountingActionsSerializer', () => {
             attachments: [],
             images: [],
             parameters: [],
-            keywords: []
+            keywords: [],
+            hasSystemGeneratedSerialNumber: false
           }),
           parentPlatform: null
         })
@@ -303,7 +304,8 @@ describe('MountingActionsSerializer', () => {
             parameters: [],
             archived: false,
             keywords: [],
-            country: ''
+            country: '',
+            hasSystemGeneratedSerialNumber: false
           }),
           parentPlatform: null,
           parentDevice: null
@@ -514,7 +516,8 @@ describe('MountingActionsSerializer', () => {
         attachments: [],
         images: [],
         parameters: [],
-        keywords: []
+        keywords: [],
+        hasSystemGeneratedSerialNumber: false
       })
       const deviceMountNode = new DeviceNode(
         DeviceMountAction.createFromObject({
@@ -567,7 +570,8 @@ describe('MountingActionsSerializer', () => {
             properties: [],
             parameters: [],
             keywords: [],
-            country: ''
+            country: '',
+            hasSystemGeneratedSerialNumber: false
           }),
           parentPlatform: platform,
           parentDevice: null
@@ -806,7 +810,8 @@ describe('MountingActionsSerializer', () => {
         customFields: [],
         properties: [],
         keywords: [],
-        country: ''
+        country: '',
+        hasSystemGeneratedSerialNumber: false
       })
       const deviceMountNode = new DeviceNode(
         DeviceMountAction.createFromObject({
@@ -859,7 +864,8 @@ describe('MountingActionsSerializer', () => {
             properties: [],
             parameters: [],
             keywords: [],
-            country: ''
+            country: '',
+            hasSystemGeneratedSerialNumber: false
           }),
           parentDevice,
           parentPlatform: null

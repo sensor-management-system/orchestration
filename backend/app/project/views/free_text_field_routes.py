@@ -37,6 +37,7 @@ from ..api.models import (
     GenericConfigurationAction,
     GenericDeviceAction,
     GenericPlatformAction,
+    Organization,
     Platform,
     PlatformAttachment,
     PlatformParameter,
@@ -640,6 +641,14 @@ class ContactOrganizationEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct contact organizations."""
 
     field = Contact.organization
+
+
+@free_text_field_routes.route("/controller/organization-names", methods=["GET"])
+@class_based_view
+class OrganizationNameEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct contact organizations."""
+
+    field = Organization.name
 
 
 @free_text_field_routes.route("/controller/attachment-labels", methods=["GET"])

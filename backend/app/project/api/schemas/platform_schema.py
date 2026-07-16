@@ -52,6 +52,7 @@ class PlatformSchema(Schema):
     update_description = fields.Str(dump_only=True)
     keywords = fields.Field(many=True, allow_none=True)
     country = fields.Str(allow_none=True)
+    has_system_generated_serial_number = fields.Boolean(allow_none=True)
     created_by = Relationship(
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},

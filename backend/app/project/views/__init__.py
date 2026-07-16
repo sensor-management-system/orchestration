@@ -18,6 +18,7 @@ from .additional_site_routes import additional_site_routes  # noqa: F401
 from .docs import docs_routes  # noqa: F401
 from .download_files import download_routes  # noqa: F401
 from .free_text_field_routes import free_text_field_routes  # noqa: F401
+from .generator_routes import generator_routes  # noqa: F401
 from .login import login_routes  # noqa: F401
 from .proxy import proxy_routes  # noqa: F401
 from .sensorml import sensor_ml_routes  # noqa: F401

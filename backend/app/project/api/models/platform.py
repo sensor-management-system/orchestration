@@ -52,6 +52,7 @@ class Platform(
     update_description = db.Column(db.String(256), nullable=True)
     keywords = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)
     country = db.Column(db.String(256), nullable=True)
+    has_system_generated_serial_number = db.Column(db.Boolean, default=False)
 
     def to_search_entry(self, include_relationships=True):
         """Convert the model to a dict to store it in a full text search."""

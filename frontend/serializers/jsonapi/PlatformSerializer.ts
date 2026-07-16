@@ -89,6 +89,7 @@ export class PlatformSerializer {
       result.serialNumber = attributes.serial_number || ''
       result.persistentIdentifier = attributes.persistent_identifier || ''
       result.country = attributes.country || ''
+      result.hasSystemGeneratedSerialNumber = attributes.has_system_generated_serial_number || false
 
       if (attributes.is_private) {
         result.visibility = Visibility.Private
@@ -220,7 +221,8 @@ export class PlatformSerializer {
         is_public: platform.isPublic,
         group_ids: platform.permissionGroups.filter(i => i.id !== null).map(i => i.id),
         keywords: platform.keywords,
-        country: platform.country
+        country: platform.country,
+        has_system_generated_serial_number: platform.hasSystemGeneratedSerialNumber
       }
     }
 

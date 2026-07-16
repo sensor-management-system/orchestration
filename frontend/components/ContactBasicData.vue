@@ -63,7 +63,15 @@ SPDX-License-Identifier: EUPL-1.2
     <v-row>
       <v-col cols="12" md="9">
         <label>Organization</label>
-        {{ value.organization | orDefault }}
+        <span v-if="organization">
+          <nuxt-link :to="'/organizations/' + organization.id" target="_blank">
+            {{ organization.name }}
+            <v-icon small>mdi-open-in-new</v-icon>
+          </nuxt-link>
+        </span>
+        <span v-else>
+          {{ value.organization | orDefault }}
+        </span>
       </v-col>
     </v-row>
   </div>
@@ -73,6 +81,7 @@ SPDX-License-Identifier: EUPL-1.2
 import { Component, mixins, Prop } from 'nuxt-property-decorator'
 
 import { Contact } from '@/models/Contact'
+import { Organization } from '@/models/Organization'
 import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 @Component
@@ -83,6 +92,12 @@ export default class ContactBasicData extends mixins(ExternalUrlLinkMixin) {
     type: Contact
   })
   readonly value!: Contact
+
+  @Prop({
+    required: false,
+    type: Organization
+  })
+  readonly organization!: Organization | null
 }
 
 </script>

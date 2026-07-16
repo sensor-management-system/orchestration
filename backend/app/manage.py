@@ -114,6 +114,7 @@ def es_reindex():
         Contact,
         Device,
         ManufacturerModel,
+        Organization,
         Platform,
         Site,
     )
@@ -123,6 +124,7 @@ def es_reindex():
         Contact,
         Device,
         ManufacturerModel,
+        Organization,
         Platform,
         Site,
     ]:

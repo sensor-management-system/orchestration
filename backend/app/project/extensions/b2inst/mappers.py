@@ -15,6 +15,7 @@ from ...api.models import (
     Contact,
     DeviceContactRole,
     DeviceMountAction,
+    Organization,
     PlatformContactRole,
     PlatformMountAction,
 )
@@ -72,6 +73,17 @@ class B2InstDeviceMapper:
             name = contact.organization
             owner_identifier = None
             owner_identifier_type = None
+
+            possible_organization = (
+                db.session.query(Organization)
+                .filter_by(name=contact.organization)
+                .first()
+            )
+            if possible_organization and possible_organization.ror:
+                owner_identifier = possible_organization.ror
+                # TODO: Change to ROR once they are supported by B2INST
+                owner_identifier_type = "URL"
+
             if name:
                 owners.add(
                     schemas.B2InstOwner(
@@ -232,6 +244,17 @@ class B2InstPlatformMapper:
             name = contact.organization
             owner_identifier = None
             owner_identifier_type = None
+
+            possible_organization = (
+                db.session.query(Organization)
+                .filter_by(name=contact.organization)
+                .first()
+            )
+            if possible_organization and possible_organization.ror:
+                owner_identifier = possible_organization.ror
+                # TODO: Change to ROR once they are supported by B2INST
+                owner_identifier_type = "URL"
+
             if name:
                 owners.add(
                     schemas.B2InstOwner(
@@ -450,6 +473,17 @@ class B2InstConfigurationMapper:
             name = contact.organization
             owner_identifier = None
             owner_identifier_type = None
+
+            possible_organization = (
+                db.session.query(Organization)
+                .filter_by(name=contact.organization)
+                .first()
+            )
+            if possible_organization and possible_organization.ror:
+                owner_identifier = possible_organization.ror
+                # TODO: Change to ROR once they are supported by B2INST
+                owner_identifier_type = "URL"
+
             if name:
                 owners.add(
                     schemas.B2InstOwner(

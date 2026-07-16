@@ -41,6 +41,7 @@ export interface IDevice extends IPermissionableMultipleGroups, IMetaCreationInf
   inventoryNumber: string
   archived: boolean
   country: string
+  hasSystemGeneratedSerialNumber: boolean
 
   createdAt: DateTime | null
   updatedAt: DateTime | null
@@ -104,6 +105,7 @@ export class Device implements IDevice, IVisible {
   private _parameters: Parameter[] = []
   private _permissionGroups: PermissionGroup[] = []
   private _keywords: string[] = []
+  private _hasSystemGeneratedSerialNumber: boolean = false
 
   private _createdBy: IContact | null = null
   private _updatedBy: IContact | null = null
@@ -321,6 +323,14 @@ export class Device implements IDevice, IVisible {
     this._keywords = newKeywords
   }
 
+  get hasSystemGeneratedSerialNumber (): boolean {
+    return this._hasSystemGeneratedSerialNumber
+  }
+
+  set hasSystemGeneratedSerialNumber (newValue: boolean) {
+    this._hasSystemGeneratedSerialNumber = newValue
+  }
+
   get createdBy (): IContact | null {
     return this._createdBy
   }
@@ -425,6 +435,7 @@ export class Device implements IDevice, IVisible {
     newObject.parameters = someObject.parameters.map(Parameter.createFromObject)
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
     newObject.keywords = [...someObject.keywords]
+    newObject.hasSystemGeneratedSerialNumber = someObject.hasSystemGeneratedSerialNumber
 
     newObject.createdBy = someObject.createdBy ? Contact.createFromObject(someObject.createdBy) : null
     newObject.updatedBy = someObject.updatedBy ? Contact.createFromObject(someObject.updatedBy) : null

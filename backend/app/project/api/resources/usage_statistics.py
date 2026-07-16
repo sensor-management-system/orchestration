@@ -16,6 +16,7 @@ from ..models import (
     DatastreamLink,
     Device,
     DeviceAttachment,
+    Organization,
     Platform,
     PlatformAttachment,
     Site,
@@ -80,13 +81,11 @@ class UsageStatistics(ResourceList):
                 + counts["site_pids"]
             )
 
-            counts["organizations"] = (
-                db.session.query(User)
-                .join(User.contact)
-                .filter(User.active)
-                .filter(Contact.organization.is_not(None))
-                .filter(Contact.organization != "")
-                .distinct(Contact.organization)
+            counts["organizations"] = db.session.query(Organization).count()
+            counts["organization_ror_ids"] = (
+                db.session.query(Organization)
+                .filter(Organization.ror.is_not(None))
+                .filter(Organization.ror != "")
                 .count()
             )
             counts["uploads"] = (

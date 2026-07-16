@@ -13,7 +13,7 @@ import pathlib
 
 from flask import current_app
 
-from ....api.models import Contact, User
+from ....api.models import Contact, Organization, User
 from ....api.models.base_model import db
 
 
@@ -78,13 +78,23 @@ class CreateNewUserByUserinfoMixin:
                 organization_names = json.load(infile)
 
             domain = attributes["email"].split("@")[-1]
-            organization = organization_names.get(domain)
+            organization_name = organization_names.get(domain)
+
+            if organization_name:
+                existing_organization = (
+                    db.session.query(Organization)
+                    .filter_by(name=organization_name)
+                    .first()
+                )
+                if not existing_organization:
+                    new_organization = Organization(name=organization_name)
+                    db.session.add(new_organization)
 
             contact = Contact(
                 given_name=attributes["given_name"],
                 family_name=attributes["family_name"],
                 email=attributes["email"],
-                organization=organization,
+                organization=organization_name,
                 active=True,
             )
             db.session.add(contact)

@@ -62,6 +62,7 @@ class DeviceSchema(Schema):
     update_description = fields.Str(dump_only=True)
     keywords = fields.Field(many=True, allow_none=True)
     country = fields.Str(allow_none=True)
+    has_system_generated_serial_number = fields.Boolean(allow_none=True)
     created_by = Relationship(
         attribute="created_by",
         related_view="api.user_detail",
