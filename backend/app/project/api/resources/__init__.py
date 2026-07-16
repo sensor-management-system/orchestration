@@ -11,8 +11,7 @@
 
 from .configuration_attachment_resources import (  # noqa: F401
     ConfigurationAttachmentDetail,
-    ConfigurationAttachmentList,
-)
+    ConfigurationAttachmentList,)
 from .configuration_controllers import (  # noqa: F401
     ControllerConfigurationMountingActions,
     ControllerConfigurationMountingActionTimepoints,
@@ -153,6 +152,10 @@ from .manufacturer_model_resources import (  # noqa: F401
 from .mounting_availabilities import (  # noqa: F401
     DeviceAvailabilities,
     PlatformAvailabilities,
+)
+from .organization_resources import (  # noqa: F401
+    OrganizationDetail,
+    OrganizationList,
 )
 from .pid_resources import PidList, PidDetail  # noqa: F401
 from .ping import Ping  # noqa: F401

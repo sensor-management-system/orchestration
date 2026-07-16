@@ -27,6 +27,7 @@ from ..models import (
     Contact,
     Device,
     DeviceContactRole,
+    Organization,
     Platform,
     PlatformContactRole,
 )
@@ -104,6 +105,15 @@ class ContactList(MqttNotificationMixin, ResourceList):
             if has_email:
                 raise ConflictError("E-Mail already used.")
 
+        organization_name = data.get("organization")
+        if organization_name:
+            existing_organization = (
+                db.session.query(Organization).filter_by(name=organization_name).first()
+            )
+            if not existing_organization:
+                new_organization = Organization(name=organization_name)
+                db.session.add(new_organization)
+
     def after_post(self, result):
         """Add some more data to the new site."""
         result_id = result[0]["data"]["id"]
@@ -167,6 +177,14 @@ class ContactDetail(MqttNotificationMixin, ResourceDetail):
             )
             if has_email:
                 raise ConflictError("Email already used.")
+        organization_name = data.get("organization")
+        if organization_name:
+            existing_organization = (
+                db.session.query(Organization).filter_by(name=organization_name).first()
+            )
+            if not existing_organization:
+                new_organization = Organization(name=organization_name)
+                db.session.add(new_organization)
 
     def after_patch(self, result, *args, **kwargs):
         """Run some actions after patching the entry."""

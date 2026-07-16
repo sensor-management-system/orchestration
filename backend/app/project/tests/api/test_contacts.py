@@ -21,6 +21,7 @@ from project.api.models import (
     Contact,
     Device,
     DeviceContactRole,
+    Organization,
     Platform,
     PlatformContactRole,
     User,
@@ -119,6 +120,55 @@ class TestContactServices(BaseTestCase):
         )
         self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
+    def test_post_contact_with_organization_name_creates_organization_entity(self):
+        """Ensure we update the organization list when creating contacts with organization."""
+        self.assertEqual(db.session.query(Organization).count(), 0)
+
+        userinfo = generate_userinfo_data()
+        contact = {
+            "given_name": fake.first_name(),
+            "family_name": fake.last_name(),
+            "email": fake.unique.email(),
+            "organization": "Org1",
+        }
+
+        data = {"data": {"type": "contact", "attributes": contact}}
+        access_headers = create_token(userinfo)
+        with self.client:
+            response = self.client.post(
+                self.url,
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(db.session.query(Organization).count(), 1)
+        organization = db.session.query(Organization).first()
+        self.assertEqual(organization.name, "Org1")
+
+        next_contact_data = {
+            "data": {
+                "type": "contact",
+                "attributes": {
+                    "given_name": fake.first_name(),
+                    "family_name": fake.last_name(),
+                    "email": fake.unique.email(),
+                    "organization": "Org1",
+                },
+            }
+        }
+
+        with self.client:
+            response = self.client.post(
+                self.url,
+                data=json.dumps(next_contact_data),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 201)
+        # It reuses the existing organization
+        self.assertEqual(db.session.query(Organization).count(), 1)
+
     def test_update_contact_as_self(self):
         """
         Ensure update contact behaves correctly.
@@ -139,6 +189,7 @@ class TestContactServices(BaseTestCase):
                 },
             }
         }
+        self.assertEqual(db.session.query(Organization).count(), 0)
         with self.run_requests_as(user):
             with self.client:
                 response = self.client.patch(
@@ -162,6 +213,70 @@ class TestContactServices(BaseTestCase):
         self.expect(notification_data["attributes"]["family_name"]).to_equal(
             contact.family_name
         )
+
+        self.assertEqual(db.session.query(Organization).count(), 1)
+        organization = db.session.query(Organization).first()
+        self.assertEqual(organization.name, "Helmholtz")
+
+        next_updated = {
+            "data": {
+                "type": "contact",
+                "id": contact.id,
+                "attributes": {
+                    "given_name": "updated",
+                    "organization": "GFZ",
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with self.client:
+                response = self.client.patch(
+                    f"{self.url}/{contact.id}",
+                    data=json.dumps(next_updated),
+                    content_type="application/vnd.api+json",
+                )
+        self.assertEqual(db.session.query(Organization).count(), 2)
+
+        next_updated = {
+            "data": {
+                "type": "contact",
+                "id": contact.id,
+                "attributes": {
+                    "given_name": "updated",
+                    "organization": "Helmholtz",
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with self.client:
+                response = self.client.patch(
+                    f"{self.url}/{contact.id}",
+                    data=json.dumps(next_updated),
+                    content_type="application/vnd.api+json",
+                )
+        self.assertEqual(db.session.query(Organization).count(), 2)
+
+        next_updated = {
+            "data": {
+                "type": "contact",
+                "id": contact.id,
+                "attributes": {
+                    "given_name": "updated",
+                    "organization": "",
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with self.client:
+                response = self.client.patch(
+                    f"{self.url}/{contact.id}",
+                    data=json.dumps(next_updated),
+                    content_type="application/vnd.api+json",
+                )
+        self.assertEqual(db.session.query(Organization).count(), 2)
 
     def test_update_contact_as_superuser(self):
         """
@@ -534,7 +649,7 @@ class TestContactServices(BaseTestCase):
         )
 
     def test_contact_creation_without_known_organization(self):
-        """Ensure that we still add the contact, even if the organzation is unknow."""
+        """Ensure that we still add the contact, even if the organization is unknow."""
         user_data = {
             "given_name": "Test",
             "family_name": "User",

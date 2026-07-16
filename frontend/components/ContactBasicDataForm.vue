@@ -151,7 +151,7 @@ SPDX-License-Identifier: EUPL-1.2
         <autocomplete-text-input
           :value="value.organization"
           label="Organization"
-          endpoint="contact-organizations"
+          endpoint="organization-names"
           @input="update('organization', $event)"
         />
       </v-col>

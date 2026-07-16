@@ -38,8 +38,10 @@ SPDX-License-Identifier: EUPL-1.2
           <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
             <label>Part of</label>
             <span v-if="value.outerSiteId && site">
-              <nuxt-link :to="'/sites/' + value.outerSiteId" target="_blank">{{ site.label }}</nuxt-link>
-              <v-icon small>mdi-open-in-new</v-icon>
+              <nuxt-link :to="'/sites/' + value.outerSiteId" target="_blank">
+                {{ site.label }}
+                <v-icon small>mdi-open-in-new</v-icon>
+              </nuxt-link>
             </span>
             <span v-else>
               {{ null | orDefault }}

@@ -378,7 +378,7 @@ SPDX-License-Identifier: EUPL-1.2
       class="my-4"
     />
     <v-row>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <v-text-field
           :value="value.serialNumber"
           :readonly="readonly"
@@ -389,12 +389,34 @@ SPDX-License-Identifier: EUPL-1.2
           :placeholder="serialNumberPlaceholder"
           @input="update('serialNumber', $event)"
         >
-          <v-icon v-if="serialNumberHint" slot="append" color="warning">
-            mdi-alert
-          </v-icon>
+          <template v-if="serialNumberHint" slot="append">
+            <v-icon v-if="value.hasSystemGeneratedSerialNumber" disabled>
+              mdi-auto-fix
+            </v-icon>
+            <v-icon v-else color="warning">
+              mdi-alert
+            </v-icon>
+          </template>
+          <template v-if="generateSerialNumberActive" slot="append-outer">
+            <v-tooltip right>
+              <template #activator="{ on, attrs }">
+                <v-btn
+                  :disabled="!generateSerialNumberActive"
+                  icon
+                  color="primary"
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="setGeneratedSerialNumber"
+                >
+                  <v-icon>mdi-auto-fix</v-icon>
+                </v-btn>
+              </template>
+              <span>Generate a random serial number if there is none provided by the manufacturer</span>
+            </v-tooltip>
+          </template>
         </v-text-field>
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <v-text-field
           :value="value.inventoryNumber"
           :readonly="readonly"
@@ -482,6 +504,7 @@ import { LoadDevicetypesAction, LoadEquipmentstatusAction, LoadManufacturersActi
 import { DownloadAttachmentAction, DevicesState } from '@/store/devices'
 import { ProxyUrlAction } from '@/store/proxy'
 import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 type StatusSelectValue = Status | string | undefined
 type DeviceTypeSelectValue = DeviceType | string | undefined
@@ -495,6 +518,7 @@ type ManufacturerSelectValue = Manufacturer | string | undefined
   methods: {
     ...mapActions('vocabulary', ['loadDevicetypes', 'loadManufacturers', 'loadEquipmentstatus']),
     ...mapActions('devices', ['downloadAttachment']),
+    ...mapActions('progressindicator', ['setLoading']),
     ...mapActions('proxy', ['proxyUrl'])
   },
   components: {
@@ -530,6 +554,7 @@ export default class DeviceBasicDataForm extends mixins(Rules, ExternalUrlLinkMi
   loadDevicetypes !: LoadDevicetypesAction
   loadManufacturers !: LoadManufacturersAction
   loadEquipmentstatus !: LoadEquipmentstatusAction
+  setLoading!: SetLoadingAction
 
   @Prop({
     required: true,
@@ -621,7 +646,13 @@ export default class DeviceBasicDataForm extends mixins(Rules, ExternalUrlLinkMi
   }
 
   get serialNumberHint () {
-    return this.isSerialNumberInUse ? 'Another device already has an equal serial number.' : ''
+    if (this.isSerialNumberInUse) {
+      return 'Another device already has an equal serial number.'
+    }
+    if (this.value.hasSystemGeneratedSerialNumber) {
+      return 'Serial number was generated randomly by the system.'
+    }
+    return ''
   }
 
   async fetch () {
@@ -673,6 +704,7 @@ export default class DeviceBasicDataForm extends mixins(Rules, ExternalUrlLinkMi
         break
       case 'serialNumber':
         newObj.serialNumber = value as string
+        newObj.hasSystemGeneratedSerialNumber = false
         break
       case 'inventoryNumber':
         newObj.inventoryNumber = value as string
@@ -867,6 +899,25 @@ export default class DeviceBasicDataForm extends mixins(Rules, ExternalUrlLinkMi
    */
   itemHasDefinition (item: ICvSelectItem): boolean {
     return hasDefinition(item)
+  }
+
+  async setGeneratedSerialNumber () {
+    try {
+      this.setLoading(true)
+      const newSerialNumber = await this.$api.generators.generateSerialNumber()
+      const newObj = Device.createFromObject(this.value)
+      newObj.serialNumber = newSerialNumber
+      newObj.hasSystemGeneratedSerialNumber = true
+
+      this.$emit('input', newObj)
+      this.loadSerialNumbers(newObj)
+    } finally {
+      this.setLoading(false)
+    }
+  }
+
+  get generateSerialNumberActive (): boolean {
+    return !this.value.serialNumber
   }
 
   addNewKeyword () {

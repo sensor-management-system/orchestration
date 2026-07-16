@@ -641,7 +641,13 @@ paths = {
         endpoint="/controller/contact-organizations",
         description="Get the list of distinct organization field values of all contacts.",
         operation_id="controller_contact_organizations",
-        response_description="List of distinct organizations.",
+        response_description="List of distinct organizations of the contacts.",
+    ),
+    **template(
+        endpoint="/controller/organization-names",
+        description="Get the list of distinct organization names.",
+        operation_id="controller_organization_names",
+        response_description="List of distinct organization names.",
     ),
     **template(
         endpoint="/controller/attachment-labels",

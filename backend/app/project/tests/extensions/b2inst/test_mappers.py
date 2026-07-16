@@ -16,6 +16,7 @@ from project.api.models import (
     DeviceContactRole,
     DeviceMountAction,
     DeviceProperty,
+    Organization,
     Platform,
     PlatformContactRole,
     PlatformMountAction,
@@ -119,6 +120,10 @@ class TestB2InstDeviceMapper(BaseTestCase):
             orcid="9234-5678-9012-3456",
             organization="LocalHost",
         )
+        organization = Organization(
+            name="LocalHost",
+            ror="https://ror.org/LocalHost",
+        )
         device_contact_role1 = DeviceContactRole(
             device=device,
             contact=contact1,
@@ -140,6 +145,7 @@ class TestB2InstDeviceMapper(BaseTestCase):
                 device,
                 contact1,
                 contact2,
+                organization,
                 device_contact_role1,
                 device_contact_role2,
                 device_property,
@@ -162,8 +168,8 @@ class TestB2InstDeviceMapper(BaseTestCase):
                     schemas.B2InstOwner(
                         ownerName="LocalHost",
                         ownerContact=None,
-                        ownerIdentifier=None,
-                        ownerIdentifierType=None,
+                        ownerIdentifier="https://ror.org/LocalHost",
+                        ownerIdentifierType="URL",
                     )
                 ],
                 InstrumentType=[
@@ -560,6 +566,10 @@ class TestB2InstPlatformMapper(BaseTestCase):
             orcid="9234-5678-9012-3456",
             organization="LocalHost",
         )
+        organization = Organization(
+            name="LocalHost",
+            ror="https://ror.org/LocalHost",
+        )
         platform_contact_role1 = PlatformContactRole(
             platform=platform,
             contact=contact1,
@@ -577,6 +587,7 @@ class TestB2InstPlatformMapper(BaseTestCase):
                 platform,
                 contact1,
                 contact2,
+                organization,
                 platform_contact_role1,
                 platform_contact_role2,
             ]
@@ -598,8 +609,8 @@ class TestB2InstPlatformMapper(BaseTestCase):
                     schemas.B2InstOwner(
                         ownerName="LocalHost",
                         ownerContact=None,
-                        ownerIdentifier=None,
-                        ownerIdentifierType=None,
+                        ownerIdentifier="https://ror.org/LocalHost",
+                        ownerIdentifierType="URL",
                     )
                 ],
                 InstrumentType=[
@@ -995,6 +1006,10 @@ class TestB2InstConfigurationMapper(BaseTestCase):
             role_name="Owner",
             role_uri="https://cv/api/v1/roles/1/",
         )
+        organization = Organization(
+            name="LocalHost",
+            ror="https://ror.org/LocalHost",
+        )
         device = Device(
             short_name="Test device",
             device_type_name="Soil moisture sensor",
@@ -1065,6 +1080,7 @@ class TestB2InstConfigurationMapper(BaseTestCase):
                 device_contact_role,
                 device_mount_action,
                 device_property,
+                organization,
                 platform,
                 platform_contact_role,
                 platform_mount_action,
@@ -1087,8 +1103,8 @@ class TestB2InstConfigurationMapper(BaseTestCase):
                     schemas.B2InstOwner(
                         ownerName="LocalHost",
                         ownerContact=None,
-                        ownerIdentifier=None,
-                        ownerIdentifierType=None,
+                        ownerIdentifier="https://ror.org/LocalHost",
+                        ownerIdentifierType="URL",
                     )
                 ],
                 InstrumentType=[

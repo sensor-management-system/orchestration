@@ -20,6 +20,7 @@ import { PermissionGroup, IPermissionable, IArchivable, IPersistentlyIdentifiabl
 import { IVisible } from '@/models/Visibility'
 import { IMetaCreationInfo } from '@/models/MetaCreationInfo'
 import { Contact } from '@/models/Contact'
+import { Organization } from '@/models/Organization'
 
 export type PermissionHandable = IPermissionable & IVisible & IMetaCreationInfo & IArchivable & IPersistentlyIdentifiable
 
@@ -64,6 +65,8 @@ export type CanModifyEntityGetter = (entity: PermissionHandable) => boolean
 export type CanDeleteEntityGetter = (entity: PermissionHandable) => boolean
 export type CanDeleteContactGetter = (entity: Contact) => boolean
 export type CanModifyContactGetter = (entity: Contact) => boolean
+export type CanModifyOrganizationGetter = (entity: Organization) => boolean
+export type CanDeleteOrganizationGetter = (entity: Organization) => boolean
 
 export type CanArchiveEntityGetter = (entity: PermissionHandable) => boolean
 export type CanRestoreEntityGetter = (entity: PermissionHandable) => boolean
@@ -177,6 +180,21 @@ const getters: GetterTree<PermissionsState, RootState> = {
       return true
     }
     return false
+  },
+  canDeleteOrganization: (state: PermissionsState) => (_entity: Organization): boolean => {
+    if (state.userInfo && state.userInfo.isSuperUser) {
+      return true
+    }
+    return false
+  },
+  canModifyOrganization: (state: PermissionsState) => (_entity: Organization): boolean => {
+    if (state.userInfo && state.userInfo.isSuperUser) {
+      return true
+    }
+    return false
+  },
+  canCreateOrganization: (state: PermissionsState) => {
+    return state.userInfo && state.userInfo.isSuperUser
   },
   canArchiveEntity: (state: PermissionsState, getters: any) => (entity: PermissionHandable): boolean => {
     if (entity.archived) {

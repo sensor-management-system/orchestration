@@ -67,6 +67,7 @@ from .involved_device_for_datastream_link import (  # noqa: F401
 )
 from .manufacturer_model import ManufacturerModel  # noqa: F401
 from .mount_actions import DeviceMountAction, PlatformMountAction  # noqa: F401
+from .organization import Organization  # noqa: F401
 from .permission_group import PermissionGroup  # noqa: F401
 from .permission_group_membership import PermissionGroupMembership  # noqa: F401
 from .platform import Platform  # noqa: F401

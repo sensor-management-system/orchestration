@@ -106,12 +106,22 @@ SPDX-License-Identifier: EUPL-1.2
         </v-list-item>
 
         <!-- Group information -->
-        <v-list-item to="/info/groups" nuxt>
+        <v-list-item v-if="isLoggedIn" to="/organizations" nuxt>
           <v-list-item-action>
             <v-icon>mdi-account-group</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>Groups</v-list-item-title>
+            <v-list-item-title>Organizations</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <!-- Group information -->
+        <v-list-item to="/info/groups" nuxt>
+          <v-list-item-action>
+            <v-icon>mdi-account-check</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Permissions</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 

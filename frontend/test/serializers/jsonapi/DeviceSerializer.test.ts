@@ -47,6 +47,7 @@ const createTestDevice = () => {
   device.updateDescription = ''
   device.keywords = ['key', 'word']
   device.country = 'Germany'
+  device.hasSystemGeneratedSerialNumber = true
 
   device.customFields = [
     CustomTextField.createFromObject({
@@ -210,7 +211,8 @@ describe('DeviceSerializer', () => {
             manufacturer_uri: null,
             archived: false,
             keywords: ['key', 'word'],
-            country: 'Germany'
+            country: 'Germany',
+            has_system_generated_serial_number: true
           },
           relationships: {
             updated_by: {
@@ -288,7 +290,8 @@ describe('DeviceSerializer', () => {
             persistent_identifier: null,
             manufacturer_uri: null,
             archived: false,
-            country: null
+            country: null,
+            has_system_generated_serial_number: null
           },
           relationships: {
             updated_by: {
@@ -360,6 +363,7 @@ describe('DeviceSerializer', () => {
       expectedDevice1.archived = false
       expectedDevice1.keywords = ['key', 'word']
       expectedDevice1.country = 'Germany'
+      expectedDevice1.hasSystemGeneratedSerialNumber = true
 
       const expectedDevice2 = new Device()
       expectedDevice2.id = '44'
@@ -386,6 +390,7 @@ describe('DeviceSerializer', () => {
       expectedDevice2.parameters = []
       expectedDevice2.archived = false
       expectedDevice2.country = ''
+      expectedDevice2.hasSystemGeneratedSerialNumber = false
 
       const serializer = new DeviceSerializer()
       const devicesWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
@@ -430,7 +435,8 @@ describe('DeviceSerializer', () => {
             status_name: null,
             persistent_identifier: '0000001',
             manufacturer_uri: null,
-            archived: false
+            archived: false,
+            has_system_generated_serial_number: false
           },
           relationships: {
             updated_by: {
@@ -493,6 +499,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.contacts = []
       expectedDevice.parameters = []
       expectedDevice.archived = false
+      expectedDevice.hasSystemGeneratedSerialNumber = false
 
       const serializer = new DeviceSerializer()
       const deviceWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -522,7 +529,8 @@ describe('DeviceSerializer', () => {
             status_name: null,
             persistent_identifier: '0000001',
             manufacturer_uri: null,
-            archived: false
+            archived: false,
+            has_system_generated_serial_number: false
           },
           relationships: {
             updated_by: {
@@ -958,6 +966,7 @@ describe('DeviceSerializer', () => {
           unitName: 'Unit 2'
         })
       ]
+      expectedDevice.hasSystemGeneratedSerialNumber = false
 
       const serializer = new DeviceSerializer()
       const deviceWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -990,7 +999,8 @@ describe('DeviceSerializer', () => {
           status_name: null,
           persistent_identifier: '0000001',
           manufacturer_uri: null,
-          archived: false
+          archived: false,
+          has_system_generated_serial_number: false
         },
         relationships: {
           updated_by: {
@@ -1047,6 +1057,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.contacts = []
       expectedDevice.parameters = []
       expectedDevice.archived = false
+      expectedDevice.hasSystemGeneratedSerialNumber = false
 
       const included: any[] = []
 
@@ -1085,7 +1096,8 @@ describe('DeviceSerializer', () => {
           status_name: null,
           persistent_identifier: '0000001',
           manufacturer_uri: null,
-          archived: false
+          archived: false,
+          has_system_generated_serial_number: false
         },
         relationships: {
           updated_by: {
@@ -1142,6 +1154,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.contacts = []
       expectedDevice.parameters = []
       expectedDevice.archived = false
+      expectedDevice.hasSystemGeneratedSerialNumber = false
 
       const included: any[] = []
 
@@ -1204,6 +1217,8 @@ describe('DeviceSerializer', () => {
       expect(attributes.keywords).toEqual(['key', 'word'])
       expect(attributes).toHaveProperty('country')
       expect(attributes.country).toEqual('Germany')
+      expect(attributes).toHaveProperty('has_system_generated_serial_number')
+      expect(attributes.has_system_generated_serial_number).toEqual(true)
       // expect(attributes).toHaveProperty('created_at')
       // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015620+00:00')
       // I wasn't able to find the exact date time format, so we use ISO date times

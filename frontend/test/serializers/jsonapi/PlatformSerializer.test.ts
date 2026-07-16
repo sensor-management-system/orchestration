@@ -40,6 +40,7 @@ const createTestPlatform = () => {
   platform.updateDescription = ''
   platform.keywords = ['key', 'word']
   platform.country = 'Germany'
+  platform.hasSystemGeneratedSerialNumber = true
 
   platform.attachments = [
     Attachment.createFromObject({
@@ -134,7 +135,8 @@ describe('PlatformSerializer', () => {
             manufacturer_uri: 'manufacturer/xyz',
             archived: true,
             keywords: ['key', 'word'],
-            country: 'Germany'
+            country: 'Germany',
+            has_system_generated_serial_number: true
           },
           relationships: {
             updated_by: {
@@ -204,7 +206,8 @@ describe('PlatformSerializer', () => {
             persistent_identifier: null,
             manufacturer_uri: null,
             archived: false,
-            country: null
+            country: null,
+            has_system_generated_serial_number: false
           },
           relationships: {
             updated_by: {
@@ -426,6 +429,7 @@ describe('PlatformSerializer', () => {
       expectedPlatform1.createdByUserId = '42'
       expectedPlatform1.archived = true
       expectedPlatform1.keywords = ['key', 'word']
+      expectedPlatform1.hasSystemGeneratedSerialNumber = true
 
       const expectedPlatform2 = new Platform()
       expectedPlatform2.id = '52'
@@ -456,6 +460,7 @@ describe('PlatformSerializer', () => {
       expectedPlatform2.contacts = []
       expectedPlatform2.archived = false
       expectedPlatform2.country = ''
+      expectedPlatform2.hasSystemGeneratedSerialNumber = false
 
       const serializer = new PlatformSerializer()
 
@@ -500,7 +505,8 @@ describe('PlatformSerializer', () => {
             platform_type_name: 'Station',
             persistent_identifier: 'boeken_BF1',
             manufacturer_uri: 'manufacturer/xyz',
-            archived: true
+            archived: true,
+            has_system_generated_serial_number: true
           },
           relationships: {
             updated_by: {
@@ -697,6 +703,7 @@ describe('PlatformSerializer', () => {
         updatedAt: null
       })]
       expectedPlatform.archived = true
+      expectedPlatform.hasSystemGeneratedSerialNumber = true
 
       const serializer = new PlatformSerializer()
 
@@ -731,7 +738,8 @@ describe('PlatformSerializer', () => {
           platform_type_name: 'Station',
           persistent_identifier: 'boeken_BF1',
           manufacturer_uri: 'manufacturer/xyz',
-          archived: false
+          archived: false,
+          has_system_generated_serial_number: false
         },
         relationships: {
           updated_by: {
@@ -928,6 +936,7 @@ describe('PlatformSerializer', () => {
         updatedAt: null
       })]
       expectedPlatform.archived = false
+      expectedPlatform.hasSystemGeneratedSerialNumber = false
 
       const serializer = new PlatformSerializer()
       const platfromWithMeta = serializer.convertJsonApiDataToModel(jsonApiData, included)
@@ -992,6 +1001,8 @@ describe('PlatformSerializer', () => {
       expect(attributes.keywords).toEqual(['key', 'word'])
       expect(attributes).toHaveProperty('country')
       expect(attributes.country).toEqual('Germany')
+      expect(attributes).toHaveProperty('has_system_generated_serial_number')
+      expect(attributes.has_system_generated_serial_number).toEqual(true)
       // expect(attributes).toHaveProperty('created_at')
       // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015620+00:00')
       // I wasn't able to find the exact date time format, so we use ISO date times

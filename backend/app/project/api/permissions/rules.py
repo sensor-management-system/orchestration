@@ -46,6 +46,7 @@ from ..models import (
     GenericPlatformAction,
     GenericPlatformActionAttachment,
     InvolvedDeviceForDatastreamLink,
+    Organization,
     Platform,
     PlatformAttachment,
     PlatformContactRole,
@@ -1422,6 +1423,72 @@ def filter_visible(query):
     return filter_visible.delegate(
         GenericPlatformAction, query.join(GenericPlatformAction)
     )
+
+
+# Organization
+@can_see.register(Organization)
+def can_see(entity):
+    """Return if the entity can be seen."""
+    return True
+
+
+@can_create.register(Organization)
+def can_create(type_, data):
+    """Return if the entity can be created."""
+    if g.user and g.user.is_superuser:
+        return True
+    return False
+
+
+@can_edit.register(Organization)
+def can_edit(entity):
+    """Return if the entity can be edited."""
+    if g.user and g.user.is_superuser:
+        return True
+    return False
+
+
+@can_change.register(Organization)
+def can_change(entity, data):
+    """Return if the entity can be changed to the target data."""
+    if g.user and g.user.is_superuser:
+        return True
+    return False
+
+
+@can_delete.register(Organization)
+def can_delete(entity):
+    """Return if the entity can be deleted."""
+    if g.user and g.user.is_superuser:
+        return True
+    return False
+
+
+@can_archive.register(Organization)
+def can_archive(entity):
+    """Return if the entity can be archived."""
+    # We don't have archived or restored organizations.
+    return False
+
+
+@can_restore.register(Organization)
+def can_restore(entity):
+    """Return if the entity can be restored."""
+    # We don't have archived or restored organizations.
+    return False
+
+
+@filter_visible.register(Organization)
+def filter_visible(query):
+    """Filter the query on the visibility settings."""
+    return query
+
+
+@filter_visible_es.register(Organization)
+def filter_visible_es(model_class):
+    """Create the filter for the visiblity of the organizations."""
+    # No restrictions
+    return None
 
 
 # Platform

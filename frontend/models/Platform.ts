@@ -65,6 +65,7 @@ export interface IPlatform extends IPermissionableMultipleGroups, IMetaCreationI
   parameters: IParameter[]
   permissionGroups: IPermissionGroup[]
   keywords: string[]
+  hasSystemGeneratedSerialNumber: boolean
 
   visibility: Visibility
 }
@@ -109,6 +110,7 @@ export class Platform implements IPlatform, IVisible {
   private _parameters: Parameter[] = []
   private _permissionGroups: PermissionGroup[] = []
   private _keywords: string[] = []
+  private _hasSystemGeneratedSerialNumber: boolean = false
 
   private _visibility: Visibility = Visibility.Internal
 
@@ -320,6 +322,14 @@ export class Platform implements IPlatform, IVisible {
     this._keywords = newKeywords
   }
 
+  get hasSystemGeneratedSerialNumber (): boolean {
+    return this._hasSystemGeneratedSerialNumber
+  }
+
+  set hasSystemGeneratedSerialNumber (newValue: boolean) {
+    this._hasSystemGeneratedSerialNumber = newValue
+  }
+
   get createdByUserId (): string | null {
     return this._createdByUserId
   }
@@ -410,6 +420,7 @@ export class Platform implements IPlatform, IVisible {
     newObject.parameters = someObject.parameters.map(Parameter.createFromObject)
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
     newObject.keywords = [...someObject.keywords]
+    newObject.hasSystemGeneratedSerialNumber = someObject.hasSystemGeneratedSerialNumber
     newObject.createdByUserId = someObject.createdByUserId
 
     newObject.visibility = someObject.visibility

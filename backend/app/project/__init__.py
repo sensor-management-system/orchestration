@@ -48,6 +48,7 @@ from .views import (
     docs_routes,
     download_routes,
     free_text_field_routes,
+    generator_routes,
     login_routes,
     proxy_routes,
     sensor_ml_routes,
@@ -145,6 +146,7 @@ def create_app():
     app.register_blueprint(login_routes)
     # Routes for the free text field introspection
     app.register_blueprint(free_text_field_routes)
+    app.register_blueprint(generator_routes)
     # sensor_ml_routes
     app.jinja_env.lstrip_blocks = True
     app.jinja_env.trim_blocks = True
