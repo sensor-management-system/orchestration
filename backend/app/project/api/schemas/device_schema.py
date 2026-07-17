@@ -1,8 +1,11 @@
-# SPDX-FileCopyrightText: 2020 - 2023
+# SPDX-FileCopyrightText: 2020 - 2026
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+# - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3,
+#   https://www.fz-juelich.de/en/ibg/ibg-3)
 #
 # SPDX-License-Identifier: EUPL-1.2
 
@@ -15,6 +18,7 @@ from ..schemas.attachment_schema import AttachmentSchema
 from ..schemas.contact_schema import ContactSchema
 from ..schemas.customfield_schema import InnerCustomFieldSchema
 from ..schemas.device_property_schema import InnerDevicePropertySchema
+from ..serializer.fields.sorted_string_list_field import SortedStringListField
 
 
 class DeviceSchema(Schema):
@@ -51,6 +55,8 @@ class DeviceSchema(Schema):
     model = fields.Str(allow_none=True)
     inventory_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
+    schema_version = fields.Str(allow_none=True)
+    identifier_type = fields.Str(allow_none=True)
     website = fields.Str(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
@@ -60,7 +66,7 @@ class DeviceSchema(Schema):
     is_public = fields.Boolean(allow_none=True)
     archived = fields.Boolean(dump_only=True)
     update_description = fields.Str(dump_only=True)
-    keywords = fields.Field(many=True, allow_none=True)
+    keywords = SortedStringListField(allow_none=True)
     country = fields.Str(allow_none=True)
     has_system_generated_serial_number = fields.Boolean(allow_none=True)
     created_by = Relationship(

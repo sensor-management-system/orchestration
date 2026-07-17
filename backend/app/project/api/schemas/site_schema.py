@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2022 - 2024
+# SPDX-FileCopyrightText: 2022 - 2026
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3,
+#   https://www.fz-juelich.de/en/ibg/ibg-3)
 #
 # SPDX-License-Identifier: EUPL-1.2
 
@@ -8,6 +11,7 @@
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
+from ..serializer.fields.sorted_string_list_field import SortedStringListField
 from ..serializer.fields.wkt_polygon_field import WktPolygonField
 
 
@@ -50,7 +54,7 @@ class SiteSchema(Schema):
     elevation_datum_name = fields.Str(allow_none=True)
     elevation_datum_uri = fields.Str(allow_none=True)
     website = fields.Str(allow_none=True)
-    keywords = fields.Field(many=True, allow_none=True)
+    keywords = SortedStringListField(allow_none=True)
 
     created_by = Relationship(
         attribute="created_by",

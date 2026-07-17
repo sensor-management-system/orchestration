@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Added:
 - Functionality to generate alternative serial numbers within the system ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/711))
+- Keywords in the basic view are now sorted for devices, platforms, configurations, and sites & labs ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/714))
 
 ## 1.27.4 - 2026-07-15
 

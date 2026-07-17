@@ -1,8 +1,11 @@
-# SPDX-FileCopyrightText: 2021 - 2024
+# SPDX-FileCopyrightText: 2021 - 2026
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+# - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3,
+#   https://www.fz-juelich.de/en/ibg/ibg-3)
 #
 # SPDX-License-Identifier: EUPL-1.2
 
@@ -528,6 +531,29 @@ class TestPlatformServices(BaseTestCase):
                     )
         self.assertEqual(resp.status_code, 200)
 
+    def test_get_keywords_sorted(self):
+        """Ensure platform keywords are sorted in API responses."""
+        platform = Platform(
+            short_name="A test platform",
+            keywords=["water depth", "GPS", "location", "Atmos"],
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(platform)
+        db.session.commit()
+
+        response = self.client.get(
+            f"{self.platform_url}/{platform.id}",
+            content_type="application/vnd.api+json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            ["Atmos", "GPS", "location", "water depth"],
+            response.json["data"]["attributes"]["keywords"],
+        )
+
     def test_post_keywords(self):
         """Ensure we can post keywords."""
         platform_data = {
@@ -535,7 +561,7 @@ class TestPlatformServices(BaseTestCase):
                 "type": "platform",
                 "attributes": {
                     "short_name": "A test platform",
-                    "keywords": ["word1", "word2"],
+                    "keywords": ["word2", "word1"],
                     "is_public": True,
                     "is_private": False,
                     "is_internal": False,
