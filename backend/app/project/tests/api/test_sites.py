@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2022 - 2024
+# SPDX-FileCopyrightText: 2022 - 2026
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3,
+#   https://www.fz-juelich.de/en/ibg/ibg-3)
 #
 # SPDX-License-Identifier: EUPL-1.2
 
@@ -678,6 +681,28 @@ class TestSiteApi(BaseTestCase):
             "https://gfz-potsdam.de",
         )
 
+    def test_get_keywords_sorted(self):
+        """Ensure site keywords are sorted in API responses."""
+        site = Site(
+            label="A test site",
+            keywords=["water depth", "GPS", "location", "Atmos"],
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(site)
+        db.session.commit()
+
+        response = self.client.get(
+            f"{self.sites_url}/{site.id}",
+            content_type="application/vnd.api+json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            ["Atmos", "GPS", "location", "water depth"],
+            response.json["data"]["attributes"]["keywords"],
+        )
+
     def test_post_keywords(self):
         """Ensure we can post keywords."""
         site_data = {
@@ -685,7 +710,7 @@ class TestSiteApi(BaseTestCase):
                 "type": "site",
                 "attributes": {
                     "label": "A test site",
-                    "keywords": ["word1", "word2"],
+                    "keywords": ["word2", "word1"],
                     "is_public": True,
                     "is_internal": False,
                 },

@@ -1,9 +1,12 @@
-# SPDX-FileCopyrightText: 2021 - 2024
+# SPDX-FileCopyrightText: 2021 - 2026
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
+# - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+# - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3,
+#   https://www.fz-juelich.de/en/ibg/ibg-3)
 #
 # SPDX-License-Identifier: EUPL-1.2
 
@@ -1202,6 +1205,29 @@ class TestConfigurationsService(BaseTestCase):
                     )
         self.assertEqual(resp.status_code, 200)
 
+    def test_get_keywords_sorted(self):
+        """Ensure configuration keywords are sorted in API responses."""
+        configuration = Configuration(
+            label="A test configuration",
+            keywords=["water depth", "GPS", "location", "Atmos"],
+            is_public=True,
+            is_internal=False,
+            cfg_permission_group="123",
+        )
+        db.session.add(configuration)
+        db.session.commit()
+
+        response = self.client.get(
+            f"{self.configurations_url}/{configuration.id}",
+            content_type="application/vnd.api+json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            ["Atmos", "GPS", "location", "water depth"],
+            response.json["data"]["attributes"]["keywords"],
+        )
+
     def test_post_keywords(self):
         """Ensure we can post keywords."""
         configuration_data = {
@@ -1209,7 +1235,7 @@ class TestConfigurationsService(BaseTestCase):
                 "type": "configuration",
                 "attributes": {
                     "label": "A test configuration",
-                    "keywords": ["word1", "word2"],
+                    "keywords": ["word2", "word1"],
                     "is_public": True,
                     "is_internal": False,
                     "cfg_permission_group": "123",
