@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.28.0 (Unreleased)
+## 1.28.1 (Unreleased)
+
+## 1.28.0 - 2026-07-20
 
 Added:
 - Functionality to generate alternative serial numbers within the system ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/711))
