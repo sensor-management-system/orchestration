@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.28.1 (Unreleased)
+## 1.28.2 (Unreleased)
+
+## 1.28.1 - 2026-07-20
 
 Fixed:
 - Mapping of ROR identifier to B2INST uses now the Other identifier type ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/723))
