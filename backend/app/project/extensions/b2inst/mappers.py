@@ -82,7 +82,7 @@ class B2InstDeviceMapper:
             if possible_organization and possible_organization.ror:
                 owner_identifier = possible_organization.ror
                 # TODO: Change to ROR once they are supported by B2INST
-                owner_identifier_type = "URL"
+                owner_identifier_type = "Other"
 
             if name:
                 owners.add(
@@ -253,7 +253,7 @@ class B2InstPlatformMapper:
             if possible_organization and possible_organization.ror:
                 owner_identifier = possible_organization.ror
                 # TODO: Change to ROR once they are supported by B2INST
-                owner_identifier_type = "URL"
+                owner_identifier_type = "Other"
 
             if name:
                 owners.add(
@@ -482,7 +482,7 @@ class B2InstConfigurationMapper:
             if possible_organization and possible_organization.ror:
                 owner_identifier = possible_organization.ror
                 # TODO: Change to ROR once they are supported by B2INST
-                owner_identifier_type = "URL"
+                owner_identifier_type = "Other"
 
             if name:
                 owners.add(

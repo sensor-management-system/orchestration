@@ -169,7 +169,7 @@ class TestB2InstDeviceMapper(BaseTestCase):
                         ownerName="LocalHost",
                         ownerContact=None,
                         ownerIdentifier="https://ror.org/LocalHost",
-                        ownerIdentifierType="URL",
+                        ownerIdentifierType="Other",
                     )
                 ],
                 InstrumentType=[
@@ -610,7 +610,7 @@ class TestB2InstPlatformMapper(BaseTestCase):
                         ownerName="LocalHost",
                         ownerContact=None,
                         ownerIdentifier="https://ror.org/LocalHost",
-                        ownerIdentifierType="URL",
+                        ownerIdentifierType="Other",
                     )
                 ],
                 InstrumentType=[
@@ -1104,7 +1104,7 @@ class TestB2InstConfigurationMapper(BaseTestCase):
                         ownerName="LocalHost",
                         ownerContact=None,
                         ownerIdentifier="https://ror.org/LocalHost",
-                        ownerIdentifierType="URL",
+                        ownerIdentifierType="Other",
                     )
                 ],
                 InstrumentType=[
