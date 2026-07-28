@@ -227,7 +227,17 @@ function getDummyDeviceMountAction (): DeviceMountAction {
       orcid: '',
       createdAt: null,
       updatedAt: null,
-      createdByUserId: null
+      createdByUserId: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     }),
     endContact: null,
     beginDescription: 'Second action',

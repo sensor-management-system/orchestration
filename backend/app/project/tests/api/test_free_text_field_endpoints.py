@@ -5312,6 +5312,643 @@ class TestContactOrganizationEndpoint(BaseTestCase):
             self.assertTrue(get_endpoint[field] != "")
 
 
+class TestContactStreetEndpoint(BaseTestCase):
+    """Tests for the free text field endpoint for contact streets."""
+
+    url = f"{base_url}/controller/contact-streets"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal",
+            family_name="contact",
+            email="normal.contact@localhost",
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        # We have a contact (self.normal_contact), but there are no
+        # organizations.
+        self.assertEqual(data, [])
+
+    def test_get_for_three_contacts(self):
+        """Ensure we get a list of contacts."""
+        self.normal_contact.street = "Telegrafenberg"
+        contact2 = Contact(
+            given_name="second",
+            family_name="contact",
+            email="second@contacts",
+            street="Telegrafenberg",
+        )
+        contact3 = Contact(
+            given_name="third",
+            family_name="contact",
+            email="third@contacts",
+            street="Am Mühlenberg",
+        )
+
+        db.session.add_all([self.normal_contact, contact2, contact3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["Am Mühlenberg", "Telegrafenberg"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+
+class TestContactStreetNumberEndpoint(BaseTestCase):
+    """Tests for the free text field endpoint for contact street numbers."""
+
+    url = f"{base_url}/controller/contact-street-numbers"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal",
+            family_name="contact",
+            email="normal.contact@localhost",
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        # We have a contact (self.normal_contact), but there are no
+        # organizations.
+        self.assertEqual(data, [])
+
+    def test_get_for_three_contacts(self):
+        """Ensure we get a list of contacts."""
+        self.normal_contact.street_number = "1a"
+        contact2 = Contact(
+            given_name="second",
+            family_name="contact",
+            email="second@contacts",
+            street_number="1a",
+        )
+        contact3 = Contact(
+            given_name="third",
+            family_name="contact",
+            email="third@contacts",
+            street_number="20",
+        )
+
+        db.session.add_all([self.normal_contact, contact2, contact3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["1a", "20"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+
+class TestContactCityEndpoint(BaseTestCase):
+    """Tests for the free text field endpoint for contact cities."""
+
+    url = f"{base_url}/controller/contact-cities"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal",
+            family_name="contact",
+            email="normal.contact@localhost",
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        # We have a contact (self.normal_contact), but there are no
+        # organizations.
+        self.assertEqual(data, [])
+
+    def test_get_for_three_contacts(self):
+        """Ensure we get a list of contacts."""
+        self.normal_contact.city = "Potsdam"
+        contact2 = Contact(
+            given_name="second",
+            family_name="contact",
+            email="second@contacts",
+            city="Potsdam",
+        )
+        contact3 = Contact(
+            given_name="third",
+            family_name="contact",
+            email="third@contacts",
+            city="Leipzig",
+        )
+
+        db.session.add_all([self.normal_contact, contact2, contact3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["Leipzig", "Potsdam"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+
+class TestContactAdministrativeAreaEndpoint(BaseTestCase):
+    """Tests for the free text field endpoint for contact administrative areas."""
+
+    url = f"{base_url}/controller/contact-administrative-areas"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal",
+            family_name="contact",
+            email="normal.contact@localhost",
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        # We have a contact (self.normal_contact), but there are no
+        # organizations.
+        self.assertEqual(data, [])
+
+    def test_get_for_three_contacts(self):
+        """Ensure we get a list of contacts."""
+        self.normal_contact.administrative_area = "Brandenburg"
+        contact2 = Contact(
+            given_name="second",
+            family_name="contact",
+            email="second@contacts",
+            administrative_area="Brandenburg",
+        )
+        contact3 = Contact(
+            given_name="third",
+            family_name="contact",
+            email="third@contacts",
+            administrative_area="Berlin",
+        )
+
+        db.session.add_all([self.normal_contact, contact2, contact3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["Berlin", "Brandenburg"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+
+class TestContactZipCodeEndpoint(BaseTestCase):
+    """Tests for the free text field endpoint for contact zip codes."""
+
+    url = f"{base_url}/controller/contact-zip-codes"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal",
+            family_name="contact",
+            email="normal.contact@localhost",
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        # We have a contact (self.normal_contact), but there are no
+        # organizations.
+        self.assertEqual(data, [])
+
+    def test_get_for_three_contacts(self):
+        """Ensure we get a list of contacts."""
+        self.normal_contact.zip_code = "14473"
+        contact2 = Contact(
+            given_name="second",
+            family_name="contact",
+            email="second@contacts",
+            zip_code="14473",
+        )
+        contact3 = Contact(
+            given_name="third",
+            family_name="contact",
+            email="third@contacts",
+            zip_code="14469",
+        )
+
+        db.session.add_all([self.normal_contact, contact2, contact3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["14469", "14473"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+
+class TestContactBuildingEndpoint(BaseTestCase):
+    """Tests for the free text field endpoint for contact buildings."""
+
+    url = f"{base_url}/controller/contact-buildings"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal",
+            family_name="contact",
+            email="normal.contact@localhost",
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        # We have a contact (self.normal_contact), but there are no
+        # organizations.
+        self.assertEqual(data, [])
+
+    def test_get_for_three_contacts(self):
+        """Ensure we get a list of contacts."""
+        self.normal_contact.building = "A70"
+        contact2 = Contact(
+            given_name="second",
+            family_name="contact",
+            email="second@contacts",
+            building="A70",
+        )
+        contact3 = Contact(
+            given_name="third",
+            family_name="contact",
+            email="third@contacts",
+            building="C4",
+        )
+
+        db.session.add_all([self.normal_contact, contact2, contact3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["A70", "C4"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+
+class TestContactRoomEndpoint(BaseTestCase):
+    """Tests for the free text field endpoint for contact rooms."""
+
+    url = f"{base_url}/controller/contact-rooms"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal",
+            family_name="contact",
+            email="normal.contact@localhost",
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        # We have a contact (self.normal_contact), but there are no
+        # organizations.
+        self.assertEqual(data, [])
+
+    def test_get_for_three_contacts(self):
+        """Ensure we get a list of contacts."""
+        self.normal_contact.room = "R319"
+        contact2 = Contact(
+            given_name="second",
+            family_name="contact",
+            email="second@contacts",
+            room="R319",
+        )
+        contact3 = Contact(
+            given_name="third",
+            family_name="contact",
+            email="third@contacts",
+            room="F123",
+        )
+
+        db.session.add_all([self.normal_contact, contact2, contact3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["F123", "R319"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+
 class TestOrganizationNameEndpoint(BaseTestCase):
     """Tests for the free text field endpoint for organization names."""
 

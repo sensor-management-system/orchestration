@@ -7,6 +7,8 @@
  *
  * SPDX-License-Identifier: EUPL-1.2
  */
+import { DateTime } from 'luxon'
+
 import { ContactBasicData } from '@/models/basic/ContactBasicData'
 
 import {
@@ -28,6 +30,18 @@ export class ContactBasicDataSerializer {
       newEntry.email = attributes.email
       newEntry.organization = attributes.organization || ''
       newEntry.orcid = attributes.orcid || ''
+      newEntry.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
+      newEntry.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
+      newEntry.telephone = attributes.telephone || ''
+      newEntry.faxNumber = attributes.fax_number || ''
+      newEntry.city = attributes.city || ''
+      newEntry.zipCode = attributes.zip_code || ''
+      newEntry.administrativeArea = attributes.administrative_area || ''
+      newEntry.country = attributes.country || ''
+      newEntry.street = attributes.street || ''
+      newEntry.streetNumber = attributes.street_number || ''
+      newEntry.room = attributes.room || ''
+      newEntry.building = attributes.building || ''
     }
 
     return newEntry

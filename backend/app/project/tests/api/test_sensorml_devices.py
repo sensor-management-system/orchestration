@@ -497,6 +497,183 @@ class TestSensorMLDevice(BaseTestCase):
             "https://orcid.org/0000-1111-2222-3333",
         )
 
+    def test_get_public_device_contact_with_phone_and_address(self):
+        """Ensure we include the phone and delivery point information."""
+        owner_name = "Owner"
+        owner_uri = current_app.config["CV_URL"] + "/contactroles/4/"
+        contact1 = Contact(
+            given_name="Given",
+            family_name="Fam",
+            email="given@family",
+            telephone="911",
+            fax_number="912",
+            city="Potsdam",
+            zip_code="14473",
+            administrative_area="Brandenburg",
+            street="Telegrafenberg",
+            street_number="123",
+            country="Germany",
+            building="H",
+            room="V1",
+            organization="Dummy organization",
+            website="https://dummy/stuff/given.fam",
+        )
+        contact_role1 = DeviceContactRole(
+            contact=contact1,
+            device=self.device,
+            role_name=owner_name,
+            role_uri=owner_uri,
+        )
+
+        db.session.add_all([contact1, contact_role1])
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.device.id}/sensorml")
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_contacts = root.find("{http://www.opengis.net/sensorml/2.0}contacts")
+        sml_contact_list = sml_contacts.find(
+            "{http://www.opengis.net/sensorml/2.0}ContactList"
+        )
+        sml_contact_entries = sml_contact_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}contact"
+        )
+        self.assertEqual(len(sml_contact_entries), 1)
+        first_contact = sml_contact_entries[0]
+
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}contactInfo")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Contact")
+            .find("{http://www.isotc211.org/2005/gmd}phone")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Telephone")
+            .find("{http://www.isotc211.org/2005/gmd}voice")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            contact1.telephone,
+        )
+
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}contactInfo")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Contact")
+            .find("{http://www.isotc211.org/2005/gmd}phone")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Telephone")
+            .find("{http://www.isotc211.org/2005/gmd}facsimile")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            contact1.fax_number,
+        )
+
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}contactInfo")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Contact")
+            .find("{http://www.isotc211.org/2005/gmd}address")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Address")
+            .find("{http://www.isotc211.org/2005/gmd}deliveryPoint")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            f"{contact1.street} {contact1.street_number}",
+        )
+
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}contactInfo")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Contact")
+            .find("{http://www.isotc211.org/2005/gmd}address")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Address")
+            .find("{http://www.isotc211.org/2005/gmd}city")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            contact1.city,
+        )
+
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}contactInfo")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Contact")
+            .find("{http://www.isotc211.org/2005/gmd}address")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Address")
+            .find("{http://www.isotc211.org/2005/gmd}postalCode")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            contact1.zip_code,
+        )
+
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}contactInfo")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Contact")
+            .find("{http://www.isotc211.org/2005/gmd}address")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Address")
+            .find("{http://www.isotc211.org/2005/gmd}administrativeArea")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            contact1.administrative_area,
+        )
+
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}contactInfo")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Contact")
+            .find("{http://www.isotc211.org/2005/gmd}address")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Address")
+            .find("{http://www.isotc211.org/2005/gmd}country")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            contact1.country,
+        )
+
+    def test_get_public_device_contact_no_street_number(self):
+        """Ensure we can create delivery point information without the street number."""
+        owner_name = "Owner"
+        owner_uri = current_app.config["CV_URL"] + "/contactroles/4/"
+        contact1 = Contact(
+            given_name="Given",
+            family_name="Fam",
+            email="given@family",
+            street="Telegrafenberg",
+        )
+        contact_role1 = DeviceContactRole(
+            contact=contact1,
+            device=self.device,
+            role_name=owner_name,
+            role_uri=owner_uri,
+        )
+
+        db.session.add_all([contact1, contact_role1])
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.device.id}/sensorml")
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_contacts = root.find("{http://www.opengis.net/sensorml/2.0}contacts")
+        sml_contact_list = sml_contacts.find(
+            "{http://www.opengis.net/sensorml/2.0}ContactList"
+        )
+        sml_contact_entries = sml_contact_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}contact"
+        )
+        self.assertEqual(len(sml_contact_entries), 1)
+        first_contact = sml_contact_entries[0]
+
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}contactInfo")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Contact")
+            .find("{http://www.isotc211.org/2005/gmd}address")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Address")
+            .find("{http://www.isotc211.org/2005/gmd}deliveryPoint")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            f"{contact1.street}",
+        )
+
     def test_get_public_device_with_long_name(self):
         """Check that we give out the long name."""
         self.device.long_name = "some long name"

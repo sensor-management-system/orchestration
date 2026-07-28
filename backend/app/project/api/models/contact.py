@@ -49,6 +49,19 @@ class Contact(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     active = db.Column(db.Boolean, default=True)
     organization = db.Column(db.String(1024), nullable=True)
     orcid = db.Column(db.String(32), nullable=True, unique=True)
+
+    telephone = db.Column(db.String(64), nullable=True)
+    fax_number = db.Column(db.String(64), nullable=True)
+
+    street = db.Column(db.String(256), nullable=True)
+    street_number = db.Column(db.String(256), nullable=True)
+    city = db.Column(db.String(256), nullable=True)
+    zip_code = db.Column(db.String(256), nullable=True)
+    administrative_area = db.Column(db.String(256), nullable=True)
+    country = db.Column(db.String(256), nullable=True)
+    building = db.Column(db.String(256), nullable=True)
+    room = db.Column(db.String(256), nullable=True)
+
     devices = db.relationship(
         "Device",
         secondary=device_contacts,
@@ -79,6 +92,16 @@ class Contact(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
             "email": self.email,
             "organization": self.organization,
             "orcid": self.orcid,
+            "telephone": self.telephone,
+            "fax_number": self.fax_number,
+            "street": self.street,
+            "street_number": self.street_number,
+            "city": self.city,
+            "zip_code": self.zip_code,
+            "administrative_area": self.administrative_area,
+            "country": self.country,
+            "building": self.building,
+            "room": self.room,
             "created_by_id": self.created_by_id,
         }
 
@@ -103,6 +126,16 @@ class Contact(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
             "organization": type_keyword_and_full_searchable,
             "email": type_keyword_and_full_searchable,
             "orcid": type_keyword_and_full_searchable,
+            "telephone": type_keyword_and_full_searchable,
+            "fax_number": type_keyword_and_full_searchable,
+            "street": type_keyword_and_full_searchable,
+            "street_number": type_keyword_and_full_searchable,
+            "city": type_keyword_and_full_searchable,
+            "zip_code": type_keyword_and_full_searchable,
+            "administrative_area": type_keyword_and_full_searchable,
+            "country": type_keyword_and_full_searchable,
+            "building": type_keyword_and_full_searchable,
+            "room": type_keyword_and_full_searchable,
             "created_by_id": {
                 "type": "integer",
             },

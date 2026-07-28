@@ -64,6 +64,16 @@ export class ContactSerializer {
       newEntry.orcid = attributes.orcid || ''
       newEntry.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
       newEntry.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
+      newEntry.telephone = attributes.telephone || ''
+      newEntry.faxNumber = attributes.fax_number || ''
+      newEntry.city = attributes.city || ''
+      newEntry.zipCode = attributes.zip_code || ''
+      newEntry.administrativeArea = attributes.administrative_area || ''
+      newEntry.country = attributes.country || ''
+      newEntry.street = attributes.street || ''
+      newEntry.streetNumber = attributes.street_number || ''
+      newEntry.room = attributes.room || ''
+      newEntry.building = attributes.building || ''
     }
 
     const relationships = jsonApiData.relationships
@@ -108,7 +118,17 @@ export class ContactSerializer {
         // We don't want it to be empty string, as this would make
         // the unique constraint problematic.
         // Using null is save here.
-        orcid: contact.orcid ? contact.orcid : null
+        orcid: contact.orcid ? contact.orcid : null,
+        telephone: contact.telephone,
+        fax_number: contact.faxNumber,
+        city: contact.city,
+        zip_code: contact.zipCode,
+        administrative_area: contact.administrativeArea,
+        country: contact.country,
+        street: contact.street,
+        street_number: contact.streetNumber,
+        room: contact.room,
+        building: contact.building
       }
     }
     if (contact.id) {

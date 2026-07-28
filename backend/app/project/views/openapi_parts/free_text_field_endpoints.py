@@ -644,6 +644,48 @@ paths = {
         response_description="List of distinct organizations of the contacts.",
     ),
     **template(
+        endpoint="/controller/contact-streets",
+        description="Get the list of distinct contact street values of all contacts.",
+        operation_id="controller_contact_streets",
+        response_description="List of distinct streets of the contacts.",
+    ),
+    **template(
+        endpoint="/controller/contact-street-numbers",
+        description="Get the list of distinct contact street number values of all contacts.",
+        operation_id="controller_contact_street_numbers",
+        response_description="List of distinct street numbers of the contacts.",
+    ),
+    **template(
+        endpoint="/controller/contact-cities",
+        description="Get the list of distinct contact city values of all contacts.",
+        operation_id="controller_contact_cities",
+        response_description="List of distinct cities of the contacts.",
+    ),
+    **template(
+        endpoint="/controller/contact-administrative-areas",
+        description="Get the list of distinct contact administrative area values of all contacts.",
+        operation_id="controller_contact_administrative_areas",
+        response_description="List of distinct administrative areas of the contacts.",
+    ),
+    **template(
+        endpoint="/controller/contact-zip-codes",
+        description="Get the list of distinct contact zip code values of all contacts.",
+        operation_id="controller_contact_zip_codes",
+        response_description="List of distinct zip codes of the contacts.",
+    ),
+    **template(
+        endpoint="/controller/contact-buildings",
+        description="Get the list of distinct contact building values of all contacts.",
+        operation_id="controller_contact_buildings",
+        response_description="List of distinct buildings of the contacts.",
+    ),
+    **template(
+        endpoint="/controller/contact-rooms",
+        description="Get the list of distinct contact room values of all contacts.",
+        operation_id="controller_contact_rooms",
+        response_description="List of distinct rooms of the contacts.",
+    ),
+    **template(
         endpoint="/controller/organization-names",
         description="Get the list of distinct organization names.",
         operation_id="controller_organization_names",

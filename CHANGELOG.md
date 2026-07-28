@@ -7,7 +7,10 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.28.2 (Unreleased)
+## 1.29.0 (Unreleased)
+
+Added:
+- More contact related fields to provide more coverage for ISO and SensorML fields ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/725))
 
 ## 1.28.1 - 2026-07-20
 

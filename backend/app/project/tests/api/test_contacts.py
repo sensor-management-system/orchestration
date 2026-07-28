@@ -169,6 +169,48 @@ class TestContactServices(BaseTestCase):
         # It reuses the existing organization
         self.assertEqual(db.session.query(Organization).count(), 1)
 
+    def test_post_with_full_set_of_metadata(self):
+        """Ensure we handle the fields in the schema."""
+        userinfo = generate_userinfo_data()
+        contact_attributes = {
+            "given_name": "fake",
+            "family_name": "user",
+            "email": "fake.user@localhost",
+            "organization": "Org1",
+            "orcid": "0000-0000-0000-0001",
+            "telephone": "12345",
+            "fax_number": "12346",
+            "street": "Main Street",
+            "street_number": "123",
+            "city": "Capital City",
+            "zip_code": "00001",
+            "country": "United Places somewhere on Earth",
+            "administrative_area": "CC",
+            "building": "A",
+            "room": "40001",
+        }
+
+        data = {"data": {"type": "contact", "attributes": contact_attributes}}
+        access_headers = create_token(userinfo)
+        with self.client:
+            response = self.client.post(
+                self.url,
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 201)
+
+        response_attributes = response.json["data"]["attributes"]
+
+        contact = (
+            db.session.query(Contact).filter_by(id=response.json["data"]["id"]).first()
+        )
+
+        for k, v in contact_attributes.items():
+            self.assertEqual(v, response_attributes[k])
+            self.assertEqual(v, getattr(contact, k))
+
     def test_update_contact_as_self(self):
         """
         Ensure update contact behaves correctly.

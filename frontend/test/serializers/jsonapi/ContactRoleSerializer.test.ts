@@ -99,7 +99,17 @@ describe('ContactRoleSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
       })
       const expectedContactRole2 = ContactRole.createFromObject({
@@ -116,7 +126,17 @@ describe('ContactRoleSerializer', () => {
           email: 'test2@test.test',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
       })
 
@@ -145,7 +165,17 @@ describe('ContactRoleSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
       })
 

@@ -643,6 +643,64 @@ class ContactOrganizationEndPoint(AbstractFreeTextFieldEndpoint):
     field = Contact.organization
 
 
+@free_text_field_routes.route("/controller/contact-streets", methods=["GET"])
+@class_based_view
+class ContactStreetEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct contact streets."""
+
+    field = Contact.street
+
+
+@free_text_field_routes.route("/controller/contact-street-numbers", methods=["GET"])
+@class_based_view
+class ContactStreetNumberEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct contact street numbers."""
+
+    field = Contact.street_number
+
+
+@free_text_field_routes.route("/controller/contact-cities", methods=["GET"])
+@class_based_view
+class ContactCityEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct contact cities."""
+
+    field = Contact.city
+
+
+@free_text_field_routes.route(
+    "/controller/contact-administrative-areas", methods=["GET"]
+)
+@class_based_view
+class ContactAdministrativeAreaEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct contact cities."""
+
+    field = Contact.administrative_area
+
+
+@free_text_field_routes.route("/controller/contact-zip-codes", methods=["GET"])
+@class_based_view
+class ContactZipCodeEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct contact zip codes."""
+
+    field = Contact.zip_code
+
+
+@free_text_field_routes.route("/controller/contact-buildings", methods=["GET"])
+@class_based_view
+class ContactBuildingEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct contact buildings."""
+
+    field = Contact.building
+
+
+@free_text_field_routes.route("/controller/contact-rooms", methods=["GET"])
+@class_based_view
+class ContactRoomEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct contact rooms."""
+
+    field = Contact.room
+
+
 @free_text_field_routes.route("/controller/organization-names", methods=["GET"])
 @class_based_view
 class OrganizationNameEndPoint(AbstractFreeTextFieldEndpoint):

@@ -38,6 +38,8 @@ SPDX-License-Identifier: EUPL-1.2
         <li>Organization</li>
         <li>Website (if available)</li>
         <li>ORCID (if available)</li>
+        <li>Address (if provided by the user)</li>
+        <li>Phone and fax numbers (if provided by the users)</li>
       </ul>
     </p>
     <p>
