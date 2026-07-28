@@ -144,7 +144,17 @@ describe('DeviceCalibrationActionSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -171,7 +181,17 @@ describe('DeviceCalibrationActionSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -201,7 +221,17 @@ describe('DeviceCalibrationActionSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -231,7 +261,17 @@ describe('DeviceCalibrationActionSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -261,7 +301,17 @@ describe('DeviceCalibrationActionSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -291,7 +341,17 @@ describe('DeviceCalibrationActionSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const attachment1 = Attachment.createFromObject({
         id: '11',
@@ -421,7 +481,17 @@ describe('DeviceCalibrationActionSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const measuredQuantity1 = DeviceProperty.createFromObject({
         id: '111',
@@ -625,7 +695,17 @@ describe('DeviceCalibrationActionSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const action = new DeviceCalibrationAction()
       action.id = '3'
@@ -678,7 +758,17 @@ describe('DeviceCalibrationActionSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const action = new DeviceCalibrationAction()
       action.id = '3'
@@ -731,7 +821,17 @@ describe('DeviceCalibrationActionSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const action = new DeviceCalibrationAction()
       action.id = '3'
@@ -784,7 +884,17 @@ describe('DeviceCalibrationActionSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const action = new DeviceCalibrationAction()
       action.id = '3'

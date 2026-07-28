@@ -177,7 +177,17 @@ describe('MountingActionsSerializer', () => {
           orcid: '',
           createdAt: null,
           updatedAt: null,
-          createdByUserId: null
+          createdByUserId: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         }),
         Contact.createFromObject({
           id: '8',
@@ -189,7 +199,17 @@ describe('MountingActionsSerializer', () => {
           orcid: '',
           createdAt: null,
           updatedAt: null,
-          createdByUserId: null
+          createdByUserId: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
       ]
 
@@ -466,7 +486,17 @@ describe('MountingActionsSerializer', () => {
           orcid: '',
           createdAt: null,
           updatedAt: null,
-          createdByUserId: null
+          createdByUserId: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         }),
         Contact.createFromObject({
           id: '8',
@@ -478,7 +508,17 @@ describe('MountingActionsSerializer', () => {
           website: '',
           createdAt: null,
           updatedAt: null,
-          createdByUserId: null
+          createdByUserId: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
       ]
 
@@ -758,7 +798,17 @@ describe('MountingActionsSerializer', () => {
           orcid: '',
           createdAt: null,
           updatedAt: null,
-          createdByUserId: null
+          createdByUserId: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         }),
         Contact.createFromObject({
           id: '8',
@@ -770,7 +820,17 @@ describe('MountingActionsSerializer', () => {
           website: '',
           createdAt: null,
           updatedAt: null,
-          createdByUserId: null
+          createdByUserId: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
       ]
 

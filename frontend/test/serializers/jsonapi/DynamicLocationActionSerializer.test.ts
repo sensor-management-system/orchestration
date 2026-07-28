@@ -60,7 +60,17 @@ describe('DynamicLocationActionSerializer', () => {
         website: '',
         createdAt: DateTime.utc(2023, 2, 26, 0, 0, 0),
         updatedAt: DateTime.utc(2023, 2, 27, 0, 0, 0),
-        createdByUserId: null
+        createdByUserId: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const expectedAction = DynamicLocationAction.createFromObject({
         id: '1',
@@ -97,7 +107,17 @@ describe('DynamicLocationActionSerializer', () => {
         website: '',
         createdAt: DateTime.utc(2023, 2, 26, 0, 0, 0),
         updatedAt: DateTime.utc(2023, 2, 27, 0, 0, 0),
-        createdByUserId: null
+        createdByUserId: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const action = DynamicLocationAction.createFromObject({
         id: '1',

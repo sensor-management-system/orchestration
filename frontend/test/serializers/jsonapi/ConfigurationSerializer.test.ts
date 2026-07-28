@@ -399,7 +399,17 @@ describe('ConfigurationSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         }),
         Contact.createFromObject({
           id: '2',
@@ -411,7 +421,17 @@ describe('ConfigurationSerializer', () => {
           email: 'test@tost.test',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
       ]
 
@@ -484,7 +504,17 @@ describe('ConfigurationSerializer', () => {
           organization: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         }),
         Contact.createFromObject({
           id: '2',
@@ -496,7 +526,17 @@ describe('ConfigurationSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
       ]
       configuration.siteId = '1'
@@ -602,7 +642,17 @@ describe('ConfigurationSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         }),
         Contact.createFromObject({
           id: '2',
@@ -614,7 +664,17 @@ describe('ConfigurationSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
       ]
       const serializer = new ConfigurationSerializer()
@@ -704,7 +764,17 @@ describe('configurationWithMetaToConfigurationByThrowingErrorOnMissing', () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     })
     configuration.contacts.push(contact)
 
@@ -769,7 +839,17 @@ describe('configurationWithMetaToConfigurationByAddingDummyObjects', () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     })
     configuration.contacts.push(contact)
     const missing = {
@@ -798,7 +878,17 @@ describe('configurationWithMetaToConfigurationByAddingDummyObjects', () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     })
     configuration.contacts.push(contact)
     const missing = {

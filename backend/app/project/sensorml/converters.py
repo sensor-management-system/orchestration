@@ -19,24 +19,29 @@ from . import cleanup
 from .models import (
     GcoCharacterString,
     GmdAddress,
+    GmdAdministrativeArea,
     GmdCiAddress,
     GmdCiContact,
     GmdCiOnlineResource,
     GmdCiResponsibleParty,
     GmdCiRoleCode,
+    GmdCiTelephone,
     GmdCity,
     GmdContactInfo,
     GmdCountry,
     GmdDeliveryPoint,
     GmdElectronicalMailAddress,
+    GmdFacsimile,
     GmdIndividualName,
     GmdLinkage,
     GmdName,
     GmdOnlineResource,
     GmdOrganisationName,
+    GmdPhone,
     GmdPostalCode,
     GmdRole,
     GmdUrl,
+    GmdVoice,
     GmlBegin,
     GmlDescription,
     GmlEnd,
@@ -152,6 +157,45 @@ class ContactRoleConverter:
                     )
                 )
             )
+            if contact_role.contact.street:
+                delivery_point_parts = [contact_role.contact.street]
+                if contact_role.contact.street_number:
+                    delivery_point_parts.append(contact_role.contact.street_number)
+
+                gmd_address.gmd_ci_address.gmd_delivery_point = GmdDeliveryPoint(
+                    gco_character_string=GcoCharacterString(
+                        text=" ".join(delivery_point_parts)
+                    )
+                )
+            if contact_role.contact.zip_code:
+                gmd_address.gmd_ci_address.gmd_postal_code = GmdPostalCode(
+                    gco_character_string=GcoCharacterString(
+                        text=contact_role.contact.zip_code
+                    )
+                )
+
+            if contact_role.contact.city:
+                gmd_address.gmd_ci_address.gmd_city = GmdCity(
+                    gco_character_string=GcoCharacterString(
+                        text=contact_role.contact.city
+                    )
+                )
+
+            if contact_role.contact.administrative_area:
+                gmd_address.gmd_ci_address.gmd_administrative_area = (
+                    GmdAdministrativeArea(
+                        gco_character_string=GcoCharacterString(
+                            text=contact_role.contact.administrative_area
+                        )
+                    )
+                )
+
+            if contact_role.contact.country:
+                gmd_address.gmd_ci_address.gmd_country = GmdCountry(
+                    gco_character_string=GcoCharacterString(
+                        text=contact_role.contact.country
+                    )
+                )
             gmd_online_resource = None
             if contact_role.contact.orcid:
                 gmd_online_resource = GmdOnlineResource(
@@ -176,6 +220,22 @@ class ContactRoleConverter:
                     gmd_address=gmd_address, gmd_online_resource=gmd_online_resource
                 )
             )
+            if contact_role.contact.telephone or contact_role.contact.fax_number:
+                gmd_ci_telephone = GmdCiTelephone()
+
+                if contact_role.contact.telephone:
+                    gmd_ci_telephone.gmd_voice = GmdVoice(
+                        GcoCharacterString(text=contact_role.contact.telephone)
+                    )
+                if contact_role.contact.fax_number:
+                    gmd_ci_telephone.gmd_facsimile = GmdFacsimile(
+                        GcoCharacterString(text=contact_role.contact.fax_number)
+                    )
+
+                gmd_contact_info.gmd_ci_contact.gmd_phone = GmdPhone(
+                    gmd_ci_telephone=gmd_ci_telephone
+                )
+
             role_code_list_value = ""
             if contact_role.role_uri:
                 role_code_list_value = contact_role.role_uri.strip("/").split("/")[-1]

@@ -156,6 +156,120 @@ SPDX-License-Identifier: EUPL-1.2
         />
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-text-field
+          :value="value.telephone"
+          label="Telephone"
+          :readonly="readonly"
+          :disabled="readonly"
+          @input="update('telephone', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-text-field
+          :value="value.faxNumber"
+          label="Fax number"
+          :readonly="readonly"
+          :disabled="readonly"
+          @input="update('faxNumber', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <autocomplete-text-input
+          :value="value.street"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Street"
+          placeholder="Street name"
+          endpoint="contact-streets"
+          @input="update('street', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <autocomplete-text-input
+          :value="value.streetNumber"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Street number"
+          placeholder="Street number"
+          endpoint="contact-street-numbers"
+          @input="update('streetNumber', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="2">
+        <autocomplete-text-input
+          :value="value.city"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="City"
+          placeholder="City"
+          endpoint="contact-cities"
+          @input="update('city', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="2">
+        <autocomplete-text-input
+          :value="value.zipCode"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Zip code"
+          placeholder="Zip code"
+          endpoint="contact-zip-codes"
+          @input="update('zipCode', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="2">
+        <autocomplete-text-input
+          :value="value.administrativeArea"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Administrative area"
+          placeholder="Administrative area"
+          endpoint="contact-administrative-areas"
+          @input="update('administrativeArea', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <combobox
+          :value="value.country"
+          :items="countryNames"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Country"
+          placeholder="Country"
+          @input="update('country', $event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <autocomplete-text-input
+          :value="value.building"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Building"
+          placeholder="Building"
+          endpoint="contact-buildings"
+          @input="update('building', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <autocomplete-text-input
+          :value="value.room"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Room"
+          placeholder="Room"
+          endpoint="contact-rooms"
+          @input="update('room', $event)"
+        />
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 <script lang="ts">
@@ -169,11 +283,14 @@ import Validator from '@/utils/validator'
 import { isValidOrcid } from '@/utils/orcidHelpers'
 
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
+import Combobox from '@/components/shared/Combobox.vue'
+
 import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 @Component({
   components: {
-    AutocompleteTextInput
+    AutocompleteTextInput,
+    Combobox
   }
 })
 export default class ContactBasicDataForm extends mixins(Rules, ExternalUrlLinkMixin) {
@@ -188,6 +305,13 @@ export default class ContactBasicDataForm extends mixins(Rules, ExternalUrlLinkM
     type: Boolean
   })
   readonly readonly!: boolean
+
+  @Prop({
+    default: () => [] as string[],
+    required: true,
+    type: Array
+  })
+  readonly countryNames!: string[]
 
   private additionalRules = {
     isValidEmailAddress: Validator.isValidEmailAddress,
@@ -225,6 +349,36 @@ export default class ContactBasicDataForm extends mixins(Rules, ExternalUrlLinkM
         break
       case 'orcid':
         newObj.orcid = value
+        break
+      case 'telephone':
+        newObj.telephone = value
+        break
+      case 'faxNumber':
+        newObj.faxNumber = value
+        break
+      case 'city':
+        newObj.city = value
+        break
+      case 'zipCode':
+        newObj.zipCode = value
+        break
+      case 'administrativeArea':
+        newObj.administrativeArea = value
+        break
+      case 'country':
+        newObj.country = value
+        break
+      case 'street':
+        newObj.street = value
+        break
+      case 'streetNumber':
+        newObj.streetNumber = value
+        break
+      case 'room':
+        newObj.room = value
+        break
+      case 'building':
+        newObj.building = value
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')

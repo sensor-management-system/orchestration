@@ -26,12 +26,32 @@ describe('ContactSerializer', () => {
         website: '',
         createdAt: DateTime.utc(2022, 12, 24, 12, 0, 0),
         updatedAt: DateTime.utc(2022, 12, 25, 5, 0, 0),
-        createdByUserId: '123'
+        createdByUserId: '123',
+        telephone: '911',
+        faxNumber: '912',
+        city: 'Sbrinksfyld',
+        zipCode: '12345',
+        administrativeArea: 'ST',
+        country: 'US',
+        street: 'Ewergryn',
+        streetNumber: '456',
+        room: 'upstairs',
+        building: 'house'
       })
       const serializer = new ContactSerializer()
       const payload = serializer.convertModelToJsonApiData(contact)
 
       expect(payload.attributes?.orcid).toBeNull()
+      expect(payload.attributes.telephone).toEqual('911')
+      expect(payload.attributes.fax_number).toEqual('912')
+      expect(payload.attributes.city).toEqual('Sbrinksfyld')
+      expect(payload.attributes.zip_code).toEqual('12345')
+      expect(payload.attributes.administrative_area).toEqual('ST')
+      expect(payload.attributes.country).toEqual('US')
+      expect(payload.attributes.street).toEqual('Ewergryn')
+      expect(payload.attributes.street_number).toEqual('456')
+      expect(payload.attributes.room).toEqual('upstairs')
+      expect(payload.attributes.building).toEqual('house')
     })
     it('should use the orcid if present', () => {
       const contact = Contact.createFromObject({
@@ -44,7 +64,17 @@ describe('ContactSerializer', () => {
         website: '',
         createdAt: DateTime.utc(2022, 12, 24, 12, 0, 0),
         updatedAt: DateTime.utc(2022, 12, 25, 5, 0, 0),
-        createdByUserId: '123'
+        createdByUserId: '123',
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const serializer = new ContactSerializer()
       const payload = serializer.convertModelToJsonApiData(contact)
@@ -93,7 +123,17 @@ describe('ContactSerializer', () => {
             website: null,
             family_name: 'Mustermann',
             organization: null,
-            orcid: null
+            orcid: null,
+            telephone: '911',
+            fax_number: '912',
+            city: 'Berlin',
+            zip_code: '10300',
+            country: 'Germany',
+            administrative_area: 'Bundesland Berlin',
+            street: 'Unter den Linden',
+            street_number: '4a',
+            room: 'R123',
+            building: 'Front'
           },
           id: '1',
           links: {
@@ -119,6 +159,16 @@ describe('ContactSerializer', () => {
       expectedContact.email = 'test@test.test'
       expectedContact.organization = ''
       expectedContact.orcid = ''
+      expectedContact.telephone = '911'
+      expectedContact.faxNumber = '912'
+      expectedContact.city = 'Berlin'
+      expectedContact.zipCode = '10300'
+      expectedContact.administrativeArea = 'Bundesland Berlin'
+      expectedContact.country = 'Germany'
+      expectedContact.street = 'Unter den Linden'
+      expectedContact.streetNumber = '4a'
+      expectedContact.room = 'R123'
+      expectedContact.building = 'Front'
 
       const serializer = new ContactSerializer()
       const contacts = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
@@ -289,7 +339,17 @@ describe('ContactSerializer', () => {
           orcid: '',
           createdAt: null,
           updatedAt: null,
-          createdByUserId: null
+          createdByUserId: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         }),
         Contact.createFromObject({
           id: '5',
@@ -301,7 +361,17 @@ describe('ContactSerializer', () => {
           orcid: '0000-0000-0000-0001',
           createdAt: null,
           updatedAt: null,
-          createdByUserId: null
+          createdByUserId: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
       ]
 
@@ -382,7 +452,17 @@ describe('ContactSerializer', () => {
         orcid: '0000-0000-0000-0001',
         createdAt: null,
         updatedAt: null,
-        createdByUserId: null
+        createdByUserId: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
 
       const serializer = new ContactSerializer()

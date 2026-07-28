@@ -89,7 +89,17 @@ const createTestPlatform = () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     }),
     Contact.createFromObject({
       id: '5',
@@ -101,7 +111,17 @@ const createTestPlatform = () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     })
   ]
   return platform
@@ -424,7 +444,17 @@ describe('PlatformSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })]
       expectedPlatform1.createdByUserId = '42'
       expectedPlatform1.archived = true
@@ -700,7 +730,17 @@ describe('PlatformSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })]
       expectedPlatform.archived = true
       expectedPlatform.hasSystemGeneratedSerialNumber = true
@@ -933,7 +973,17 @@ describe('PlatformSerializer', () => {
         orcid: '',
         createdByUserId: null,
         createdAt: null,
-        updatedAt: null
+        updatedAt: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })]
       expectedPlatform.archived = false
       expectedPlatform.hasSystemGeneratedSerialNumber = false
@@ -1173,7 +1223,17 @@ describe('platformWithMetaToPlatformByThrowingErrorOnMissing', () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     })
     platform.contacts.push(contact)
 
@@ -1239,7 +1299,17 @@ describe('platformWithMetaToPlatformByAddingDummyObjects', () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     })
     platform.contacts.push(contact)
     const missing = {
@@ -1287,7 +1357,17 @@ describe('platformWithMetaToPlatformByAddingDummyObjects', () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     })
     platform.contacts.push(contact)
 

@@ -705,7 +705,17 @@ describe('GenericActionSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
         const expectedAction = new GenericAction()
         expectedAction.id = '7'
@@ -734,7 +744,17 @@ describe('GenericActionSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
         const expectedAction = new GenericAction()
         expectedAction.id = '7'
@@ -796,7 +816,17 @@ describe('GenericActionSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
         const attachment1 = Attachment.createFromObject({
           id: '51',
@@ -858,7 +888,17 @@ describe('GenericActionSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
 
         const action = new GenericAction()

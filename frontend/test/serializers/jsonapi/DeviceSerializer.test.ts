@@ -168,7 +168,17 @@ const createTestDevice = () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     }),
     Contact.createFromObject({
       id: '5',
@@ -180,7 +190,17 @@ const createTestDevice = () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     })
   ]
   return device
@@ -946,7 +966,17 @@ describe('DeviceSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
       ]
       expectedDevice.archived = false
@@ -1414,7 +1444,17 @@ describe('deviceWithMetaToDeviceByThrowingErrorOnMissing', () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     })
     device.contacts.push(contact)
 
@@ -1480,7 +1520,17 @@ describe('deviceWithMetaToDeviceByAddingDummyObjects', () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     })
     device.contacts.push(contact)
     const missing = {
@@ -1528,7 +1578,17 @@ describe('deviceWithMetaToDeviceByAddingDummyObjects', () => {
       orcid: '',
       createdByUserId: null,
       createdAt: null,
-      updatedAt: null
+      updatedAt: null,
+      telephone: '',
+      faxNumber: '',
+      city: '',
+      zipCode: '',
+      administrativeArea: '',
+      country: '',
+      street: '',
+      streetNumber: '',
+      room: '',
+      building: ''
     })
     device.contacts.push(contact)
 

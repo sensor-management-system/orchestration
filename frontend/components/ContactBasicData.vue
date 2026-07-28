@@ -74,6 +74,36 @@ SPDX-License-Identifier: EUPL-1.2
         </span>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <label>Telephone</label>
+        {{ value.telephone | orDefault }}
+      </v-col>
+      <v-col cols="12" md="3">
+        <label>Fax number</label>
+        {{ value.faxNumber | orDefault }}
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <label>Street</label>
+        {{ [value.street, value.streetNumber] | sparseJoin(' ') | orDefault }}
+      </v-col>
+      <v-col cols="12" md="3">
+        <label>City</label>
+        {{ composedCity | orDefault }}
+      </v-col>
+      <v-col cols="12" md="3">
+        <label>Country</label>
+        {{ value.country | orDefault }}
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <label>Building - Room</label>
+        {{ [value.building, value.room] | sparseJoin(' - ') | orDefault }}
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -98,6 +128,13 @@ export default class ContactBasicData extends mixins(ExternalUrlLinkMixin) {
     type: Organization
   })
   readonly organization!: Organization | null
+
+  get composedCity (): string {
+    // This should result in something like 14473 Potsdam, Brandenburg
+    const cityPart = [this.value.zipCode, this.value.city].filter(x => x).join(' ')
+    const result = [cityPart, this.value.administrativeArea].filter(x => x).join(', ')
+    return result
+  }
 }
 
 </script>

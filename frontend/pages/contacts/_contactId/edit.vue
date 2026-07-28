@@ -23,6 +23,7 @@ SPDX-License-Identifier: EUPL-1.2
         ref="basicForm"
         v-model="contactCopy"
         :readonly="false"
+        :country-names="countryNames"
       />
       <v-card-actions>
         <v-spacer />
@@ -39,7 +40,7 @@ SPDX-License-Identifier: EUPL-1.2
 <script lang="ts">
 import { Component, mixins, Vue, Watch } from 'nuxt-property-decorator'
 
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction } from '@/store/appbar'
 import { ContactsState, LoadContactAction, SaveContactAction } from '@/store/contacts'
@@ -51,6 +52,7 @@ import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 import { ErrorMessageDispatcher, sourceLowerCaseIncludes } from '@/utils/errorHelpers'
+import { LoadCountriesAction } from '@/store/vocabulary'
 
 @Component({
   components: {
@@ -58,11 +60,15 @@ import { ErrorMessageDispatcher, sourceLowerCaseIncludes } from '@/utils/errorHe
     ContactBasicDataForm
   },
   middleware: ['auth'],
-  computed: mapState('contacts', ['contact']),
+  computed: {
+    ...mapState('contacts', ['contact']),
+    ...mapGetters('vocabulary', ['countryNames'])
+  },
   methods: {
     ...mapActions('contacts', ['saveContact', 'loadContact']),
     ...mapActions('appbar', ['setTitle']),
-    ...mapActions('progressindicator', ['setLoading'])
+    ...mapActions('progressindicator', ['setLoading']),
+    ...mapActions('vocabulary', ['loadCountries'])
   }
 })
 export default class ContactEditPage extends mixins(CheckEditAccess) {
@@ -74,6 +80,15 @@ export default class ContactEditPage extends mixins(CheckEditAccess) {
   loadContact!: LoadContactAction
   setTitle!: SetTitleAction
   setLoading!: SetLoadingAction
+  loadCountries!: LoadCountriesAction
+
+  async fetch () {
+    try {
+      await this.loadCountries()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load countries')
+    }
+  }
 
   /**
    * route to which the user is redirected when he is not allowed to access the page

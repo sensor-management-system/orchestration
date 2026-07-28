@@ -193,7 +193,17 @@ describe('PlatformMountActionSerializer', () => {
         orcid: '',
         createdAt: null,
         updatedAt: null,
-        createdByUserId: null
+        createdByUserId: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
       const expectedCt2 = ContactBasicData.createFromObject({
         id: 'ct2',
@@ -205,7 +215,17 @@ describe('PlatformMountActionSerializer', () => {
         orcid: '0000-0000-0000-0001',
         createdAt: null,
         updatedAt: null,
-        createdByUserId: null
+        createdByUserId: null,
+        telephone: '',
+        faxNumber: '',
+        city: '',
+        zipCode: '',
+        administrativeArea: '',
+        country: '',
+        street: '',
+        streetNumber: '',
+        room: '',
+        building: ''
       })
 
       const expectedCf1 = ConfigurationBasicData.createFromObject({

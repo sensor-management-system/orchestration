@@ -955,7 +955,17 @@ describe('SoftwareUpdateActionSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
         const expectedAction = new SoftwareUpdateAction()
         expectedAction.id = '3'
@@ -985,7 +995,17 @@ describe('SoftwareUpdateActionSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
         const expectedAction = new SoftwareUpdateAction()
         expectedAction.id = '3'
@@ -1050,7 +1070,17 @@ describe('SoftwareUpdateActionSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
         const contact2 = Contact.createFromObject({
           id: '3',
@@ -1062,7 +1092,17 @@ describe('SoftwareUpdateActionSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
         const attachment1 = Attachment.createFromObject({
           id: '51',
@@ -1133,7 +1173,17 @@ describe('SoftwareUpdateActionSerializer', () => {
           orcid: '',
           createdByUserId: null,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          telephone: '',
+          faxNumber: '',
+          city: '',
+          zipCode: '',
+          administrativeArea: '',
+          country: '',
+          street: '',
+          streetNumber: '',
+          room: '',
+          building: ''
         })
 
         const action = new SoftwareUpdateAction()

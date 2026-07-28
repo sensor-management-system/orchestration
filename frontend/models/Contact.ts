@@ -18,6 +18,16 @@ export interface IContact {
   website: string
   organization: string
   orcid: string
+  telephone: string
+  faxNumber: string
+  street: string
+  streetNumber: string
+  city: string
+  zipCode: string
+  administrativeArea: string
+  country: string
+  building: string
+  room: string
   createdAt: DateTime | null
   updatedAt: DateTime | null
   createdByUserId: string | null
@@ -31,6 +41,16 @@ export class Contact implements IContact {
   private _website: string = ''
   private _organization: string = ''
   private _orcid: string = ''
+  private _telephone: string = ''
+  private _faxNumber: string = ''
+  private _street: string = ''
+  private _streetNumber: string = ''
+  private _city: string = ''
+  private _zipCode: string = ''
+  private _administrativeArea: string = ''
+  private _country: string = ''
+  private _building: string = ''
+  private _room: string = ''
 
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
@@ -94,6 +114,86 @@ export class Contact implements IContact {
 
   set orcid (newOrcid: string) {
     this._orcid = newOrcid
+  }
+
+  get telephone (): string {
+    return this._telephone
+  }
+
+  set telephone (newTelephone: string) {
+    this._telephone = newTelephone
+  }
+
+  get faxNumber (): string {
+    return this._faxNumber
+  }
+
+  set faxNumber (newFaxNumber: string) {
+    this._faxNumber = newFaxNumber
+  }
+
+  get street (): string {
+    return this._street
+  }
+
+  set street (newStreet: string) {
+    this._street = newStreet
+  }
+
+  get streetNumber (): string {
+    return this._streetNumber
+  }
+
+  set streetNumber (newStreetNumber: string) {
+    this._streetNumber = newStreetNumber
+  }
+
+  get city (): string {
+    return this._city
+  }
+
+  set city (newCity: string) {
+    this._city = newCity
+  }
+
+  get zipCode (): string {
+    return this._zipCode
+  }
+
+  set zipCode (newZipCode: string) {
+    this._zipCode = newZipCode
+  }
+
+  get administrativeArea (): string {
+    return this._administrativeArea
+  }
+
+  set administrativeArea (newAdministrativeArea: string) {
+    this._administrativeArea = newAdministrativeArea
+  }
+
+  get country (): string {
+    return this._country
+  }
+
+  set country (newCountry: string) {
+    this._country = newCountry
+  }
+
+  get building (): string {
+    return this._building
+  }
+
+  set building (newBuilding: string) {
+    this._building = newBuilding
+  }
+
+  get room (): string {
+    return this._room
+  }
+
+  set room (newRoom) {
+    this._room = newRoom
   }
 
   get createdAt (): DateTime | null {
@@ -160,6 +260,16 @@ export class Contact implements IContact {
     newObject.website = someObject.website
     newObject.organization = someObject.organization
     newObject.orcid = someObject.orcid
+    newObject.telephone = someObject.telephone
+    newObject.faxNumber = someObject.faxNumber
+    newObject.street = someObject.street
+    newObject.streetNumber = someObject.streetNumber
+    newObject.city = someObject.city
+    newObject.zipCode = someObject.zipCode
+    newObject.administrativeArea = someObject.administrativeArea
+    newObject.country = someObject.country
+    newObject.building = someObject.building
+    newObject.room = someObject.room
     newObject.createdAt = someObject.createdAt
     newObject.updatedAt = someObject.updatedAt
     newObject.createdByUserId = someObject.createdByUserId

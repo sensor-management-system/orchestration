@@ -25,6 +25,7 @@ SPDX-License-Identifier: EUPL-1.2
       <ContactBasicDataForm
         ref="basicForm"
         v-model="contact"
+        :country-names="countryNames"
       />
       <v-card-actions>
         <v-spacer />
@@ -41,7 +42,7 @@ SPDX-License-Identifier: EUPL-1.2
 <script lang="ts">
 import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 import { SetDefaultsAction, SetTitleAction, SetShowBackButtonAction } from '@/store/appbar'
 import { SaveContactAction } from '@/store/contacts'
@@ -54,17 +55,22 @@ import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import { ErrorMessageDispatcher, sourceLowerCaseIncludes } from '@/utils/errorHelpers'
+import { LoadCountriesAction } from '@/store/vocabulary'
 
 @Component({
   components: {
     SaveAndCancelButtons,
     ContactBasicDataForm
   },
+  computed: {
+    ...mapGetters('vocabulary', ['countryNames'])
+  },
   middleware: ['auth'],
   methods: {
     ...mapActions('contacts', ['saveContact']),
     ...mapActions('appbar', ['setDefaults', 'setTitle', 'setShowBackButton']),
-    ...mapActions('progressindicator', ['setLoading'])
+    ...mapActions('progressindicator', ['setLoading']),
+    ...mapActions('vocabulary', ['loadCountries'])
   }
 })
 export default class ContactNewPage extends mixins(Rules) {
@@ -79,6 +85,15 @@ export default class ContactNewPage extends mixins(Rules) {
   setTitle!: SetTitleAction
   setLoading!: SetLoadingAction
   setShowBackButton!: SetShowBackButtonAction
+  loadCountries!: LoadCountriesAction
+
+  async fetch () {
+    try {
+      await this.loadCountries()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load countries')
+    }
+  }
 
   created () {
     /** this page accepts the query parameter 'redirect' as a html encoded URI

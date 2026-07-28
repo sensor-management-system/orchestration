@@ -415,6 +415,19 @@ class GmdCity:
 
 
 @dataclass
+class GmdAdministrativeArea:
+    """Represent a gmd:administrativeArea."""
+
+    gco_character_string: GcoCharacterString
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gmd.tag("administrativeArea")
+        element.append(self.gco_character_string.to_xml())
+        return element
+
+
+@dataclass
 class GmdPostalCode:
     """Represent a gmd:postalCode."""
 
@@ -459,6 +472,7 @@ class GmdCiAddress:
 
     gmd_electronical_mail_address: Optional[GmdElectronicalMailAddress] = None
     gmd_city: Optional[GmdCity] = None
+    gmd_administrative_area: Optional[GmdAdministrativeArea] = None
     gmd_postal_code: Optional[GmdPostalCode] = None
     gmd_country: Optional[GmdCountry] = None
     gmd_delivery_point: Optional[GmdDeliveryPoint] = None
@@ -470,6 +484,8 @@ class GmdCiAddress:
             element.append(self.gmd_delivery_point.to_xml())
         if self.gmd_city:
             element.append(self.gmd_city.to_xml())
+        if self.gmd_administrative_area:
+            element.append(self.gmd_administrative_area.to_xml())
         if self.gmd_postal_code:
             element.append(self.gmd_postal_code.to_xml())
         if self.gmd_country:
@@ -538,15 +554,74 @@ class GmdOnlineResource:
 
 
 @dataclass
+class GmdVoice:
+    """Represent a gmd:voice."""
+
+    gco_character_string: GcoCharacterString
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gmd.tag("voice")
+        element.append(self.gco_character_string.to_xml())
+        return element
+
+
+@dataclass
+class GmdFacsimile:
+    """Represent a gmd:facsimile."""
+
+    gco_character_string: GcoCharacterString
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gmd.tag("facsimile")
+        element.append(self.gco_character_string.to_xml())
+        return element
+
+
+@dataclass
+class GmdCiTelephone:
+    """Represent a gmd:CI_Telephone."""
+
+    gmd_voice: Optional[GmdVoice] = None
+    gmd_facsimile: Optional[GmdFacsimile] = None
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gmd.tag("CI_Telephone")
+        if self.gmd_voice:
+            element.append(self.gmd_voice.to_xml())
+        if self.gmd_facsimile:
+            element.append(self.gmd_facsimile.to_xml())
+        return element
+
+
+@dataclass
+class GmdPhone:
+    """Represent a gmd:phone."""
+
+    gmd_ci_telephone: GmdCiTelephone
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gmd.tag("phone")
+        element.append(self.gmd_ci_telephone.to_xml())
+        return element
+
+
+@dataclass
 class GmdCiContact:
     """Represent a gmd:CI_Contact."""
 
     gmd_address: GmdAddress
     gmd_online_resource: Optional[GmdOnlineResource] = None
+    gmd_phone: Optional[GmdPhone] = None
 
     def to_xml(self):
         """Transform to xml element."""
         element = gmd.tag("CI_Contact")
+        if self.gmd_phone:
+            element.append(self.gmd_phone.to_xml())
         element.append(self.gmd_address.to_xml())
         if self.gmd_online_resource:
             element.append(self.gmd_online_resource.to_xml())
