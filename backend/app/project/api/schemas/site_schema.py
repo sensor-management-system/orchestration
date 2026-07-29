@@ -43,6 +43,7 @@ class SiteSchema(Schema):
     street_number = fields.Str(allow_none=True)
     city = fields.Str(allow_none=True)
     zip_code = fields.Str(allow_none=True)
+    administrative_area = fields.Str(allow_none=True)
     country = fields.Str(allow_none=True)
     building = fields.Str(allow_none=True)
     room = fields.Str(allow_none=True)

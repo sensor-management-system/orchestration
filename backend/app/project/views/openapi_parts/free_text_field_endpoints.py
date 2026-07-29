@@ -584,6 +584,12 @@ paths = {
         response_description="List of distinct cities for sites.",
     ),
     **template(
+        endpoint="/controller/site-administrative-areas",
+        description=("Get the list of distinct administrative areas of all sites"),
+        operation_id="controller_site_administrative_areas",
+        response_description="List of distinct administrative areas for sites.",
+    ),
+    **template(
         endpoint="/controller/site-countries",
         description=("Get the list of distinct countries of all sites"),
         operation_id="controller_site_countries",

@@ -280,7 +280,7 @@ SPDX-License-Identifier: EUPL-1.2
       </v-row>
       <h4>Address information</h4>
       <v-row>
-        <v-col cols="8">
+        <v-col cols="12" md="8">
           <autocomplete-text-input
             :value="value.address.street"
             :readonly="readonly"
@@ -291,7 +291,7 @@ SPDX-License-Identifier: EUPL-1.2
             @input="update('address.street', $event)"
           />
         </v-col>
-        <v-col cols="4">
+        <v-col cols="12" md="4">
           <autocomplete-text-input
             :value="value.address.streetNumber"
             :readonly="readonly"
@@ -304,7 +304,7 @@ SPDX-License-Identifier: EUPL-1.2
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="6">
+        <v-col cols="12" md="3">
           <autocomplete-text-input
             :value="value.address.city"
             :readonly="readonly"
@@ -315,7 +315,7 @@ SPDX-License-Identifier: EUPL-1.2
             @input="update('address.city', $event)"
           />
         </v-col>
-        <v-col cols="2">
+        <v-col cols="12" md="3">
           <autocomplete-text-input
             :value="value.address.zipCode"
             :readonly="readonly"
@@ -326,7 +326,18 @@ SPDX-License-Identifier: EUPL-1.2
             @input="update('address.zipCode', $event)"
           />
         </v-col>
-        <v-col cols="4">
+        <v-col cols="12" md="3">
+          <autocomplete-text-input
+            :value="value.address.administrativeArea"
+            :readonly="readonly"
+            :disabled="readonly"
+            label="Administrative area"
+            placeholder="Administrative area"
+            endpoint="site-administrative-areas"
+            @input="update('address.administrativeArea', $event)"
+          />
+        </v-col>
+        <v-col cols="12" md="3">
           <combobox
             :value="value.address.country"
             :items="countryNames"
@@ -339,7 +350,7 @@ SPDX-License-Identifier: EUPL-1.2
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="6">
+        <v-col cols="12" md="6">
           <autocomplete-text-input
             :value="value.address.building"
             :readonly="readonly"
@@ -350,7 +361,7 @@ SPDX-License-Identifier: EUPL-1.2
             @input="update('address.building', $event)"
           />
         </v-col>
-        <v-col cols="6">
+        <v-col cols="12" md="6">
           <autocomplete-text-input
             :value="value.address.room"
             :readonly="readonly"
@@ -671,6 +682,10 @@ export default class SiteBasicDataForm extends mixins(Rules, ExternalUrlLinkMixi
 
       case 'address.zipCode':
         newObj.address.zipCode = value as string
+        break
+
+      case 'address.administrativeArea':
+        newObj.address.administrativeArea = value as string
         break
 
       case 'address.country':

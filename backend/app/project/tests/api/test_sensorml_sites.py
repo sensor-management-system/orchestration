@@ -463,6 +463,7 @@ class TestSensorMLSite(BaseTestCase):
         self.site.city = "Potsdam"
         self.site.zip_code = "14473"
         self.site.country = "Germany"
+        self.site.administrative_area = "Brandenburg"
         self.site.street = "Telegrafenberg"
         # GFZ doesn't have a street number, but lets imagine that it would have it.
         self.site.street_number = "123"
@@ -495,6 +496,12 @@ class TestSensorMLSite(BaseTestCase):
             .find("{http://www.isotc211.org/2005/gco}CharacterString")
             .text,
             self.site.zip_code,
+        )
+        self.assertEqual(
+            gmd_ci_address.find("{http://www.isotc211.org/2005/gmd}administrativeArea")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            self.site.administrative_area,
         )
         self.assertEqual(
             gmd_ci_address.find("{http://www.isotc211.org/2005/gmd}country")

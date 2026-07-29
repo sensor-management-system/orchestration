@@ -275,4 +275,11 @@ export class Contact implements IContact {
     newObject.createdByUserId = someObject.createdByUserId
     return newObject
   }
+
+  get composedCity (): string {
+    // This should result in something like 14473 Potsdam, Brandenburg
+    const cityPart = [this.zipCode, this.city].filter(x => x).join(' ')
+    const result = [cityPart, this.administrativeArea].filter(x => x).join(', ')
+    return result
+  }
 }

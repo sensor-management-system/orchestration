@@ -91,7 +91,7 @@ SPDX-License-Identifier: EUPL-1.2
       </v-col>
       <v-col cols="12" md="3">
         <label>City</label>
-        {{ composedCity | orDefault }}
+        {{ value.composedCity | orDefault }}
       </v-col>
       <v-col cols="12" md="3">
         <label>Country</label>
@@ -128,13 +128,6 @@ export default class ContactBasicData extends mixins(ExternalUrlLinkMixin) {
     type: Organization
   })
   readonly organization!: Organization | null
-
-  get composedCity (): string {
-    // This should result in something like 14473 Potsdam, Brandenburg
-    const cityPart = [this.value.zipCode, this.value.city].filter(x => x).join(' ')
-    const result = [cityPart, this.value.administrativeArea].filter(x => x).join(', ')
-    return result
-  }
 }
 
 </script>

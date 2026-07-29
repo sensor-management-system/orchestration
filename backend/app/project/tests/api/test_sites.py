@@ -345,6 +345,7 @@ class TestSiteApi(BaseTestCase):
             "city",
             "zip_code",
             "country",
+            "administrative_area",
             "building",
             "room",
             "created_at",

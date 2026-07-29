@@ -28,6 +28,7 @@ export interface IAddress {
   streetNumber?: string
   city?: string
   zipCode?: string
+  administrativeArea?: string
   country?: string
   building?: string
   room?: string
@@ -358,5 +359,15 @@ export class Site implements ISite, IVisible {
     newObject.outerSiteId = someObject.outerSiteId
 
     return newObject
+  }
+
+  get composedCity (): string {
+    // This should result in something like 14473 Potsdam, Brandenburg
+    if (!this.address) {
+      return ''
+    }
+    const cityPart = [this.address.zipCode, this.address.city].filter(x => x).join(' ')
+    const result = [cityPart, this.address.administrativeArea].filter(x => x).join(', ')
+    return result
   }
 }

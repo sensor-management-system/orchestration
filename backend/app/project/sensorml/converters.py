@@ -1917,6 +1917,7 @@ class SiteConverter:
             [
                 self.site.city,
                 self.site.zip_code,
+                self.site.administrative_area,
                 self.site.country,
                 self.site.street,
                 self.site.street_number,
@@ -1938,6 +1939,14 @@ class SiteConverter:
             if self.site.country:
                 gco_character_string = GcoCharacterString(text=self.site.country)
                 gmd_country = GmdCountry(gco_character_string=gco_character_string)
+            gmd_administrative_area = None
+            if self.site.administrative_area:
+                gco_character_string = GcoCharacterString(
+                    text=self.site.administrative_area
+                )
+                gmd_administrative_area = GmdAdministrativeArea(
+                    gco_character_string=gco_character_string
+                )
             gmd_delivery_point = None
             if any(
                 [
@@ -1967,6 +1976,7 @@ class SiteConverter:
                 gmd_city=gmd_city,
                 gmd_postal_code=gmd_postal_code,
                 gmd_country=gmd_country,
+                gmd_administrative_area=gmd_administrative_area,
                 gmd_delivery_point=gmd_delivery_point,
             )
             swe_extension = SweExtension(

@@ -105,6 +105,7 @@ export class SiteSerializer {
         streetNumber: attributes.street_number || '',
         city: attributes.city || '',
         zipCode: attributes.zip_code || '',
+        administrativeArea: attributes.administrative_area || '',
         country: attributes.country || '',
         building: attributes.building || '',
         room: attributes.room || ''
@@ -218,6 +219,7 @@ export class SiteSerializer {
         street: site.address.street,
         street_number: site.address.streetNumber,
         zip_code: site.address.zipCode,
+        administrative_area: site.address.administrativeArea,
         country: site.address.country,
         building: site.address.building,
         room: site.address.room,

@@ -587,6 +587,14 @@ class SiteCityEndPoint(AbstractFreeTextFieldEndpoint):
     field = Site.city
 
 
+@free_text_field_routes.route("/controller/site-administrative-areas", methods=["GET"])
+@class_based_view
+class SiteAdministrativeAreaEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct site administrative areas."""
+
+    field = Site.administrative_area
+
+
 @free_text_field_routes.route("/controller/site-countries", methods=["GET"])
 @class_based_view
 class SiteCountryEndPoint(AbstractFreeTextFieldEndpoint):
