@@ -39,6 +39,7 @@ class Site(
     street_number = db.Column(db.String(256), nullable=True)
     city = db.Column(db.String(256), nullable=True)
     zip_code = db.Column(db.String(256), nullable=True)
+    administrative_area = db.Column(db.String(256), nullable=True)
     country = db.Column(db.String(256), nullable=True)
     building = db.Column(db.String(256), nullable=True)
     room = db.Column(db.String(256), nullable=True)
@@ -94,6 +95,7 @@ class Site(
             "street_number": self.street_number,
             "city": self.city,
             "zip_code": self.zip_code,
+            "administrative_area": self.administrative_area,
             "country": self.country,
             "building": self.building,
             "room": self.room,
@@ -164,6 +166,7 @@ class Site(
                     "street_number": type_keyword_and_full_searchable,
                     "city": type_keyword_and_full_searchable,
                     "zip_code": type_keyword_and_full_searchable,
+                    "administrative_area": type_keyword_and_full_searchable,
                     "country": type_keyword_and_full_searchable,
                     "building": type_keyword_and_full_searchable,
                     "room": type_keyword_and_full_searchable,

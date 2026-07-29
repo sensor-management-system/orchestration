@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Added:
 - More contact related fields to provide more coverage for ISO and SensorML fields ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/725))
+- Added administrative area field for site addresses ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/726))
 
 ## 1.28.1 - 2026-07-20
 

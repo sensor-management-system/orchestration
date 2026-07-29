@@ -105,7 +105,7 @@ SPDX-License-Identifier: EUPL-1.2
           xl="5"
           class="nowrap-truncate"
         >
-          {{ [site.address.zipCode, site.address.city] | sparseJoin(' ') | orDefault }}
+          {{ site.composedCity | orDefault }}
         </v-col>
         <v-col
           cols="4"

@@ -120,7 +120,7 @@ SPDX-License-Identifier: EUPL-1.2
       </v-col>
       <v-col cols="12" md="3">
         <label>City</label>
-        {{ [value.address.zipCode, value.address.city] | sparseJoin(' ') | orDefault }}
+        {{ value.composedCity | orDefault }}
       </v-col>
       <v-col cols="12" md="3">
         <label>Country</label>
