@@ -13,6 +13,9 @@ Added:
 - More contact related fields to provide more coverage for ISO and SensorML fields ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/725))
 - Added administrative area field for site addresses ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/726))
 
+Fixed:
+- Fix the handling of entitlement attributes in case of single attribute elements without the other array ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/727))
+
 ## 1.28.1 - 2026-07-20
 
 Fixed:

@@ -28,7 +28,76 @@ logger = logging.getLogger(__name__)
 UserInfo = collections.namedtuple("UserInfo", ["attributes", "exp"])
 
 
-class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
+class SyncPermssionGroupsByEntitlementsMixin:
+    """Mixin class to encapsulate the sync of the permision groups."""
+
+    def sync_permission_groups_by_entitlements(self, user, attributes):
+        """Sync the group memberships by the current entitlements."""
+        entitlement_array = attributes.get("eduperson_entitlement", [])
+        if isinstance(entitlement_array, str):
+            entitlement_array = [entitlement_array]
+        set_of_entitlements = set(entitlement_array)
+
+        allow_list = current_app.config["OIDC_ENTITLEMENT_ALLOW_LIST"]
+        ignore_list = current_app.config["OIDC_ENTITLEMENT_IGNORE_LIST"]
+
+        existing_memberships = user.memberships
+        for current_membership in existing_memberships:
+            pm = current_membership.permission_group
+            entitlement = pm.entitlement
+            if entitlement and entitlement not in set_of_entitlements:
+                db.session.delete(current_membership)
+                db.session.commit()
+
+        for entitlement in set_of_entitlements:
+
+            if not allow_list:
+                # There is no explicit allow list, so we can use it.
+                allow = True
+            else:
+                allow = False
+                for list_entry in allow_list:
+                    if fnmatch.fnmatch(entitlement, list_entry):
+                        allow = True
+                        break
+
+            ignore = False
+            for list_entry in ignore_list:
+                if fnmatch.fnmatch(entitlement, list_entry):
+                    ignore = True
+                    break
+
+            if allow and not ignore:
+                permission_group = (
+                    db.session.query(PermissionGroup)
+                    .filter_by(entitlement=entitlement)
+                    .first()
+                )
+                if permission_group is None:
+                    name = PermissionGroup.convert_entitlement_to_name(entitlement)
+                    permission_group = PermissionGroup(
+                        name=name, entitlement=entitlement
+                    )
+                    db.session.add(permission_group)
+                    db.session.commit()
+
+                membership = (
+                    db.session.query(PermissionGroupMembership)
+                    .filter_by(user_id=user.id, permission_group_id=permission_group.id)
+                    .first()
+                )
+
+                if membership is None:
+                    membership = PermissionGroupMembership(
+                        permission_group=permission_group, user=user
+                    )
+                    db.session.add(membership)
+                    db.session.commit()
+
+
+class OpenIdConnectAuthMechanism(
+    CreateNewUserByUserinfoMixin, SyncPermssionGroupsByEntitlementsMixin
+):
     """Mechanism to authenticate via OpenIDConnect."""
 
     def __init__(self, app=None):
@@ -143,63 +212,3 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             self.sync_permission_groups_by_entitlements(user, user_info.attributes)
 
         return user
-
-    def sync_permission_groups_by_entitlements(self, user, attributes):
-        """Sync the group memberships by the current entitlements."""
-        set_of_entitlements = set(attributes.get("eduperson_entitlement", []))
-
-        allow_list = current_app.config["OIDC_ENTITLEMENT_ALLOW_LIST"]
-        ignore_list = current_app.config["OIDC_ENTITLEMENT_IGNORE_LIST"]
-
-        existing_memberships = user.memberships
-        for current_membership in existing_memberships:
-            pm = current_membership.permission_group
-            entitlement = pm.entitlement
-            if entitlement and entitlement not in set_of_entitlements:
-                db.session.delete(current_membership)
-                db.session.commit()
-
-        for entitlement in set_of_entitlements:
-
-            if not allow_list:
-                # There is no explicit allow list, so we can use it.
-                allow = True
-            else:
-                allow = False
-                for list_entry in allow_list:
-                    if fnmatch.fnmatch(entitlement, list_entry):
-                        allow = True
-                        break
-
-            ignore = False
-            for list_entry in ignore_list:
-                if fnmatch.fnmatch(entitlement, list_entry):
-                    ignore = True
-                    break
-
-            if allow and not ignore:
-                permission_group = (
-                    db.session.query(PermissionGroup)
-                    .filter_by(entitlement=entitlement)
-                    .first()
-                )
-                if permission_group is None:
-                    name = PermissionGroup.convert_entitlement_to_name(entitlement)
-                    permission_group = PermissionGroup(
-                        name=name, entitlement=entitlement
-                    )
-                    db.session.add(permission_group)
-                    db.session.commit()
-
-                membership = (
-                    db.session.query(PermissionGroupMembership)
-                    .filter_by(user_id=user.id, permission_group_id=permission_group.id)
-                    .first()
-                )
-
-                if membership is None:
-                    membership = PermissionGroupMembership(
-                        permission_group=permission_group, user=user
-                    )
-                    db.session.add(membership)
-                    db.session.commit()

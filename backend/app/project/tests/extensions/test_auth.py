@@ -6,9 +6,12 @@
 
 """Here are tests for the auth middleware."""
 
-from project.api.models import Contact, Organization, User
+from project.api.models import Contact, Organization, PermissionGroup, User
 from project.api.models.base_model import db
 from project.extensions.auth.mechanisms.mixins import CreateNewUserByUserinfoMixin
+from project.extensions.auth.mechanisms.openidconnect import (
+    SyncPermssionGroupsByEntitlementsMixin,
+)
 from project.tests.base import BaseTestCase
 
 
@@ -113,3 +116,48 @@ class TestGetUserOrCreateNew(BaseTestCase):
         self.assertEqual(db.session.query(Contact).count(), 1)
         self.assertEqual(db.session.query(User).count(), 1)
         self.assertEqual(db.session.query(Organization).count(), 1)
+
+    def test_sync_permission_groups_by_entitlements_creates_groups(self):
+        """Test the creation of the permission groups with an array of entitlements."""
+        contact = Contact(
+            given_name="Max", family_name="Mustermann", email="max@muster.mann"
+        )
+        user = User(subject=contact.email, contact=contact)
+        db.session.add_all([contact, user])
+        db.session.commit()
+
+        attributes = {
+            "eduperson_entitlement": [
+                "abc:def:ghi",
+                "abc:def:ghi:jkl",
+            ],
+        }
+
+        SyncPermssionGroupsByEntitlementsMixin().sync_permission_groups_by_entitlements(
+            user, attributes
+        )
+        groups = db.session.query(PermissionGroup).all()
+        entitlements = [g.entitlement for g in groups]
+        self.assertEqual(len(entitlements), 2)
+        self.assertIn("abc:def:ghi", entitlements)
+        self.assertIn("abc:def:ghi:jkl", entitlements)
+
+    def test_sync_permission_groups_by_single_entitlement_creates_group(self):
+        """Test the creation of the permissino groips with just a string of entitlements."""
+        contact = Contact(
+            given_name="Max", family_name="Mustermann", email="max@muster.mann"
+        )
+        user = User(subject=contact.email, contact=contact)
+        db.session.add_all([contact, user])
+        db.session.commit()
+        attributes = {
+            "eduperson_entitlement": "abc:def:ghi",
+        }
+        SyncPermssionGroupsByEntitlementsMixin().sync_permission_groups_by_entitlements(
+            user, attributes
+        )
+
+        groups = db.session.query(PermissionGroup).all()
+        entitlements = [g.entitlement for g in groups]
+        self.assertEqual(len(entitlements), 1)
+        self.assertIn("abc:def:ghi", entitlements)
