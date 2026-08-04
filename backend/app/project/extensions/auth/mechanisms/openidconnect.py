@@ -17,6 +17,7 @@ import jwt
 import requests
 from cachetools import TTLCache
 from flask import current_app, request
+from sqlalchemy.exc import IntegrityError
 
 from ....api.helpers.errors import AuthenticationFailedError
 from ....api.models import PermissionGroup, PermissionGroupMembership
@@ -28,7 +29,7 @@ logger = logging.getLogger(__name__)
 UserInfo = collections.namedtuple("UserInfo", ["attributes", "exp"])
 
 
-class SyncPermssionGroupsByEntitlementsMixin:
+class SyncPermissionGroupsByEntitlementsMixin:
     """Mixin class to encapsulate the sync of the permision groups."""
 
     def sync_permission_groups_by_entitlements(self, user, attributes):
@@ -74,12 +75,22 @@ class SyncPermssionGroupsByEntitlementsMixin:
                     .first()
                 )
                 if permission_group is None:
-                    name = PermissionGroup.convert_entitlement_to_name(entitlement)
-                    permission_group = PermissionGroup(
-                        name=name, entitlement=entitlement
-                    )
-                    db.session.add(permission_group)
-                    db.session.commit()
+                    try:
+                        name = PermissionGroup.convert_entitlement_to_name(entitlement)
+                        permission_group = PermissionGroup(
+                            name=name, entitlement=entitlement
+                        )
+                        db.session.add(permission_group)
+                        db.session.commit()
+                    except IntegrityError:
+                        db.session.rollback()
+                        # Ok, we got an integrity error, as the permission group was created
+                        # in the mean time - which is fine.
+                        permission_group = (
+                            db.session.query(PermissionGroup)
+                            .filter_by(entitlement=entitlement)
+                            .first()
+                        )
 
                 membership = (
                     db.session.query(PermissionGroupMembership)
@@ -88,15 +99,19 @@ class SyncPermssionGroupsByEntitlementsMixin:
                 )
 
                 if membership is None:
-                    membership = PermissionGroupMembership(
-                        permission_group=permission_group, user=user
-                    )
-                    db.session.add(membership)
-                    db.session.commit()
+                    try:
+                        membership = PermissionGroupMembership(
+                            permission_group=permission_group, user=user
+                        )
+                        db.session.add(membership)
+                        db.session.commit()
+                    except IntegrityError:
+                        db.session.rollback()
+                        # As the membership was created in the mean time, we are fine.
 
 
 class OpenIdConnectAuthMechanism(
-    CreateNewUserByUserinfoMixin, SyncPermssionGroupsByEntitlementsMixin
+    CreateNewUserByUserinfoMixin, SyncPermissionGroupsByEntitlementsMixin
 ):
     """Mechanism to authenticate via OpenIDConnect."""
 

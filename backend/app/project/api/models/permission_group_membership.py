@@ -8,8 +8,10 @@
 
 from .base_model import db
 
+
 class PermissionGroupMembership(db.Model):
     """Model for the membership of a user in a group."""
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     permission_group_id = db.Column(
         db.Integer, db.ForeignKey("permission_group.id"), nullable=False
@@ -21,9 +23,7 @@ class PermissionGroupMembership(db.Model):
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("user.id"), nullable=False
-    )
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     user = db.relationship(
         "User",
         backref=db.backref(
@@ -31,3 +31,4 @@ class PermissionGroupMembership(db.Model):
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )
+    __table_args__ = (db.UniqueConstraint("user_id", "permission_group_id"),)
