@@ -10,7 +10,7 @@ from project.api.models import Contact, Organization, PermissionGroup, User
 from project.api.models.base_model import db
 from project.extensions.auth.mechanisms.mixins import CreateNewUserByUserinfoMixin
 from project.extensions.auth.mechanisms.openidconnect import (
-    SyncPermssionGroupsByEntitlementsMixin,
+    SyncPermissionGroupsByEntitlementsMixin,
 )
 from project.tests.base import BaseTestCase
 
@@ -133,7 +133,7 @@ class TestGetUserOrCreateNew(BaseTestCase):
             ],
         }
 
-        SyncPermssionGroupsByEntitlementsMixin().sync_permission_groups_by_entitlements(
+        SyncPermissionGroupsByEntitlementsMixin().sync_permission_groups_by_entitlements(
             user, attributes
         )
         groups = db.session.query(PermissionGroup).all()
@@ -153,7 +153,7 @@ class TestGetUserOrCreateNew(BaseTestCase):
         attributes = {
             "eduperson_entitlement": "abc:def:ghi",
         }
-        SyncPermssionGroupsByEntitlementsMixin().sync_permission_groups_by_entitlements(
+        SyncPermissionGroupsByEntitlementsMixin().sync_permission_groups_by_entitlements(
             user, attributes
         )
 

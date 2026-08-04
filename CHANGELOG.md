@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.29.1 (Unreleased)
 
+Fixed:
+- Make synchronization of permission group and membership more robust ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/730))
+
 ## 1.29.0 - 2026-08-04
 
 Added:
