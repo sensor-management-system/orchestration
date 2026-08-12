@@ -15,10 +15,6 @@ sms:
       enabled: true
       className: "haproxy"
       annotations:
-        cert-manager.io/cluster-issuer: "cert-manager-acme"
-        cert-manager.io/private-key-algorithm: "ECDSA"
-        cert-manager.io/private-key-size: "384"
-        cert-manager.io/private-key-rotation-policy: "Always"
         haproxy-ingress.github.io/config-backend: |
           http-response set-header 'X-Content-Type-Options' 'nosniff';
           http-response set-header 'Content-Security-Policy' "default-src 'self'; script-src 'self' 'unsafe-inline'; img-src * data: ; style-src 'self' 'unsafe-inline' * ; font-src 'self' *; frame-src 'self' *.ufz.de ; child-src 'self' *.ufz.de ; object-src 'none' ; frame-ancestors 'self' https://*.ufz.de ;connect-src https://*.ufz.de ;";
@@ -28,10 +24,6 @@ sms:
           paths:
             - path: /sms/backend/
               pathType: Prefix
-      tls:
-        - secretName: "web-intern-stage-app-ufz-de"
-          hosts:
-            - "web-intern-stage.app.ufz.de"
 
     nginx:
       image:
@@ -124,10 +116,6 @@ sms:
       enabled: true
       className: "haproxy"
       annotations:
-        cert-manager.io/cluster-issuer: "cert-manager-acme"
-        cert-manager.io/private-key-algorithm: "ECDSA"
-        cert-manager.io/private-key-size: "384"
-        cert-manager.io/private-key-rotation-policy: "Always"
         haproxy-ingress.github.io/config-backend: |
           http-response set-header 'X-Content-Type-Options' 'nosniff';
           http-response set-header 'Content-Security-Policy' "default-src 'self' https://*.ufz.de https://login.helmholtz.de https://sms-cv.helmholtz.cloud; script-src 'self' 'unsafe-inline' 'unsafe-eval' ; img-src 'self' blob: data: https://*.osm.org ; style-src 'self' 'unsafe-inline' * ; font-src 'self' *; frame-src 'self' *.ufz.de ; child-src 'self' *.ufz.de ; object-src 'none' ; frame-ancestors 'self' https://*.ufz.de ;";
@@ -137,10 +125,6 @@ sms:
           paths:
             - path: /sms/
               pathType: Prefix
-      tls:
-        - secretName: web-intern-stage-app-ufz-de
-          hosts:
-            - "web-intern-stage.app.ufz.de"
 
     environmentVariables:
       - name: BASE_URL_ENV_PLACEHOLDER
@@ -242,10 +226,6 @@ sms:
       enabled: true
       className: "haproxy"
       annotations:
-        cert-manager.io/cluster-issuer: "cert-manager-acme"
-        cert-manager.io/private-key-algorithm: "ECDSA"
-        cert-manager.io/private-key-size: "384"
-        cert-manager.io/private-key-rotation-policy: "Always"
         kubernetes.io/ingress.class: haproxy
         haproxy-ingress.github.io/app-root: /sms/cv
         haproxy-ingress.github.io/config-backend: |
@@ -257,10 +237,7 @@ sms:
           paths:
             - path: /sms/cv/
               pathType: Prefix
-      tls:
-        - secretName: "web-intern-stage-app-ufz-de"
-          hosts:
-            - "web-intern-stage.app.ufz.de"
+      tls: []
 
   sms-cv-db:
     enabled: true
