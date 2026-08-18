@@ -10,7 +10,8 @@ SPDX-License-Identifier: EUPL-1.2
 ## 1.29.1 (Unreleased)
 
 Changed:
-- Update KIT prod docker-compose script (formatting, IMKTRO TSMDL API URL update) ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/739))
+- KIT prod docker-compose script: formatting and update IMKTRO TSMDL API URL ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/739))
+- KIT prod docker-compose script: use correct entrypoint for backend ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/742))
 - Use ROR as identifier type for the b2inst interface ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/740))
 
 Fixed:
