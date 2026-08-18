@@ -94,7 +94,7 @@ services:
       OIDC_TOKEN_ENDPOINT_FOR_FRONTEND: ${OIDC_TOKEN_ENDPOINT_FOR_FRONTEND:-http://localhost/keycloak/realms/local-dev/protocol/openid-connect/token}
     depends_on:
       - db
-    entrypoint: /usr/src/app/entrypoint-dev.sh
+    entrypoint: /usr/src/app/entrypoint.sh
     networks:
       - sms
 
