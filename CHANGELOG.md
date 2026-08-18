@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.29.1 (Unreleased)
 
+Changed:
+- Update KIT prod docker-compose script (formatting, IMKTRO TSMDL API URL update) ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/719))
+
 Fixed:
 - Make synchronization of permission group and membership more robust ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/730))
 
