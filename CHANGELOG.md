@@ -7,7 +7,12 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.29.1 (Unreleased)
+## 1.29.2 (Unreleased)
+
+Added:
+- Release notifications for matrix ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/744))
+
+## 1.29.1 - 2026-09-01
 
 Changed:
 - KIT prod docker-compose script: formatting and update IMKTRO TSMDL API URL ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/739))
