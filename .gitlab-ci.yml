@@ -843,6 +843,7 @@ deploy-gfz-prod:
     MQTT_AUTH_DB: ${GFZ_PROD_MQTT_AUTH_DB}
     MQTT_AUTH_USER: ${GFZ_PROD_MQTT_AUTH_USER}
     MQTT_AUTH_PASSWORD: ${GFZ_PROD_MQTT_AUTH_PASSWORD}
+    MATRIX_RELEASE_NOTIFICATION_HOOK: ${MATRIX_RELEASE_NOTIFICATION_HOOK}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -855,6 +856,12 @@ deploy-gfz-prod:
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml up -d
     - docker image prune --all --force
+    # Curl is already installed on the deployment machine
+    - >
+      curl \
+        -X POST ${MATRIX_RELEASE_NOTIFICATION_HOOK} \
+        -H "Content-Type: application/json" \
+        -d "{\"html\":\"@room 🚀<h2>SMS version <u>$SMS_VERSION</u> launched right now!</h2>\"}"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
