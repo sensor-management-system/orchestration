@@ -12,6 +12,9 @@ SPDX-License-Identifier: EUPL-1.2
 Added:
 - Release notifications for matrix ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/744))
 
+Changed:
+- Use pre-built container image for backend of KIT staging ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/745))
+
 ## 1.29.1 - 2026-09-01
 
 Changed:
