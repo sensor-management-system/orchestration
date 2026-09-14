@@ -3,12 +3,14 @@
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Norman Ziegner <norman.ziegner@ufz.de>
+# - Florian Obersteiner <florian.obersteiner@kit.edu>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+# - Karlsruhe Institute of Technology (KIT, https://www.kit.edu/)
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-FROM python:3.11-slim-bullseye as base
+FROM python:3.11-slim-trixie as base
 
 ARG BUILD_DATE
 ARG VCS_REF
