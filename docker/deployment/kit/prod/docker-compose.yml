@@ -25,18 +25,16 @@ services:
       - sms
 
   backend:
-    image: python:3.11-slim-trixie
+    image: ${BACKEND_IMAGE}
     restart: unless-stopped
     container_name: sms_backend
     working_dir: /usr/src/app
-    volumes:
-      - "${SMS_BASEPATH}/orchestration/backend/app:/usr/src/app"
     environment:
       SMS_VERSION: ${SMS_VERSION:-develop}
-      FLASK_DEBUG: ${FLASK_DEBUG:-1}
+      FLASK_DEBUG: ${FLASK_DEBUG:-0}
       URL_PREFIX: ${URL_PREFIX:-/backend/api/v1}
       STATIC_URL: ${STATIC_URL:-/static/backend}
-      APP_SETTINGS: ${APP_SETTINGS:-project.config.DevelopmentConfig}
+      APP_SETTINGS: ${APP_SETTINGS:-project.config.ProductionConfig}
       ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elastic-search:9200}
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5433/db_dev}
       DATABASE_TEST_URL: ${DATABASE_TEST_URL:-postgresql://postgres:postgres@db:5433/db_test}
@@ -94,6 +92,8 @@ services:
       OIDC_TOKEN_ENDPOINT_FOR_FRONTEND: ${OIDC_TOKEN_ENDPOINT_FOR_FRONTEND:-http://localhost/keycloak/realms/local-dev/protocol/openid-connect/token}
     depends_on:
       - db
+    volumes:
+      - backend-static-files:/usr/src/app/project/static
     entrypoint: /usr/src/app/entrypoint.sh
     networks:
       - sms
@@ -198,7 +198,7 @@ services:
       - "${SMS_BASEPATH}/config/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"
       - "${SMS_BASEPATH}/config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
       - "${SMS_BASEPATH}/orchestration/frontend/dist:/etc/nginx/html"
-      - "${SMS_BASEPATH}/orchestration/backend/app/project/static:/usr/share/nginx/html/static/backend:ro"
+      - "backend-static-files:/usr/share/nginx/html/static/backend:ro"
       - "static-files:/usr/share/nginx/html/static/cv:ro"
     depends_on:
       - frontend
@@ -206,6 +206,7 @@ services:
       - backend
 
 volumes:
+  backend-static-files:
   esdata01:
     driver: local
     driver_opts:
