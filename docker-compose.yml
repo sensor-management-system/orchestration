@@ -29,7 +29,7 @@ services:
       - sms
 
   backend:
-    image: python:3.11-slim-bullseye
+    image: python:3.11-slim-trixie
     restart: unless-stopped
     container_name: sms_backend
     working_dir: /usr/src/app
