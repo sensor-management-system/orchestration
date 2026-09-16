@@ -16,6 +16,7 @@ Changed:
 - Bump backend base image to Debian Trixie ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/747))
 - Use pre-built container image for backend of KIT staging ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/745))
 - Use pre-built container image for backend of KIT prod ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/746))
+- Use of the quay.io container registry for minio ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/749))
 
 ## 1.29.1 - 2026-09-01
 
