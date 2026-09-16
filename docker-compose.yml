@@ -182,7 +182,7 @@ services:
       && npm run dev"
 
   minio:
-    image: minio/minio:RELEASE.2021-08-05T22-01-19Z
+    image: quay.io/minio/minio:RELEASE.2021-08-05T22-01-19Z
     container_name: sms_minio
     volumes:
       - minio-data:/data/minio
