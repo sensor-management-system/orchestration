@@ -3,7 +3,7 @@
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
 # SPDX-License-Identifier: EUPL-1.2
-ARG DEBIAN_IMAGE=bullseye-slim
+ARG DEBIAN_IMAGE=trixie-slim
 FROM debian:${DEBIAN_IMAGE} AS build
 ARG GO_VERSION=1.24.0
 ARG MOSQUITTO_VERSION=2.0.19
