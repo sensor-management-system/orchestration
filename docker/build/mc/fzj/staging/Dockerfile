@@ -6,7 +6,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-FROM minio/mc:RELEASE.2023-02-16T19-20-11Z
+FROM quay.io/minio/mc:RELEASE.2023-02-16T19-20-11Z
 
 # Install dependencies
 RUN microdnf update --nodocs && \
