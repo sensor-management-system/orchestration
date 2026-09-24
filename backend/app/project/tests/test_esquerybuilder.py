@@ -22,6 +22,7 @@ from project.api.datalayers.esalchemy import (
     OrFilter,
     TermEqualsExactStringFilter,
     TermExactInListFilter,
+    ilike_filter_to_regexp,
 )
 
 
@@ -768,3 +769,45 @@ class TestFilterParser(unittest.TestCase):
 
         expected = ExistsFilter(field="manufacturer_name")
         self.assertEqual(output_filter, expected)
+
+
+class TestILikeFilterToRegexp(unittest.TestCase):
+    """Filter for the transformation from an ilike filter to a regexp one."""
+
+    def test_ilike(self):
+        """Ensure we support the wildcard chars as well as escape things important for regexp."""
+        test_cases = [
+            # Empty should be empty
+            ("", ""),
+            # Literal text should be taken literal
+            ("tereno", "tereno"),
+            # an "%" should be replaced to match content of any length (including empty)
+            ("%", ".*"),
+            # an "_" should be replaced to match exactly one char
+            ("_", "."),
+            # We went to be able to start with a wildcard & include some text
+            ("%ereno", ".*ereno"),
+            # Same for the wildcard for other elements
+            ("_ereno", ".ereno"),
+            # Multiple wildcards
+            ("%tereno%", ".*tereno.*"),
+            # Different and multiple wildcards
+            ("%te_e_o%", ".*te.e.o.*"),
+            # We want to escape dots, so that they don't have a special meaning in the regexp
+            (".", "\\."),
+            # We also want to escape questionmarks so that they don't have a special meaning in the regexp
+            ("?", "\\?"),
+            # Same for a couple of other special characters in the regexp
+            ("*", "\\*"),
+            ("[", "\\["),
+            ("]", "\\]"),
+            ("(", "\\("),
+            (")", "\\)"),
+            ("^", "\\^"),
+            ("$", "\\$"),
+            ("\\", "\\\\"),
+            ("|", "\\|"),
+        ]
+        for input_value, expected_output_value in test_cases:
+            result = ilike_filter_to_regexp(input_value)
+            self.assertEqual(result, expected_output_value)
