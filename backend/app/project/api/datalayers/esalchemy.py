@@ -17,6 +17,23 @@ from flask import current_app, request
 from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
 
 
+def ilike_filter_to_regexp(x):
+    """Transform an ilike filter query, so that we can use it with a regexp in elasticsearch."""
+    resulting_chars = []
+    chars_to_escape = set(".*?()[]{}^$\\|")
+    for char in x:
+        if char == "%":
+            resulting_chars.extend(".*")
+        elif char == "_":
+            resulting_chars.append(".")
+        elif char in chars_to_escape:
+            resulting_chars.append("\\")
+            resulting_chars.append(char)
+        else:
+            resulting_chars.append(char)
+    return "".join(resulting_chars)
+
+
 @dataclass
 class MultiFieldMatchFilter:
     """Class to search for a match in all the fields."""
@@ -212,6 +229,26 @@ class TermExactInListFilter:
         )
 
 
+@dataclass
+class FieldMatchesRegexpFilter:
+    """Filter to check if a field contains a value that matches a regexp."""
+
+    field: str
+    value: str
+    case_insensitive: bool
+
+    def to_query(self):
+        """Convert the filter to a query."""
+        return {
+            "regexp": {
+                self.field: {
+                    "value": self.value,
+                    "case_insensitive": self.case_insensitive,
+                }
+            }
+        }
+
+
 class OrFilter:
     """Class to search with multiple filters (and one must match)."""
 
@@ -340,9 +377,11 @@ class FilterParser:
         SUPPORTED_OPS = {
             "eq": lambda name, val: cls.wrap_for_nested_elements(
                 name,
-                TermEqualsExactStringFilter(term=name, value=val)
-                if val is not None
-                else MustNotFilter(ExistsFilter(field=name)),
+                (
+                    TermEqualsExactStringFilter(term=name, value=val)
+                    if val is not None
+                    else MustNotFilter(ExistsFilter(field=name))
+                ),
             ),
             "in_": lambda name, val: cls.wrap_for_nested_elements(
                 name, TermExactInListFilter(term=name, values=val)
@@ -357,9 +396,35 @@ class FilterParser:
                 # then we want the query that makes sure our field exists.
                 # Otherwise we want to check that the value that we search
                 # for is not the one that we give in the query.
-                ExistsFilter(field=name)
-                if val is None
-                else MustNotFilter(TermEqualsExactStringFilter(term=name, value=val)),
+                (
+                    ExistsFilter(field=name)
+                    if val is None
+                    else MustNotFilter(
+                        TermEqualsExactStringFilter(term=name, value=val)
+                    )
+                ),
+            ),
+            # There is no iregexp in the SqlAlchemyDataLayer, but it might still help to filter
+            # using it.
+            "iregexp": lambda name, val: cls.wrap_for_nested_elements(
+                name,
+                FieldMatchesRegexpFilter(field=name, value=val, case_insensitive=True),
+            ),
+            # The ilike filter is supported by SqlAlchemyDataLayer, but not directly by Elasticsearch.
+            # So we are going to implement it with the regexp filter.
+            "ilike": lambda name, val: cls.wrap_for_nested_elements(
+                name,
+                FieldMatchesRegexpFilter(
+                    field=name, value=ilike_filter_to_regexp(val), case_insensitive=True
+                ),
+            ),
+            "like": lambda name, val: cls.wrap_for_nested_elements(
+                name,
+                FieldMatchesRegexpFilter(
+                    field=name,
+                    value=ilike_filter_to_regexp(val),
+                    case_insensitive=False,
+                ),
             ),
         }
         # First check if we have a more complex filter

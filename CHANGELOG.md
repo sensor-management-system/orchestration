@@ -12,6 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 Added:
 - Release notifications for matrix ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/744))
 - Support for KML file uploads ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/748))
+- ilike filter for the elasticsearch data layer ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/755))
 
 Changed:
 - Bump backend base image to Debian Trixie ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/747))
