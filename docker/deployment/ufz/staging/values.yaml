@@ -192,7 +192,7 @@ sms:
       image:
         registry: "registry.hzdr.de"
         image: "hub-terra/sms/sms-cv"
-        tag: "1.4.0"
+        tag: "1.4.1"
       environmentVariables:
         - name: "DEBUG"
           value: "true"
