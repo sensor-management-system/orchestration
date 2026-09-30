@@ -182,7 +182,7 @@ services:
       && npm run dev"
 
   minio:
-    image: quay.io/minio/minio:RELEASE.2021-08-05T22-01-19Z
+    image: registry.hzdr.de/hub-terra/sms/container-proxy/minio:RELEASE.2021-08-05T22-01-19Z
     container_name: sms_minio
     volumes:
       - minio-data:/data/minio
@@ -204,7 +204,7 @@ services:
       retries: 3
 
   createbuckets:
-    image: minio/mc:RELEASE.2023-02-16T19-20-11Z
+    image: registry.hzdr.de/hub-terra/sms/container-proxy/mc:RELEASE.2023-02-16T19-20-11Z
     container_name: sms_mc
     depends_on:
       - minio
