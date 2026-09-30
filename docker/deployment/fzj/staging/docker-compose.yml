@@ -46,7 +46,7 @@ services:
       - backend
 
   minio:
-    image: quay.io/minio/minio:RELEASE.2021-07-12T02-44-53Z
+    image: registry.hzdr.de/hub-terra/sms/container-proxy/minio:RELEASE.2021-07-12T02-44-53Z
     restart: unless-stopped
     volumes:
       - minio-data:/data/minio
