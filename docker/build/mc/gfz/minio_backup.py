@@ -30,7 +30,7 @@ def main():
 
     s3_target = boto3.client(
         "s3",
-        endpoint_url="https://s3.gfz-potsdam.de:443",
+        endpoint_url="https://s3.gfz.de:443",
         aws_access_key_id=S3_EXTERNAL_BACKUP_ACCESS_KEY,
         aws_secret_access_key=S3_EXTERNAL_BACKUP_SECRET_KEY,
     )
