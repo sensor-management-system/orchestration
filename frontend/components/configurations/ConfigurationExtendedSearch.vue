@@ -140,7 +140,6 @@ import { LoadPermissionGroupsAction } from '@/store/permissions'
   methods: {
     ...mapActions('configurations', [
       'searchConfigurationsPaginated',
-      'loadConfigurationsStates',
       'loadProjects',
       'loadCampaigns'
     ]),
@@ -164,7 +163,6 @@ export default class ConfigurationExtendedSearch extends Vue {
   campaigns!: ConfigurationsState['campaigns']
   setLoading!: SetLoadingAction
   searchConfigurationsPaginated!: SearchConfigurationsPaginatedAction
-  loadConfigurationsStates!: () => void
   loadProjects!: LoadProjectsAction
   loadCampaigns!: LoadCampaignsAction
   loadPermissionGroups!: LoadPermissionGroupsAction
@@ -173,9 +171,6 @@ export default class ConfigurationExtendedSearch extends Vue {
     this.setLoading(true)
     try {
       // Only load the data if not present
-      if (this.configurationStates.length === 0) {
-        await this.loadConfigurationsStates()
-      }
       if (this.projects.length === 0) {
         await this.loadProjects()
       }

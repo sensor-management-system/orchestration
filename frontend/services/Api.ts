@@ -25,7 +25,6 @@ import { ConfigurationAttachmentApi } from '@/services/sms/ConfigurationAttachme
 import { ConfigurationCustomfieldsApi } from '@/services/sms/ConfigurationCustomfieldsApi'
 import { ConfigurationParameterApi } from '@/services/sms/ConfigurationParameterApi'
 import { ConfigurationParameterChangeActionApi } from '@/services/sms/ConfigurationParameterChangeActionApi'
-import { ConfigurationStatusApi } from '@/services/sms/ConfigurationStatusApi'
 import { ContactApi } from '@/services/sms/ContactApi'
 import { DeviceApi } from '@/services/sms/DeviceApi'
 import { DeviceAttachmentApi } from '@/services/sms/DeviceAttachmentApi'
@@ -115,7 +114,6 @@ export class Api {
   private readonly _platformApi: PlatformApi
   private readonly _configurationApi: ConfigurationApi
   private readonly _siteApi: SiteApi
-  private readonly _configurationStatesApi: ConfigurationStatusApi
   private readonly _deviceCustomfieldsApi: DeviceCustomfieldsApi
   private readonly _deviceAttachmentApi: DeviceAttachmentApi
   private readonly _deviceImageApi: DeviceImageApi
@@ -334,7 +332,6 @@ export class Api {
         return await api.findAll()
       }
     )
-    this._configurationStatesApi = new ConfigurationStatusApi()
 
     this._deviceCustomfieldsApi = new DeviceCustomfieldsApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
@@ -663,10 +660,6 @@ export class Api {
 
   get sites (): SiteApi {
     return this._siteApi
-  }
-
-  get configurationStates (): ConfigurationStatusApi {
-    return this._configurationStatesApi
   }
 
   get deviceCustomfields (): DeviceCustomfieldsApi {

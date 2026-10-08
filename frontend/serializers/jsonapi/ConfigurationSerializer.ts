@@ -77,7 +77,6 @@ export class ConfigurationSerializer {
       configuration.description = attributes.description || ''
       configuration.project = attributes.project || ''
       configuration.campaign = attributes.campaign || ''
-      configuration.status = attributes.status || ''
       configuration.archived = attributes.archived || false
       configuration.persistentIdentifier = attributes.persistent_identifier || ''
 
@@ -181,7 +180,6 @@ export class ConfigurationSerializer {
         description: configuration.description,
         project: configuration.project,
         campaign: configuration.campaign,
-        status: configuration.status,
         start_date: configuration.startDate != null ? configuration.startDate.setZone('UTC').toISO() : null,
         end_date: configuration.endDate != null ? configuration.endDate.setZone('UTC').toISO() : null,
         is_internal: configuration.isInternal,

@@ -18,7 +18,7 @@ import { RootState } from '@/store'
 
 import { Attachment } from '@/models/Attachment'
 import { Image } from '@/models/Image'
-import { Configuration } from '@/models/Configuration'
+import { Configuration, ConfigurationStatus } from '@/models/Configuration'
 import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
 import { ContactRole } from '@/models/ContactRole'
 import { CustomTextField } from '@/models/CustomTextField'
@@ -91,7 +91,7 @@ export interface ConfigurationsState {
   configurations: Configuration[]
   configuration: Configuration | null
   configurationContactRoles: ContactRole[]
-  configurationStates: string[]
+  configurationStates: ConfigurationStatus[]
   projects: string[]
   campaigns: string[]
   configurationMountingActions: ConfigurationMountingAction[]
@@ -131,7 +131,7 @@ const state = (): ConfigurationsState => ({
   configurations: [],
   configuration: null,
   configurationContactRoles: [],
-  configurationStates: [],
+  configurationStates: ['draft', 'active', 'deprecated'],
   projects: [],
   campaigns: [],
   configurationMountingActions: [],
@@ -597,10 +597,6 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   }: { configurationId: string, attachment: Attachment }): Promise<Attachment> {
     return await this.$api.configurationAttachments.update(configurationId, attachment)
   },
-  async loadConfigurationsStates ({ commit }: { commit: Commit }) {
-    const configurationStates = await this.$api.configurationStates.findAll()
-    commit('setConfigurationStates', configurationStates)
-  },
   async loadConfigurationParameters ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const configurationParameters = await this.$api.configurations.findRelatedConfigurationParameters(id)
     commit('setConfigurationParameters', configurationParameters)
@@ -979,9 +975,6 @@ const mutations = {
   },
   setConfigurationAttachment (state: ConfigurationsState, attachment: Attachment) {
     state.configurationAttachment = attachment
-  },
-  setConfigurationStates (state: ConfigurationsState, configurationStates: string[]) {
-    state.configurationStates = configurationStates
   },
   setProjects (state: ConfigurationsState, projects: string[]) {
     state.projects = projects

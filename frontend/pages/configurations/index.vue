@@ -365,7 +365,6 @@ import { QueryParams } from '@/modelUtils/QueryParams'
       'loadConfiguration',
       'setPageNumber',
       'setPageSize',
-      'loadConfigurationsStates',
       'deleteConfiguration',
       'archiveConfiguration',
       'restoreConfiguration',
@@ -406,7 +405,6 @@ export default class SearchConfigurationsPage extends Vue {
   canDeleteEntity!: CanDeleteEntityGetter
   canAccessEntity!: CanAccessEntityGetter
   initConfigurationsIndexAppBar!: () => void
-  loadConfigurationsStates!: () => void
   loadProjects!: LoadProjectsAction
   loadCampaigns!: LoadCampaignsAction
   loadPermissionGroups!: LoadPermissionGroupsAction
@@ -448,7 +446,6 @@ export default class SearchConfigurationsPage extends Vue {
       this.setLoading(true)
       this.initializeAppBar()
       await Promise.all([
-        this.loadConfigurationsStates(),
         this.loadPermissionGroups(),
         this.loadProjects(),
         this.loadCampaigns()
