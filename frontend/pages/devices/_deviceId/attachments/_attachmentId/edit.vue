@@ -16,7 +16,13 @@ SPDX-License-Identifier: EUPL-1.2
         @save="save"
       />
     </v-card-actions>
-    <AttachmentBasicDataForm ref="attachmentsEditForm" v-model="valueCopy" />
+    <AttachmentBasicDataForm
+      v-if="attachmentLoaded"
+      ref="attachmentsEditForm"
+      v-model="valueCopy"
+      :is-used-as-image="isUsedAsImage"
+      :original-url="deviceAttachment.url"
+    />
   </div>
 </template>
 
@@ -57,7 +63,7 @@ import AttachmentBasicDataForm from '@/components/shared/AttachmentBasicDataForm
   },
   middleware: ['auth'],
   computed: {
-    ...mapState('devices', ['deviceAttachment']),
+    ...mapState('devices', ['deviceAttachment', 'device']),
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
@@ -71,6 +77,16 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
 
   // vuex definition for typescript check
   deviceAttachment!: DevicesState['deviceAttachment']
+  device!: DevicesState['device']
+
+  get isUsedAsImage (): boolean {
+    return this.device?.images.some(image => image.attachment?.id === this.attachmentId) ?? false
+  }
+
+  get attachmentLoaded (): boolean {
+    return this.deviceAttachment?.id === this.attachmentId && this.valueCopy.id === this.attachmentId
+  }
+
   loadDevice!: LoadDeviceAction
   loadDeviceAttachment!: LoadDeviceAttachmentAction
   loadDeviceAttachments!: LoadDeviceAttachmentsAction
@@ -123,7 +139,8 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
   }
 
   async save () {
-    if (!(this.$refs.attachmentsEditForm as AttachmentBasicDataForm & { validateForm: () => boolean }).validateForm()) {
+    if (!this.attachmentLoaded) { return }
+    if (!await (this.$refs.attachmentsEditForm as AttachmentBasicDataForm).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }

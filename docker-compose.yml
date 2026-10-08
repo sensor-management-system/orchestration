@@ -88,6 +88,7 @@ services:
       MQTT_BROKER_PORT: ${MQTT_BROKER_PORT:-1883}
       MQTT_KEEPALIVE: ${MQTT_KEEPALIVE:-5}
       MQTT_TLS_ENABLED: ${MQTT_TLS_ENABLED:-false}
+      MAINTENANCE_DOCUMENT_URL: ${MAINTENANCE_DOCUMENT_URL:-https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-dev.md}
     depends_on:
       - db
       - keycloak
@@ -172,7 +173,6 @@ services:
       NUXT_ENV_PID_BASE_URL: ${NUXT_ENV_PID_BASE_URL:-https://hdl.handle.net}
       INSTITUTE: ${INSTITUTE:-ufz}
       SHOW_RELEASE_NOTES: ${SHOW_RELEASE_NOTES:-true}
-      NUXT_ENV_MAINTENANCE_DOCUMENT_URL: ${NUXT_ENV_MAINTENANCE_DOCUMENT_URL:-https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-dev.md}
 
     volumes:
       - ./frontend/:/home/node/

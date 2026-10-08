@@ -50,7 +50,7 @@ from .views import (
     free_text_field_routes,
     generator_routes,
     login_routes,
-    proxy_routes,
+    maintenance_routes,
     sensor_ml_routes,
     upload_routes,
 )
@@ -134,8 +134,6 @@ def create_app():
     app.register_blueprint(additional_platforms_routes)
     app.register_blueprint(additional_configuration_routes)
     app.register_blueprint(additional_site_routes)
-    # proxy routes
-    app.register_blueprint(proxy_routes)
     # upload_routes
     app.register_blueprint(upload_routes)
     # download routes
@@ -144,6 +142,7 @@ def create_app():
     app.register_blueprint(docs_routes)
     # login_routes
     app.register_blueprint(login_routes)
+    app.register_blueprint(maintenance_routes)
     # Routes for the free text field introspection
     app.register_blueprint(free_text_field_routes)
     app.register_blueprint(generator_routes)

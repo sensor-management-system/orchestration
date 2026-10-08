@@ -98,7 +98,6 @@ SPDX-License-Identifier: EUPL-1.2
           :attachments="deviceAttachments"
           :value="value.images"
           :download-attachment="downloadAttachment"
-          :proxy-url="proxyUrl"
           @input="update('images', $event)"
         />
       </v-col>
@@ -502,7 +501,6 @@ import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 import Validator from '@/utils/validator'
 import { LoadDevicetypesAction, LoadEquipmentstatusAction, LoadManufacturersAction, VocabularyState } from '@/store/vocabulary'
 import { DownloadAttachmentAction, DevicesState } from '@/store/devices'
-import { ProxyUrlAction } from '@/store/proxy'
 import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 import { SetLoadingAction } from '@/store/progressindicator'
 
@@ -518,8 +516,7 @@ type ManufacturerSelectValue = Manufacturer | string | undefined
   methods: {
     ...mapActions('vocabulary', ['loadDevicetypes', 'loadManufacturers', 'loadEquipmentstatus']),
     ...mapActions('devices', ['downloadAttachment']),
-    ...mapActions('progressindicator', ['setLoading']),
-    ...mapActions('proxy', ['proxyUrl'])
+    ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
     DeviceTypeDialog,
@@ -550,7 +547,6 @@ export default class DeviceBasicDataForm extends mixins(Rules, ExternalUrlLinkMi
   // vuex definition for typescript check
   deviceAttachments!: DevicesState['deviceAttachments']
   downloadAttachment!: DownloadAttachmentAction
-  proxyUrlAction!: ProxyUrlAction
   loadDevicetypes !: LoadDevicetypesAction
   loadManufacturers !: LoadManufacturersAction
   loadEquipmentstatus !: LoadEquipmentstatusAction

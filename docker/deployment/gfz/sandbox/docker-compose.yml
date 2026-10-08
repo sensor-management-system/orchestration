@@ -95,6 +95,7 @@ services:
     restart: unless-stopped
     environment:
       URL_PREFIX: /backend/api/v1
+      MAINTENANCE_DOCUMENT_URL: https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-gfz-sandbox.md
       STATIC_URL: /static/backend
       APP_SETTINGS: project.config.ProductionConfig
       DATABASE_URL: postgresql://${SMS_SANDBOX_BACKEND_DB_USER}:${SMS_SANDBOX_BACKEND_DB_PASSWORD}@backend-db:5432/backend
@@ -126,7 +127,6 @@ services:
       TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
       EXPORT_CONTROL_VO_LIST: urn:geant:helmholtz.de:gfz:group:sensor-management-system-export-control#idp.gfz-potsdam.de
       # We only want to allow access to external resources via the proxy - not to internal ones
-      PROXY_NETLOC_BLOCKLIST: 127.0.0.1,localhost,backend-db,backend,minio,elastic-search,nginx,traefik
       MQTT_BROKER_URL: mq
       MQTT_USERNAME: ${SMS_SANDBOX_MQTT_USERNAME}
       MQTT_PASSWORD: ${SMS_SANDBOX_MQTT_PASSWORD}
@@ -213,4 +213,3 @@ networks:
     external: true
   backend:
   mq:
-

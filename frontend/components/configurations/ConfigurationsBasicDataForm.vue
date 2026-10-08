@@ -85,7 +85,6 @@ SPDX-License-Identifier: EUPL-1.2
           :attachments="configurationAttachments"
           :value="value.images"
           :download-attachment="downloadAttachment"
-          :proxy-url="proxyUrl"
           @input="update('images', $event)"
         />
       </v-col>
@@ -204,7 +203,6 @@ import AttachmentImagesForm from '@/components/shared/AttachmentImagesForm.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 import { SearchSitesAction, SitesState } from '@/store/sites'
 import { DownloadAttachmentAction, ConfigurationsState } from '@/store/configurations'
-import { ProxyUrlAction } from '@/store/proxy'
 
 @Component({
   components: {
@@ -220,8 +218,7 @@ import { ProxyUrlAction } from '@/store/proxy'
   },
   methods: {
     ...mapActions('configurations', ['loadConfigurationsStates', 'downloadAttachment']),
-    ...mapActions('sites', ['searchSites']),
-    ...mapActions('proxy', ['proxyUrl'])
+    ...mapActions('sites', ['searchSites'])
   }
 })
 export default class ConfigurationsBasicDataForm extends Vue {
@@ -239,7 +236,6 @@ export default class ConfigurationsBasicDataForm extends Vue {
   // vuex definition for typescript check
   configurationAttachments!: ConfigurationsState['configurationAttachments']
   downloadAttachment!: DownloadAttachmentAction
-  proxyUrl!: ProxyUrlAction
   loadConfigurationsStates!: () => void
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction

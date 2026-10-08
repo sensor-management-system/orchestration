@@ -6,7 +6,7 @@ SPDX-FileCopyrightText: 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
-  <div>
+  <div v-if="images.length > 0">
     <v-container>
       <v-row>
         <v-col cols="12">
@@ -14,15 +14,15 @@ SPDX-License-Identifier: EUPL-1.2
             <div style="position: relative;">
               <v-carousel
                 v-model="visibleImageIndex"
-                :title="visibleImage?.attachment?.description ?? ''"
+                :title="visibleImageDescription"
                 height="320"
-                :hide-delimiters="value.length <= 1 || !hover"
+                :hide-delimiters="images.length <= 1 || !hover"
                 show-arrows-on-hover
                 hide-delimiter-background
-                :show-arrows="value.length > 1"
+                :show-arrows="images.length > 1"
               >
                 <v-carousel-item
-                  v-for="(image, i) in value"
+                  v-for="(image, i) in images"
                   :key="i"
                   contain
                   :src="getUrlForAttachment(image.attachment)"
@@ -39,7 +39,7 @@ SPDX-License-Identifier: EUPL-1.2
                   small
                   :elevation="0"
                   class="fullscreenButton ma-5"
-                  @click="fullscreenImageUrl = getUrlForAttachment(visibleImage?.attachment)"
+                  @click="fullscreenImageUrl = visibleImageUrl"
                 >
                   <v-icon>mdi-fullscreen</v-icon>
                 </v-btn>
@@ -49,19 +49,19 @@ SPDX-License-Identifier: EUPL-1.2
         </v-col>
 
         <v-col
-          v-if="visibleImage?.attachment?.label"
+          v-if="visibleImageLabel"
           class="text-center mt-0 pt-0"
         >
           <v-tooltip bottom>
             <template #activator="{ on, attrs }">
               <v-label
                 v-bind="attrs"
-                v-on="visibleImage?.attachment?.description ? on : null"
+                v-on="visibleImageDescription ? on : null"
               >
-                {{ visibleImage.attachment?.label }}
+                {{ visibleImageLabel }}
               </v-label>
             </template>
-            {{ visibleImage.attachment.description }}
+            {{ visibleImageDescription }}
           </v-tooltip>
         </v-col>
       </v-row>
@@ -79,13 +79,12 @@ import { Vue, Prop, Component, Watch } from 'nuxt-property-decorator'
 import { Image, IAttachmentWithUrl } from '@/models/Image'
 import { Attachment } from '@/models/Attachment'
 import ImageNotAvailable from '@/components/shared/ImageNotAvailable.vue'
-import ExpandableText from '@/components/shared/ExpandableText.vue'
 import ImageFullscreenView from '@/components/shared/ImageFullscreenView.vue'
+import { fetchAttachmentImage } from '@/utils/attachmentImage'
 
 @Component({
   components: {
     ImageFullscreenView,
-    ExpandableText,
     ImageNotAvailable
   }
 })
@@ -107,16 +106,10 @@ export default class AttachmentImagesCarousel extends Vue {
   })
   private downloadAttachment!: (attachmentUrl: string) => Promise<Blob>
 
-  @Prop({
-    required: true,
-    type: Function
-  })
-  private proxyUrl!: (attachmentUrl: string) => Promise<string>
-
   private attachmentErrors: { [idx: string]: boolean } = {}
 
   setAttachmentError (attachment: Attachment) {
-    if (!attachment.id) {
+    if (!attachment?.id || this.attachmentErrors[attachment.id]) {
       return
     }
     Vue.set(this.attachmentErrors, attachment.id, true)
@@ -129,33 +122,49 @@ export default class AttachmentImagesCarousel extends Vue {
     return this.attachmentErrors[attachment.id]
   }
 
-  async created () {
+  async mounted () {
     await this.setUrlsForAttachments()
   }
 
   async setUrlsForAttachments () {
-    for (const image of this.value) {
-      if (image.attachment?.url === null) {
+    for (const image of this.images) {
+      if (!image.attachment?.url) {
         continue
       }
       const attachment = image.attachment!
 
       try {
-        const url: string | null = attachment.isUpload
-          ? await this.downloadAttachment(attachment!.url).then(blob => window.URL.createObjectURL(blob))
-          : await this.proxyUrl(attachment.url)
+        const url = attachment.isUpload
+          ? await this.downloadAttachment(attachment.url).then(blob => window.URL.createObjectURL(blob))
+          : await fetchAttachmentImage(attachment.url)
         if (url) {
           this.urlsForAttachments.push({ attachment, url })
         }
       } catch (_) {
-        this.$store.commit('snackbar/setError', 'Downloading attachment failed')
-        break
+        this.setAttachmentError(attachment)
       }
     }
   }
 
+  get images (): Image[] {
+    return this.value.filter(image => image.attachment !== null)
+  }
+
   get visibleImage (): Image | null {
-    return this.value[this.visibleImageIndex] ?? null
+    return this.images[this.visibleImageIndex] ?? null
+  }
+
+  get visibleImageDescription (): string {
+    return this.visibleImage?.attachment?.description ?? ''
+  }
+
+  get visibleImageLabel (): string {
+    return this.visibleImage?.attachment?.label ?? ''
+  }
+
+  get visibleImageUrl (): string {
+    const attachment = this.visibleImage?.attachment
+    return attachment ? this.getUrlForAttachment(attachment) : ''
   }
 
   getUrlForAttachment (attachment: Attachment): string {
@@ -171,8 +180,17 @@ export default class AttachmentImagesCarousel extends Vue {
 
   @Watch('value', { deep: true })
   onImagesChange () {
+    for (const entry of this.urlsForAttachments) {
+      window.URL.revokeObjectURL(entry.url)
+    }
     this.urlsForAttachments = []
     this.setUrlsForAttachments()
+  }
+
+  beforeDestroy () {
+    for (const entry of this.urlsForAttachments) {
+      window.URL.revokeObjectURL(entry.url)
+    }
   }
 }
 </script>

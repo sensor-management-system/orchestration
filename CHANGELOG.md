@@ -19,6 +19,12 @@ Changed:
 - Use pre-built container image for backend of KIT staging ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/745))
 - Use pre-built container image for backend of KIT prod ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/746))
 - Use of the local container registry for minio ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/758))
+- fetch release notes directly in the browser ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/763)) 
+- fetch maintenance messages via backend ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/763))
+- validate image URLs in the browser ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/763))
+
+Fixed:
+- Remove the arbitrary-URL backend proxy to prevent SSRF ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/763))
 
 ## 1.29.1 - 2026-09-01
 

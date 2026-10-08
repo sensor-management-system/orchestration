@@ -87,7 +87,6 @@ SPDX-License-Identifier: EUPL-1.2
         <AttachmentImagesCarousel
           :value="value.images"
           :download-attachment="downloadAttachment"
-          :proxy-url="proxyUrl"
         />
       </v-col>
     </v-row>
@@ -122,7 +121,6 @@ import { Site } from '@/models/Site'
 
 import { SearchSitesAction, SitesState } from '@/store/sites'
 import { DownloadAttachmentAction } from '@/store/configurations'
-import { ProxyUrlAction } from '@/store/proxy'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
@@ -143,8 +141,7 @@ import VisibilityChip from '@/components/VisibilityChip.vue'
   computed: mapState('sites', ['sites']),
   methods: {
     ...mapActions('sites', ['searchSites']),
-    ...mapActions('configurations', ['downloadAttachment']),
-    ...mapActions('proxy', ['proxyUrl'])
+    ...mapActions('configurations', ['downloadAttachment'])
   }
 })
 export default class ConfigurationsBasicDataForm extends Vue {
@@ -160,7 +157,6 @@ export default class ConfigurationsBasicDataForm extends Vue {
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction
   downloadAttachment!: DownloadAttachmentAction
-  proxyUrl!: ProxyUrlAction
 
   async mounted () {
     try {

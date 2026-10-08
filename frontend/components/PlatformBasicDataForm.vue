@@ -97,7 +97,6 @@ SPDX-License-Identifier: EUPL-1.2
           :attachments="platformAttachments"
           :value="value.images"
           :download-attachment="downloadAttachment"
-          :proxy-url="proxyUrl"
           @input="update('images', $event)"
         />
       </v-col>
@@ -495,7 +494,6 @@ import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 import Validator from '@/utils/validator'
 import { LoadEquipmentstatusAction, LoadManufacturersAction, LoadPlatformtypesAction, VocabularyState } from '@/store/vocabulary'
 import { DownloadAttachmentAction, PlatformsState } from '@/store/platforms'
-import { ProxyUrlAction } from '@/store/proxy'
 import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 import { SetLoadingAction } from '@/store/progressindicator'
 
@@ -522,8 +520,7 @@ type ManufacturerSelectValue = Manufacturer | string | undefined
   methods: {
     ...mapActions('vocabulary', ['loadPlatformtypes', 'loadManufacturers', 'loadEquipmentstatus']),
     ...mapActions('platforms', ['downloadAttachment']),
-    ...mapActions('progressindicator', ['setLoading']),
-    ...mapActions('proxy', ['proxyUrl'])
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class PlatformBasicDataForm extends mixins(Rules, ExternalUrlLinkMixin) {
@@ -545,7 +542,6 @@ export default class PlatformBasicDataForm extends mixins(Rules, ExternalUrlLink
   // vuex definition for typescript check
   platformAttachments!: PlatformsState['platformAttachments']
   downloadAttachment!: DownloadAttachmentAction
-  proxyUrl!: ProxyUrlAction
   loadPlatformtypes !: LoadPlatformtypesAction
   loadManufacturers !: LoadManufacturersAction
   loadEquipmentstatus !: LoadEquipmentstatusAction

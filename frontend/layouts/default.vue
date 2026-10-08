@@ -474,7 +474,7 @@ SPDX-License-Identifier: EUPL-1.2
 import CookieLaw from 'vue-cookie-law'
 import { mapActions, mapState, mapGetters } from 'vuex'
 
-import { marked } from 'marked'
+import { renderMaintenanceMessage } from '@/utils/maintenanceMessage'
 
 import AppBarTitle from '@/components/AppBarTitle'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
@@ -681,13 +681,15 @@ export default {
       this.currentUrl = window.location.href
     }
   },
-  async created () {
+  created () {
     this.$nuxt.$on('app-bar-content', (component) => {
       this.appBarContent = component
     })
     this.$nuxt.$on('app-bar-extension', (component) => {
       this.appBarExtension = component
     })
+  },
+  async mounted () {
     this.maintenanceText = await this.fetchMaintenanceTextAsHtml()
   },
   methods: {
@@ -724,18 +726,8 @@ export default {
     },
     async fetchMaintenanceTextAsHtml () {
       try {
-        const url = process.env.maintenanceDocumentUrl
-        const markdownText = await this.$api.proxy.getContentViaProxy(url)
-
-        const markdownRenderer = new marked.Renderer()
-        markdownRenderer.link = function (href, _title, text) {
-          return '<a target="_blank" href="' + href + '">' + text + '</a>'
-        }
-        markdownRenderer.comments = function () {
-          return ''
-        }
-        const htmlText = marked(markdownText, { renderer: markdownRenderer })
-        return htmlText
+        const markdownText = await this.$api.maintenanceMessage.getMessage()
+        return markdownText ? renderMaintenanceMessage(markdownText) : null
       } catch (e) {
         // If we can't reach the URL, then we can't show anything.
         return null

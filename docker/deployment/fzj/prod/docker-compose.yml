@@ -96,6 +96,7 @@ services:
       - 15000:5000
     environment:
       URL_PREFIX: /backend/api/v1
+      MAINTENANCE_DOCUMENT_URL: https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-fzj-prod.md
       STATIC_URL: /static/backend
       APP_SETTINGS: project.config.ProductionConfig
       DATABASE_URL: postgresql://${BACKEND_DB_USER}:${BACKEND_DB_PASSWORD}@backend-db:5432/backend
@@ -147,4 +148,3 @@ networks:
   backend:
   reverseproxy:
     external: true
-
