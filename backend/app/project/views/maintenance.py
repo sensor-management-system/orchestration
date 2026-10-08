@@ -4,7 +4,6 @@
 """Fetch a configured maintenance document, never a client URL."""
 
 import time
-from urllib.parse import urlsplit
 
 import requests
 from flask import Blueprint, current_app, make_response
