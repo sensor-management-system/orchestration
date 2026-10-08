@@ -38,7 +38,7 @@ SPDX-License-Identifier: EUPL-1.2
           </v-col>
           <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
             <label>Status</label>
-            {{ value.status | orDefault }}
+            {{ value.getConfigurationStatus(now) }}
           </v-col>
         </v-row>
         <v-row>
@@ -115,6 +115,7 @@ SPDX-License-Identifier: EUPL-1.2
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+import { DateTime } from 'luxon'
 
 import { Configuration } from '@/models/Configuration'
 import { Site } from '@/models/Site'
@@ -194,6 +195,10 @@ export default class ConfigurationsBasicDataForm extends Vue {
 
   get configurationImagesShouldBeRendered () {
     return this.value.images.length > 0
+  }
+
+  get now (): DateTime {
+    return DateTime.utc()
   }
 }
 </script>

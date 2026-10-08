@@ -7,7 +7,7 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.29.2 (Unreleased)
+## 1.30.0 (Unreleased)
 
 Added:
 - Release notifications for matrix ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/744))
@@ -19,6 +19,7 @@ Changed:
 - Use pre-built container image for backend of KIT staging ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/745))
 - Use pre-built container image for backend of KIT prod ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/746))
 - Use of the local container registry for minio ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/758))
+- Status of configurations is set and filtered dynamically using the start and end date attributes ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/759))
 - fetch release notes directly in the browser ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/763)) 
 - fetch maintenance messages via backend ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/763))
 - validate image URLs in the browser ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/763))

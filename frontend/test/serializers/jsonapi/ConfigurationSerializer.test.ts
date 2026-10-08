@@ -37,7 +37,6 @@ describe('ConfigurationSerializer', () => {
             description: 'Boeken station',
             project: 'Tereno NO',
             campaign: 'Demmin',
-            status: 'draft',
             archived: true,
             persistent_identifier: '12345/1234567890',
             keywords: ['key', 'word']
@@ -57,7 +56,6 @@ describe('ConfigurationSerializer', () => {
           attributes: {
             // no start and no end date
             // no field for label, none for description, nor project etc
-            status: 'draft',
             archived: false,
             persistent_identifier: null
           },
@@ -246,14 +244,12 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration1.project = 'Tereno NO'
       expectedConfiguration1.campaign = 'Demmin'
       expectedConfiguration1.archived = true
-      expectedConfiguration1.status = 'draft'
       expectedConfiguration1.createdByUserId = '123456'
       expectedConfiguration1.persistentIdentifier = '12345/1234567890'
       expectedConfiguration1.keywords = ['key', 'word']
 
       const expectedConfiguration2 = new Configuration()
       expectedConfiguration2.id = '2'
-      expectedConfiguration2.status = 'draft'
       expectedConfiguration2.archived = false
 
       const expectedConfiguration3 = new Configuration()
@@ -301,8 +297,7 @@ describe('ConfigurationSerializer', () => {
             label: 'Tereno NO Boeken',
             description: 'Boeken station',
             project: 'Tereno NO',
-            campaign: 'Demmin',
-            status: 'draft'
+            campaign: 'Demmin'
           },
           relationships: {
             // no contacts, as we expect an empty case here
@@ -321,7 +316,6 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.description = 'Boeken station'
       expectedConfiguration.project = 'Tereno NO'
       expectedConfiguration.campaign = 'Demmin'
-      expectedConfiguration.status = 'draft'
 
       const serializer = new ConfigurationSerializer()
       const configurationWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -340,8 +334,7 @@ describe('ConfigurationSerializer', () => {
             label: 'Tereno NO Boeken',
             description: 'Boeken station',
             project: 'Tereno NO',
-            campaign: 'Demmin',
-            status: 'draft'
+            campaign: 'Demmin'
           },
           relationships: {
             contacts: {
@@ -387,7 +380,6 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.description = 'Boeken station'
       expectedConfiguration.project = 'Tereno NO'
       expectedConfiguration.campaign = 'Demmin'
-      expectedConfiguration.status = 'draft'
       expectedConfiguration.contacts = [
         Contact.createFromObject({
           id: '1',
@@ -451,8 +443,7 @@ describe('ConfigurationSerializer', () => {
           end_date: '2020-08-29T13:49:48.015620+00:00',
           label: 'Tereno NO Boeken',
           description: 'Boeken station',
-          project: 'Tereno NO',
-          status: 'draft'
+          project: 'Tereno NO'
         },
         relationships: {
           contacts: {
@@ -470,7 +461,6 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.description = 'Boeken station'
       expectedConfiguration.project = 'Tereno NO'
       expectedConfiguration.campaign = ''
-      expectedConfiguration.status = 'draft'
 
       const included: any[] = []
 

@@ -18,6 +18,8 @@ import { PermissionGroup, IPermissionGroup, IPermissionableSingleGroup } from '@
 import { Visibility, IVisible } from '@/models/Visibility'
 import { Parameter, IParameter } from '@/models/Parameter'
 
+export type ConfigurationStatus = 'draft' | 'active' | 'deprecated'
+
 export interface IConfiguration extends IMountActions, IPermissionableSingleGroup {
   id: string
   persistentIdentifier: string
@@ -27,7 +29,6 @@ export interface IConfiguration extends IMountActions, IPermissionableSingleGrou
   description: string
   project: string
   campaign: string
-  status: string
   archived: boolean
   contacts: IContact[]
   parameters: IParameter[]
@@ -58,7 +59,6 @@ export class Configuration implements IConfiguration, IVisible {
   private _description: string = ''
   private _project: string = ''
   private _campaign: string = ''
-  private _status: string = ''
   private _archived: boolean = false
   private _contacts: IContact[] = [] as IContact[]
   private _parameters: Parameter[] = []
@@ -140,12 +140,25 @@ export class Configuration implements IConfiguration, IVisible {
     this._campaign = newCampaign
   }
 
-  get status (): string {
-    return this._status
-  }
-
-  set status (newStatus: string) {
-    this._status = newStatus
+  // In the past we used a fixed configuration status value.
+  // But there is demand to get it from the date values.
+  getConfigurationStatus (date: DateTime): ConfigurationStatus {
+    if (!this._startDate) {
+      if (!this._endDate) {
+        return 'draft'
+      }
+      if (this._endDate > date) {
+        return 'active'
+      }
+      return 'deprecated'
+    }
+    if (this._startDate > date) {
+      return 'draft'
+    }
+    if (!this._endDate || this._endDate > date) {
+      return 'active'
+    }
+    return 'deprecated'
   }
 
   get contacts (): IContact[] {
@@ -301,7 +314,6 @@ export class Configuration implements IConfiguration, IVisible {
     newObject.description = someObject.description
     newObject.project = someObject.project
     newObject.campaign = someObject.campaign
-    newObject.status = someObject.status
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.deviceMountActions = someObject.deviceMountActions.map(DeviceMountAction.createFromObject)

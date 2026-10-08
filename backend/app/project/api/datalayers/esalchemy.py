@@ -11,7 +11,7 @@
 import csv
 import io
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 from flask import current_app, request
 from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
@@ -249,6 +249,31 @@ class FieldMatchesRegexpFilter:
         }
 
 
+@dataclass
+class RangeFilter:
+    """Filter to check for rages."""
+
+    field: str
+    gt: Optional[int | float | str] = None
+    lt: Optional[int | float | str] = None
+    gte: Optional[int | float | str] = None
+    lte: Optional[int | float | str] = None
+
+    def to_query(self):
+        """Convert the filter to a query."""
+        operation = {}
+        if self.gt is not None:
+            operation["gt"] = self.gt
+        if self.lt is not None:
+            operation["lt"] = self.lt
+        if self.gte is not None:
+            operation["gte"] = self.gte
+        if self.lte is not None:
+            operation["lte"] = self.lte
+
+        return {"range": {self.field: operation}}
+
+
 class OrFilter:
     """Class to search with multiple filters (and one must match)."""
 
@@ -424,6 +449,34 @@ class FilterParser:
                     field=name,
                     value=ilike_filter_to_regexp(val),
                     case_insensitive=False,
+                ),
+            ),
+            "lt": lambda name, val: cls.wrap_for_nested_elements(
+                name,
+                RangeFilter(
+                    field=name,
+                    lt=val,
+                ),
+            ),
+            "le": lambda name, val: cls.wrap_for_nested_elements(
+                name,
+                RangeFilter(
+                    field=name,
+                    lte=val,
+                ),
+            ),
+            "gt": lambda name, val: cls.wrap_for_nested_elements(
+                name,
+                RangeFilter(
+                    field=name,
+                    gt=val,
+                ),
+            ),
+            "ge": lambda name, val: cls.wrap_for_nested_elements(
+                name,
+                RangeFilter(
+                    field=name,
+                    gte=val,
                 ),
             ),
         }

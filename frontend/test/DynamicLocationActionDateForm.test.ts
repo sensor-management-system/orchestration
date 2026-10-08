@@ -38,7 +38,6 @@ const testConfig1 = Configuration.createFromObject({
   description: '',
   project: '',
   campaign: '',
-  status: '',
   archived: false,
   contacts: [],
   createdAt: null,

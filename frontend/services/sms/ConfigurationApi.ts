@@ -362,11 +362,86 @@ export class ConfigurationApi {
   }
 
   prepareStates () {
-    if (this.searchedStates.length > 0) {
+    const now = DateTime.utc()
+    const orFilterList = []
+    for (const searchState of this.searchedStates) {
+      if (searchState === 'draft') {
+        orFilterList.push({
+          or: [
+            {
+              name: 'start_date',
+              op: 'gt',
+              val: now.toISO()
+            },
+            {
+              and: [
+                {
+                  name: 'start_date',
+                  op: 'eq',
+                  val: null
+                },
+                {
+                  name: 'end_date',
+                  op: 'eq',
+                  val: null
+                }
+              ]
+            }
+          ]
+        })
+      } else if (searchState === 'active') {
+        orFilterList.push({
+          or: [
+            {
+              and: [
+                {
+                  name: 'start_date',
+                  op: 'le',
+                  val: now.toISO()
+                },
+                {
+                  or: [
+                    {
+                      name: 'end_date',
+                      op: 'gt',
+                      val: now.toISO()
+                    },
+                    {
+                      name: 'end_date',
+                      op: 'eq',
+                      val: null
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              and: [
+                {
+                  name: 'start_date',
+                  op: 'eq',
+                  val: null
+                },
+                {
+                  name: 'end_date',
+                  op: 'gt',
+                  val: now.toISO()
+                }
+              ]
+            }
+          ]
+        })
+      } else if (searchState === 'deprecated') {
+        orFilterList.push({
+          name: 'end_date',
+          op: 'le',
+          val: now.toISO()
+        })
+      }
+    }
+    if (orFilterList.length > 0) {
       this.filterSettings.push({
-        name: 'status',
-        op: 'in_',
-        val: this.searchedStates
+        or: orFilterList
       })
     }
   }

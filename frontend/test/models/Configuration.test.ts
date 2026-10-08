@@ -23,22 +23,168 @@ describe('Configuration', () => {
       expect(configuration.label).toEqual('new configuration')
     })
   })
-  describe('#status', () => {
-    it('should be an empty string by default', () => {
+  describe('#getConfigurationStatus', () => {
+    it('should return draft if there is no start date', () => {
+      const date = DateTime.utc(
+        2021, // year
+        1, // month (1 based)
+        22, // day
+        7, // hour
+        15, // minute
+        57 // second
+      )
       const configuration = new Configuration()
-      expect(configuration.status).toEqual('')
+      expect(configuration.getConfigurationStatus(date)).toEqual('draft')
     })
-    it('should be possible to set it', () => {
+    it('should return draft if the start date is after the test date', () => {
+      const date = DateTime.utc(
+        2021, // year
+        1, // month (1 based)
+        22, // day
+        7, // hour
+        15, // minute
+        57 // second
+      )
+      const startDate = DateTime.utc(
+        2022,
+        1,
+        22,
+        7,
+        15,
+        57
+      )
       const configuration = new Configuration()
-      configuration.status = 'draft'
-      expect(configuration.status).toEqual('draft')
+      configuration.startDate = startDate
+      expect(configuration.getConfigurationStatus(date)).toEqual('draft')
+    })
+    it('should return active if the start date is before the test date', () => {
+      const date = DateTime.utc(
+        2021, // year
+        1, // month (1 based)
+        22, // day
+        7, // hour
+        15, // minute
+        57 // second
+      )
+      const startDate = DateTime.utc(
+        2020,
+        1,
+        22,
+        7,
+        15,
+        57
+      )
+      const configuration = new Configuration()
+      configuration.startDate = startDate
+      expect(configuration.getConfigurationStatus(date)).toEqual('active')
+    })
+    it('should return active if the start date is before the test date and the end date is after the test date', () => {
+      const date = DateTime.utc(
+        2021, // year
+        1, // month (1 based)
+        22, // day
+        7, // hour
+        15, // minute
+        57 // second
+      )
+      const startDate = DateTime.utc(
+        2020,
+        1,
+        22,
+        7,
+        15,
+        57
+      )
+      const endDate = DateTime.utc(
+        2022,
+        1,
+        22,
+        7,
+        15,
+        57
+      )
+      const configuration = new Configuration()
+      configuration.startDate = startDate
+      configuration.endDate = endDate
+      expect(configuration.getConfigurationStatus(date)).toEqual('active')
+    })
+    it('should return deprecated if the end date is before the test date', () => {
+      const date = DateTime.utc(
+        2021, // year
+        1, // month (1 based)
+        22, // day
+        7, // hour
+        15, // minute
+        57 // second
+      )
+      const startDate = DateTime.utc(
+        2019,
+        1,
+        22,
+        7,
+        15,
+        57
+      )
+      const endDate = DateTime.utc(
+        2020,
+        1,
+        22,
+        7,
+        15,
+        57
+      )
+      const configuration = new Configuration()
+      configuration.startDate = startDate
+      configuration.endDate = endDate
+      expect(configuration.getConfigurationStatus(date)).toEqual('deprecated')
+    })
+    it('should return deprecated if there is only an end date in the past', () => {
+      const date = DateTime.utc(
+        2021, // year
+        1, // month (1 based)
+        22, // day
+        7, // hour
+        15, // minute
+        57 // second
+      )
+      const endDate = DateTime.utc(
+        2020,
+        1,
+        22,
+        7,
+        15,
+        57
+      )
+      const configuration = new Configuration()
+      configuration.endDate = endDate
+      expect(configuration.getConfigurationStatus(date)).toEqual('deprecated')
+    })
+    it('should return active if there is only an end date in the future', () => {
+      const date = DateTime.utc(
+        2021, // year
+        1, // month (1 based)
+        22, // day
+        7, // hour
+        15, // minute
+        57 // second
+      )
+      const endDate = DateTime.utc(
+        2023,
+        1,
+        22,
+        7,
+        15,
+        57
+      )
+      const configuration = new Configuration()
+      configuration.endDate = endDate
+      expect(configuration.getConfigurationStatus(date)).toEqual('active')
     })
   })
   describe('createFromObject', () => {
     it('should be possible to set label & status with it', () => {
       const configurationToCopyFrom = new Configuration()
       configurationToCopyFrom.label = 'Boeken'
-      configurationToCopyFrom.status = 'draft'
 
       expect(configurationToCopyFrom.startDate).toBeNull()
       expect(configurationToCopyFrom.endDate).toBeNull()
@@ -46,14 +192,12 @@ describe('Configuration', () => {
       const result = Configuration.createFromObject(configurationToCopyFrom)
 
       expect(result.label).toEqual('Boeken')
-      expect(result.status).toEqual('draft')
       expect(result.startDate).toBeNull()
       expect(result.endDate).toBeNull()
     })
     it('should also copy the start and end dates', () => {
       const configurationToCopyFrom = new Configuration()
       configurationToCopyFrom.label = 'Boeken'
-      configurationToCopyFrom.status = 'draft'
 
       configurationToCopyFrom.startDate = DateTime.utc(
         2021, // year

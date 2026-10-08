@@ -18,7 +18,7 @@ SPDX-License-Identifier: EUPL-1.2
           {{ configuration.project }}
         </div>
         <status-chip
-          :value="configuration.status"
+          :value="configuration.getConfigurationStatus(now)"
         />
         <visibility-chip
           v-model="configuration.visibility"
@@ -236,6 +236,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { DateTime } from 'luxon'
 
 import { Configuration } from '@/models/Configuration'
 
@@ -287,6 +288,10 @@ export default class ConfigurationsListItem extends Vue {
     } else {
       window.open(this.$router.resolve(this.detailLink).href, this.target)
     }
+  }
+
+  get now (): DateTime {
+    return DateTime.utc()
   }
 }
 </script>

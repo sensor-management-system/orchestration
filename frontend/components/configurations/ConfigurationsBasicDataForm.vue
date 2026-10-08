@@ -51,13 +51,23 @@ SPDX-License-Identifier: EUPL-1.2
         />
       </v-col>
       <v-col cols="12" md="3">
-        <v-autocomplete
-          :value="value.status"
-          :items="configurationStates"
-          label="Status"
-          :readonly="readonly"
-          @input="update('status',$event)"
-        />
+        <label>Status</label>
+        {{ value.getConfigurationStatus(now) }}
+        <v-tooltip
+          bottom
+        >
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>The status is automatically set based on the start and dates.</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="12" md="6">
         <v-text-field
@@ -188,8 +198,8 @@ SPDX-License-Identifier: EUPL-1.2
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
-
 import { mapActions, mapState } from 'vuex'
+import { DateTime } from 'luxon'
 
 import { Configuration } from '@/models/Configuration'
 import { Visibility } from '@/models/Visibility'
@@ -242,11 +252,6 @@ export default class ConfigurationsBasicDataForm extends Vue {
 
   async created () {
     try {
-      await this.loadConfigurationsStates()
-    } catch (error) {
-      this.$store.commit('snackbar/setError', 'Failed to load configuration states')
-    }
-    try {
       await this.searchSites()
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to load sites & labs')
@@ -258,7 +263,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
   }
 
   update (
-    key: keyof Pick<Configuration, 'visibility' | 'permissionGroup' | 'label' | 'status' | 'images' | 'startDate' | 'endDate' | 'siteId' | 'description' | 'project' | 'campaign'>,
+    key: keyof Pick<Configuration, 'visibility' | 'permissionGroup' | 'label' | 'images' | 'startDate' | 'endDate' | 'siteId' | 'description' | 'project' | 'campaign'>,
     value: any
   ) {
     if (key in this.value) {
@@ -319,6 +324,10 @@ export default class ConfigurationsBasicDataForm extends Vue {
     const newObj = Configuration.createFromObject(this.value)
     newObj.keywords = newObj.keywords.filter(k => k !== keyword)
     this.$emit('input', newObj)
+  }
+
+  get now (): DateTime {
+    return DateTime.utc()
   }
 }
 </script>
