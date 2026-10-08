@@ -53,7 +53,6 @@ SPDX-License-Identifier: EUPL-1.2
         <AttachmentImagesCarousel
           :value="value.images"
           :download-attachment="downloadAttachment"
-          :proxy-url="proxyUrl"
         />
       </v-col>
     </v-row>
@@ -210,7 +209,6 @@ import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
 import { DownloadAttachmentAction } from '@/store/platforms'
-import { ProxyUrlAction } from '@/store/proxy'
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
@@ -234,8 +232,7 @@ import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
   },
   methods: {
     ...mapActions('vocabulary', ['loadManufacturers', 'loadPlatformtypes', 'loadEquipmentstatus']),
-    ...mapActions('platforms', ['downloadAttachment']),
-    ...mapActions('proxy', ['proxyUrl'])
+    ...mapActions('platforms', ['downloadAttachment'])
   }
 })
 export default class PlatformBasicData extends mixins(ExternalUrlLinkMixin) {
@@ -257,7 +254,6 @@ export default class PlatformBasicData extends mixins(ExternalUrlLinkMixin) {
   getEquipmentstatusByUri!: GetEquipmentstatusByUriGetter
   platformtypes!: VocabularyState['platformtypes']
   downloadAttachment!: DownloadAttachmentAction
-  proxyUrl!: ProxyUrlAction
 
   async mounted () {
     try {

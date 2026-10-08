@@ -136,7 +136,7 @@ export default class DeviceAttachmentAddPage extends mixins(CheckEditAccess, Att
   }
 
   async add () {
-    if (!(this.$refs.attachmentsForm as AttachmentCreateForm & { validateForm: () => boolean }).validateForm()) {
+    if (!await (this.$refs.attachmentsForm as AttachmentCreateForm).validateForm()) {
       return
     }
 

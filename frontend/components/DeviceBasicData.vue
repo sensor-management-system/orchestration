@@ -53,7 +53,6 @@ SPDX-License-Identifier: EUPL-1.2
         <AttachmentImagesCarousel
           :value="value.images"
           :download-attachment="downloadAttachment"
-          :proxy-url="proxyUrl"
         />
       </v-col>
     </v-row>
@@ -206,7 +205,6 @@ import QrCodeDialog from '@/components/QrCodeDialog.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 
 import { DownloadAttachmentAction } from '@/store/devices'
-import { ProxyUrlAction } from '@/store/proxy'
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
@@ -219,8 +217,7 @@ import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
     AttachmentImagesCarousel
   },
   methods: {
-    ...mapActions('devices', ['downloadAttachment']),
-    ...mapActions('proxy', ['proxyUrl'])
+    ...mapActions('devices', ['downloadAttachment'])
   }
 })
 export default class DeviceBasicData extends mixins(ExternalUrlLinkMixin) {
@@ -230,7 +227,6 @@ export default class DeviceBasicData extends mixins(ExternalUrlLinkMixin) {
 
   // vuex definition for typescript check
   downloadAttachment!: DownloadAttachmentAction
-  proxyUrl!: ProxyUrlAction
 
   @Prop({
     default: () => new Device(),

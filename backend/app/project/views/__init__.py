@@ -20,6 +20,6 @@ from .download_files import download_routes  # noqa: F401
 from .free_text_field_routes import free_text_field_routes  # noqa: F401
 from .generator_routes import generator_routes  # noqa: F401
 from .login import login_routes  # noqa: F401
-from .proxy import proxy_routes  # noqa: F401
+from .maintenance import maintenance_routes  # noqa: F401
 from .sensorml import sensor_ml_routes  # noqa: F401
 from .upload_files import upload_routes  # noqa: F401

@@ -43,7 +43,6 @@ ENV SMS_VERSION $SMS_VERSION_ARG
 
 ENV SHOW_RELEASE_NOTES true
 
-ENV NUXT_ENV_MAINTENANCE_DOCUMENT_URL https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-fzj-dev.md
 
 RUN mkdir /smsfrontend
 COPY ./frontend /smsfrontend
@@ -56,5 +55,4 @@ FROM nginx:alpine as webserver
 COPY --from=js-builder /smsfrontend/dist/ /usr/share/nginx/html
 COPY ./docker/build/nginx/fzj/dev/nginx.conf /etc/nginx/nginx.conf
 COPY ./docker/build/nginx/fzj/dev/default.conf /etc/nginx/conf.d/default.conf
-
 

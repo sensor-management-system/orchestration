@@ -122,6 +122,7 @@ import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
 import { Image, IAttachmentWithUrl } from '@/models/Image'
 import { Attachment, IAttachment } from '@/models/Attachment'
 import ImageNotAvailable from '@/components/shared/ImageNotAvailable.vue'
+import { fetchAttachmentImage, URL_IMAGE_ERROR } from '@/utils/attachmentImage'
 
 @Component({
   components: { ImageNotAvailable }
@@ -154,17 +155,11 @@ export default class AttachmentImagesForm extends Vue {
   })
   private downloadAttachment!: (attachmentUrl: string) => Promise<Blob>
 
-  @Prop({
-    required: true,
-    type: Function
-  })
-  private proxyUrl!: (attachmentUrl: string) => Promise<string>
-
   private urlsForAttachments: IAttachmentWithUrl[] = []
   private visibleImageIndex = 0
   private attachmentToAdd = null
   private fab = false
-  private attachmentErrors: {[idx: string]: boolean} = {}
+  private attachmentErrors: { [idx: string]: boolean } = {}
 
   @Watch('value', { immediate: true, deep: true })
   async setUrlsForAttachments () {
@@ -178,7 +173,7 @@ export default class AttachmentImagesForm extends Vue {
   // currently we are filtering images by relying on the extension
   get renderableAttachments (): Attachment[] {
     return this.attachments.filter(attachment =>
-      this.validImageExtensions.some(suffix =>
+      !attachment.isUpload || this.validImageExtensions.some(suffix =>
         attachment.url.toLowerCase().endsWith(`.${suffix.toLowerCase()}`)
       )
     )
@@ -203,14 +198,17 @@ export default class AttachmentImagesForm extends Vue {
     }
 
     try {
-      const url: string | null = attachment.isUpload
-        ? await this.downloadAttachment(attachment!.url).then(blob => window.URL.createObjectURL(blob))
-        : await this.proxyUrl(attachment.url)
+      const url = attachment.isUpload
+        ? await this.downloadAttachment(attachment.url).then(blob => window.URL.createObjectURL(blob))
+        : await fetchAttachmentImage(attachment.url)
       if (url) {
         this.urlsForAttachments.push({ attachment, url })
       }
     } catch (_) {
-      this.$store.commit('snackbar/setError', 'Downloading attachment failed')
+      this.setAttachmentError(attachment)
+      if (attachment.isUpload) {
+        this.$store.commit('snackbar/setError', 'Downloading attachment failed')
+      }
     }
   }
 
@@ -277,14 +275,27 @@ export default class AttachmentImagesForm extends Vue {
     this.$emit('input', value)
   }
 
-  setAttachmentError (attachment: Attachment) {
-    if (!attachment.id) { return }
+  setAttachmentError (attachment: IAttachment) {
+    if (!attachment?.id || this.attachmentErrors[attachment.id]) {
+      return
+    }
     Vue.set(this.attachmentErrors, attachment.id, true)
+    if (!attachment.isUpload) {
+      this.$store.commit('snackbar/setError', URL_IMAGE_ERROR)
+    }
   }
 
   hasAttachmentError (attachment: Attachment): boolean {
-    if (!attachment.id) { return true }
+    if (!attachment?.id) {
+      return true
+    }
     return this.attachmentErrors[attachment.id]
+  }
+
+  beforeDestroy () {
+    for (const entry of this.urlsForAttachments) {
+      window.URL.revokeObjectURL(entry.url)
+    }
   }
 
   setVisibleImageIndex (value: number) {

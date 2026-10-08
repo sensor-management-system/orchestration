@@ -75,7 +75,6 @@ SPDX-License-Identifier: EUPL-1.2
         <AttachmentImagesCarousel
           :value="value.images"
           :download-attachment="downloadAttachment"
-          :proxy-url="proxyUrl"
         />
       </v-col>
     </v-row>
@@ -162,7 +161,6 @@ import AttachmentImagesCarousel from '@/components/shared/AttachmentImagesCarous
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 
 import { DownloadAttachmentAction, SearchSitesAction, SitesState } from '@/store/sites'
-import { ProxyUrlAction } from '@/store/proxy'
 import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 @Component({
@@ -177,8 +175,7 @@ import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
     ...mapState('sites', ['sites'])
   },
   methods: {
-    ...mapActions('sites', ['searchSites', 'downloadAttachment']),
-    ...mapActions('proxy', ['proxyUrl'])
+    ...mapActions('sites', ['searchSites', 'downloadAttachment'])
   }
 })
 export default class SiteBasicData extends mixins(ExternalUrlLinkMixin) {
@@ -193,7 +190,6 @@ export default class SiteBasicData extends mixins(ExternalUrlLinkMixin) {
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction
   downloadAttachment!: DownloadAttachmentAction
-  proxyUrl!: ProxyUrlAction
 
   async mounted () {
     try {

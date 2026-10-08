@@ -108,7 +108,7 @@ export default class ReleaseNotes extends Vue {
 
   private amountOfOldReleasesToShow = this.initialAmountOfOlderReleases
 
-  async created () {
+  async mounted () {
     try {
       this.isLoading = true
       this.parsedReleaseNotes = await this.$api.releaseNotes.findAllReleases()

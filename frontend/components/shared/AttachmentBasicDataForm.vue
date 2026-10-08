@@ -28,6 +28,7 @@ SPDX-License-Identifier: EUPL-1.2
           type="url"
           placeholder="https://"
           :rules="value.isUpload ? [] : [rules.required, rules.validUrl]"
+          :error-messages="imageUrlError"
           :disabled="value.isUpload"
           @input="update('url', $event)"
         />
@@ -68,22 +69,52 @@ import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue
 
 import { Rules } from '@/mixins/Rules'
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
+import { fetchAttachmentImage, URL_IMAGE_ERROR } from '@/utils/attachmentImage'
 
 @Component({
   components: { AutocompleteTextInput }
 })
 export default class AttachmentBasicDataForm extends mixins(Rules, AttachmentsMixin) {
+  private imageUrlError = ''
+
   @Prop({
     required: true,
     type: Object
   })
   readonly value!: Attachment
 
-  validateForm (): boolean {
-    return (this.$refs.form as Vue & { validate: () => boolean }).validate()
+  @Prop({ required: true, type: Boolean })
+  readonly isUsedAsImage!: boolean
+
+  @Prop({ required: true, type: String })
+  readonly originalUrl!: string
+
+  async validateForm (): Promise<boolean> {
+    this.imageUrlError = ''
+    if (!(this.$refs.form as Vue & { validate: () => boolean }).validate()) {
+      return false
+    }
+    if (this.value.isUpload || !this.isUsedAsImage || this.value.url === this.originalUrl) {
+      return true
+    }
+    const url = this.value.url
+    try {
+      const objectUrl = await fetchAttachmentImage(url)
+      window.URL.revokeObjectURL(objectUrl)
+      return !this.value.isUpload && this.value.url === url
+    } catch (_) {
+      if (!this.value.isUpload && this.value.url === url) {
+        this.imageUrlError = URL_IMAGE_ERROR
+        this.$store.commit('snackbar/setError', URL_IMAGE_ERROR)
+      }
+      return false
+    }
   }
 
   update (key: string, value: any) {
+    if (key === 'url') {
+      this.imageUrlError = ''
+    }
     const newObj = Attachment.createFromObject(this.value)
 
     switch (key) {

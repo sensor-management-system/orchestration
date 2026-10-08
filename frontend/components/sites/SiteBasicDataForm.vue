@@ -212,7 +212,6 @@ SPDX-License-Identifier: EUPL-1.2
             :attachments="siteAttachments"
             :value="value.images"
             :download-attachment="downloadAttachment"
-            :proxy-url="proxyUrl"
             @input="update('images', $event)"
           />
         </v-col>
@@ -441,7 +440,6 @@ import { SiteUsage } from '@/models/SiteUsage'
 import { SiteType } from '@/models/SiteType'
 
 import { DownloadAttachmentAction, SearchSitesAction, SitesState } from '@/store/sites'
-import { ProxyUrlAction } from '@/store/proxy'
 import { VocabularyState } from '@/store/vocabulary'
 import { Image } from '@/models/Image'
 import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
@@ -466,8 +464,7 @@ type SiteTypeComboboxValue = SiteType | string | undefined
   },
   methods: {
     ...mapState('vocabulary', ['epsgCodes']),
-    ...mapActions('sites', ['searchSites', 'downloadAttachment']),
-    ...mapActions('proxy', ['proxyUrl'])
+    ...mapActions('sites', ['searchSites', 'downloadAttachment'])
   },
   computed: {
     ...mapState('sites', ['sites', 'siteAttachments'])
@@ -484,7 +481,6 @@ export default class SiteBasicDataForm extends mixins(Rules, ExternalUrlLinkMixi
   // vuex definition for typescript check
   siteAttachments!: SitesState['siteAttachments']
   downloadAttachment!: DownloadAttachmentAction
-  proxyUrl!: ProxyUrlAction
   epsgCodes!: VocabularyState['epsgCodes']
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction

@@ -43,6 +43,7 @@ SPDX-License-Identifier: EUPL-1.2
             required
             class="required"
             :rules="[rules.required, rules.validUrl]"
+            :error-messages="imageUrlError"
             @input="update('attachment.url', $event)"
           />
         </v-col>
@@ -96,11 +97,12 @@ import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue
 import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
+import { fetchAttachmentImage, URL_IMAGE_ERROR } from '@/utils/attachmentImage'
 
 export interface AttachmentCreationFormDTO {
   attachmentType: string
   attachment: Attachment
-  file: File|null
+  file: File | null
   imageWillBeCreated: Boolean
 }
 
@@ -109,6 +111,7 @@ export interface AttachmentCreationFormDTO {
 })
 export default class AttachmentCreateForm extends mixins(Rules, UploadRules, AttachmentsMixin) {
   private imageShouldBeCreatedExplicitChoice: boolean = true
+  private imageUrlError = ''
 
   @Prop({
     required: true,
@@ -126,8 +129,26 @@ export default class AttachmentCreateForm extends mixins(Rules, UploadRules, Att
     return mimeTypes
   }
 
-  validateForm (): boolean {
-    return (this.$refs.form as Vue & { validate: () => boolean }).validate()
+  async validateForm (): Promise<boolean> {
+    this.imageUrlError = ''
+    if (!(this.$refs.form as Vue & { validate: () => boolean }).validate()) {
+      return false
+    }
+    if (this.value.attachmentType !== 'url' || !this.value.imageWillBeCreated) {
+      return true
+    }
+    const url = this.value.attachment.url
+    try {
+      const objectUrl = await fetchAttachmentImage(url)
+      window.URL.revokeObjectURL(objectUrl)
+      return this.value.attachmentType === 'url' && this.value.attachment.url === url
+    } catch (_) {
+      if (this.value.attachmentType === 'url' && this.value.attachment.url === url) {
+        this.imageUrlError = URL_IMAGE_ERROR
+        this.$store.commit('snackbar/setError', URL_IMAGE_ERROR)
+      }
+      return false
+    }
   }
 
   resetValidation (): boolean {
@@ -141,7 +162,11 @@ export default class AttachmentCreateForm extends mixins(Rules, UploadRules, Att
       }
       return this.validImageExtensions.some(extension => value.file?.name.endsWith(extension))
     }
-    return this.validImageExtensions.some(extension => value.attachment.url.endsWith(extension)) && this.rules.validUrl(value.attachment.url) === true
+    if (this.rules.validUrl(value.attachment.url) !== true) {
+      return false
+    }
+    const path = new URL(value.attachment.url).pathname.toLowerCase()
+    return this.validImageExtensions.some(extension => path.endsWith(`.${extension.toLowerCase()}`))
   }
 
   get createImageHint (): string {
@@ -157,6 +182,9 @@ export default class AttachmentCreateForm extends mixins(Rules, UploadRules, Att
   }
 
   update (key: string, value: any) {
+    if (key === 'attachment.url' || key === 'attachmentType') {
+      this.imageUrlError = ''
+    }
     const newObj: AttachmentCreationFormDTO = {
       attachment: this.value.attachment,
       attachmentType: this.value.attachmentType,
