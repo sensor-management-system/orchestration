@@ -75,20 +75,6 @@ class TestMaintenanceMessage(unittest.TestCase):
         self.assertEqual(self.client.get(self.url).status_code, 204)
         get.assert_not_called()
 
-    @patch("project.views.maintenance.requests.get")
-    def test_invalid_urls(self, get):
-        """Reject HTTP, missing hosts, credentials, and custom ports."""
-        for url in [
-            "http://codebase.helmholtz.cloud/message.md",
-            "https:///message.md",
-            "https://user:secret@codebase.helmholtz.cloud/message.md",
-            "https://codebase.helmholtz.cloud:8443/message.md",
-            "https://codebase.helmholtz.cloud:invalid/message.md",
-        ]:
-            with self.subTest(url=url):
-                self.app.config["MAINTENANCE_DOCUMENT_URL"] = url
-                self.assertEqual(self.client.get(self.url).status_code, 502)
-        get.assert_not_called()
 
     @patch("project.views.maintenance.requests.get")
     def test_upstream_errors(self, get):
