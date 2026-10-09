@@ -396,7 +396,9 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(201)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(1)
         manufacturer_model = all_manufacturer_models[0]
@@ -436,7 +438,9 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(201)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(1)
         manufacturer_model = all_manufacturer_models[0]
@@ -477,7 +481,9 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(201)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(1)
         manufacturer_model = all_manufacturer_models[0]
@@ -591,7 +597,9 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(201)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
         self.expect(len).of(all_manufacturer_models).to_equal(1)
 
     @fixtures.use(["super_user"])
@@ -816,7 +824,9 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(1)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100 x")
@@ -865,7 +875,9 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(2)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100")
@@ -917,7 +929,9 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(2)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100")
@@ -971,7 +985,9 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(2)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100")
@@ -1028,7 +1044,9 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(2)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100")
@@ -1085,7 +1103,9 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(2)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100")
@@ -1127,7 +1147,9 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(201)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(1)
         manufacturer_model = all_manufacturer_models[0]
@@ -1167,7 +1189,9 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(201)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(1)
         manufacturer_model = all_manufacturer_models[0]
@@ -1207,7 +1231,9 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(201)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(1)
         manufacturer_model = all_manufacturer_models[0]
@@ -1326,7 +1352,9 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(201)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
         self.expect(len).of(all_manufacturer_models).to_equal(1)
 
     @fixtures.use(["super_user"])
@@ -1551,7 +1579,9 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(1)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100 x")
@@ -1600,7 +1630,9 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(2)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100")
@@ -1652,7 +1684,9 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(2)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100")
@@ -1706,7 +1740,9 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(2)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100")
@@ -1763,7 +1799,9 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(2)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100")
@@ -1820,7 +1858,9 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        all_manufacturer_models = db.session.query(ManufacturerModel).all()
+        all_manufacturer_models = (
+            db.session.query(ManufacturerModel).order_by(ManufacturerModel.id).all()
+        )
 
         self.expect(len).of(all_manufacturer_models).to_equal(2)
         self.expect(all_manufacturer_models[0].model).to_equal("SMT 100")

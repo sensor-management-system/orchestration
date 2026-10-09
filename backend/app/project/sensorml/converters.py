@@ -1992,7 +1992,9 @@ class SiteConverter:
         sml_component_list = []
 
         for inner_site in filter_visible(
-            db.session.query(Site).filter_by(outer_site_id=self.site.id)
+            db.session.query(Site)
+            .filter_by(outer_site_id=self.site.id)
+            .order_by(Site.label)
         ):
             sml_physical_system = SiteConverter(
                 inner_site, self.cv_url, self.url_lookup
@@ -2006,7 +2008,9 @@ class SiteConverter:
             sml_component_list.append(sml_component)
 
         for configuration in filter_visible(
-            db.session.query(Configuration).filter_by(site_id=self.site.id)
+            db.session.query(Configuration)
+            .filter_by(site_id=self.site.id)
+            .order_by(Configuration.label)
         ):
             sml_physical_system = ConfigurationConverter(
                 configuration, self.cv_url, self.url_lookup

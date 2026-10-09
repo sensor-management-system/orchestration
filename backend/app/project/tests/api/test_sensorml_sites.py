@@ -701,7 +701,10 @@ class TestSensorMLSite(BaseTestCase):
 
         self.assertEqual(len(sml_component_entries), 2)
 
-        sml_physical_system_public_config = sml_component_entries[0].find(
+        sml_physical_system_internal_config = sml_component_entries[0].find(
+            "{http://www.opengis.net/sensorml/2.0}PhysicalSystem"
+        )
+        sml_physical_system_public_config = sml_component_entries[1].find(
             "{http://www.opengis.net/sensorml/2.0}PhysicalSystem"
         )
         gml_id_public_config = sml_physical_system_public_config.attrib.get(
@@ -712,9 +715,6 @@ class TestSensorMLSite(BaseTestCase):
             gml_id_public_config, f"configuration_{public_configuration.id}"
         )
 
-        sml_physical_system_internal_config = sml_component_entries[1].find(
-            "{http://www.opengis.net/sensorml/2.0}PhysicalSystem"
-        )
         gml_id_internal_config = sml_physical_system_internal_config.attrib.get(
             "{http://www.opengis.net/gml/3.2}id"
         )
@@ -826,7 +826,11 @@ class TestSensorMLSite(BaseTestCase):
 
         self.assertEqual(len(sml_component_entries), 2)
 
-        sml_physical_system_public_config = sml_component_entries[0].find(
+        # Odering is alphabetically
+        sml_physical_system_internal_config = sml_component_entries[0].find(
+            "{http://www.opengis.net/sensorml/2.0}PhysicalSystem"
+        )
+        sml_physical_system_public_config = sml_component_entries[1].find(
             "{http://www.opengis.net/sensorml/2.0}PhysicalSystem"
         )
         gml_id_public_config = sml_physical_system_public_config.attrib.get(
@@ -835,9 +839,6 @@ class TestSensorMLSite(BaseTestCase):
 
         self.assertEqual(gml_id_public_config, f"site_{public_inner_site.id}")
 
-        sml_physical_system_internal_config = sml_component_entries[1].find(
-            "{http://www.opengis.net/sensorml/2.0}PhysicalSystem"
-        )
         gml_id_internal_config = sml_physical_system_internal_config.attrib.get(
             "{http://www.opengis.net/gml/3.2}id"
         )
