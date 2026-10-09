@@ -40,6 +40,26 @@ fake = Faker()
 test_file_path = os.path.abspath(os.path.dirname(__file__))
 
 
+def clear_all_tables():
+    """
+    Delete the content of all the tables of our models
+    and restarts the sequences for every test.
+    """
+    with db.engine.begin() as connection:
+        # turn off foreign key checks for the rollback (because of foreign key cycles)
+        connection.execute(text("SET LOCAL session_replication_role = replica"))
+        # delete rows
+        for table in db.metadata.sorted_tables:
+            connection.execute(table.delete())
+        # restart sequences
+        connection.execute(
+            text(
+                "SELECT setval(c.oid, 1, false) FROM pg_class c "
+                "JOIN pg_namespace n ON n.oid = c.relnamespace "
+                "WHERE c.relkind = 'S' AND n.nspname = current_schema()"
+            )
+        )
+
 def query_result_to_list(query_result):
     """
     Convert a query result to a list.
@@ -422,6 +442,8 @@ class ExpectMixin:
 class BaseTestCase(TestCase, ExpectMixin):
     """Base test case for all testing the code of our app."""
 
+    _schema_created = False
+
     def create_app(self):
         """
         Create the flask app - with test settings.
@@ -473,12 +495,18 @@ class BaseTestCase(TestCase, ExpectMixin):
         Clear the database & mock the authentification for all of our tests.
         :return: None
         """
-        db.drop_all()
-        # To make sure we have postgis ready.
-        db.session.connection().execute(text("create extension if not exists postgis"))
-        db.session.commit()
-        db.create_all()
-        db.session.commit()
+        if not BaseTestCase._schema_created:
+            # Rebuild the schema once per test process.
+            # Afterward, tearDown() clears the tables.
+            db.drop_all()
+            # To make sure we have postgis ready.
+            db.session.connection().execute(
+                text("create extension if not exists postgis")
+            )
+            db.session.commit()
+            db.create_all()
+            db.session.commit()
+            BaseTestCase._schema_created = True
 
         # We start every test without being logged in
         self.logout()
@@ -495,12 +523,12 @@ class BaseTestCase(TestCase, ExpectMixin):
         """
         Cleanup after the tests.
 
-        Drop all the content of the database & restore our
+        Delete all the content of the database & restore our
         authentication mechanism.
         :return:
         """
         db.session.remove()
-        db.drop_all()
+        clear_all_tables()
 
         self.logout()
         # To reduce the scope of the mqtt.publish mock.
