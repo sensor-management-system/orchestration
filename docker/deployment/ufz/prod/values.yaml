@@ -27,12 +27,12 @@ sms:
 
     nginx:
       image:
-        tag: "ufz-backend-1.29.1"
+        tag: "ufz-backend-1.30.0"
         securityContext: {}
 
     backend:
       image:
-        tag: "ufz-prod-1.29.1"
+        tag: "ufz-prod-1.30.0"
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -111,7 +111,7 @@ sms:
     enabled: true
     image:
       repository: "registry.hzdr.de/hub-terra/sms/orchestration/generic-frontend"
-      tag: "1.29.1"
+      tag: "1.30.0"
 
     imagePullSecrets:
       - name: custom-rdm-sms.docker-registry
