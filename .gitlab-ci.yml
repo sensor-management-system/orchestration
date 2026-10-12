@@ -33,7 +33,7 @@ send-notification:
     - gfz
     - shell
   variables:
-    SMS_VERSION: ${CI_COMMIT_REF}
+    SMS_VERSION: ${CI_COMMIT_SHA}
     #MATRIX_RELEASE_NOTIFICATION_HOOK: ${MATRIX_RELEASE_NOTIFICATION_HOOK}
   script:
     - |
