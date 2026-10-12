@@ -34,14 +34,14 @@ send-notification:
     - shell
   variables:
     SMS_VERSION: ${CI_COMMIT_REF}
-    MATRIX_RELEASE_NOTIFICATION_HOOK: ${MATRIX_RELEASE_NOTIFICATION_HOOK}
+    #MATRIX_RELEASE_NOTIFICATION_HOOK: ${MATRIX_RELEASE_NOTIFICATION_HOOK}
   script:
     - |
       echo curl \
         -X POST ${MATRIX_RELEASE_NOTIFICATION_HOOK} \
         -H "Content-Type: application/json" \
         -d "{\"html\":\"@room 🚀<h2>SMS version <u>$SMS_VERSION</u> launched right now!</h2>\"}"
-    - >
+    - |
       curl \
         -X POST ${MATRIX_RELEASE_NOTIFICATION_HOOK} \
         -H "Content-Type: application/json" \
