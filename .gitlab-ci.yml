@@ -36,7 +36,7 @@ send-notification:
     SMS_VERSION: ${CI_COMMIT_REF}
     MATRIX_RELEASE_NOTIFICATION_HOOK: ${MATRIX_RELEASE_NOTIFICATION_HOOK}
   script:
-    - >
+    - |
       echo curl \
         -X POST ${MATRIX_RELEASE_NOTIFICATION_HOOK} \
         -H "Content-Type: application/json" \
