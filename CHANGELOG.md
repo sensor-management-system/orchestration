@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.30.0 (Unreleased)
+## 1.30.1 (Unreleased)
+
+## 1.30.0 - 2026-10-12
 
 Added:
 - Release notifications for matrix ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/744))
