@@ -7,7 +7,12 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.30.1 (Unreleased)
+## 1.30.2 (Unreleased)
+
+## 1.30.1 - 2026-10-13
+
+Changed:
+- Fixed issue with GFZ Backup ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/771))
 
 ## 1.30.0 - 2026-10-12
 
