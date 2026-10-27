@@ -125,7 +125,7 @@ SPDX-License-Identifier: EUPL-1.2
         <v-row>
           <v-col cols="12" md="12">
             <v-textarea
-              :value="value.description"
+              :value="value.beginDescription"
               label="Description"
               rows="3"
               @input="update('beginDescription', $event)"

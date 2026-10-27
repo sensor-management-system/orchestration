@@ -9,11 +9,17 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.30.2 (Unreleased)
 
+Changed:
+
+- Updated the gfz nginx base to stable-alpine ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/780))
+
+Fixed:
+- Show the begin description when editing a static location action ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/781))
+
 ## 1.30.1 - 2026-10-13
 
 Changed:
 - Fixed issue with GFZ Backup ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/771))
-- Updated the gfz nginx base to stable-alpine ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/780))
 
 ## 1.30.0 - 2026-10-12
 
