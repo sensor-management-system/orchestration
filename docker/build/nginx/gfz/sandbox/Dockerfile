@@ -50,7 +50,7 @@ RUN sed -i 's/"version": ".*"/"version": "'"$SMS_VERSION"'"/' package.json
 RUN npm ci
 RUN npm run build
 
-FROM nginx:alpine as webserver
+FROM nginx:stable-alpine as webserver
 EXPOSE 80
 COPY --from=js-builder /smsfrontend/dist/ /usr/share/nginx/html
 COPY ./docker/build/nginx/gfz/sandbox/nginx.conf /etc/nginx/nginx.conf

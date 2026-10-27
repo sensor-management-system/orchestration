@@ -48,7 +48,7 @@ RUN sed -i 's/"version": ".*"/"version": "'"$SMS_VERSION"'"/' package.json
 RUN npm ci
 RUN npm run build
 
-FROM nginx:alpine as webserver
+FROM nginx:stable-alpine as webserver
 EXPOSE 443
 EXPOSE 8443
 COPY --from=js-builder /smsfrontend/dist/ /usr/share/nginx/html
