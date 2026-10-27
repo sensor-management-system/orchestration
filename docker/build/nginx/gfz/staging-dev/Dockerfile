@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 
-FROM nginx:alpine as webserver
+FROM nginx:stable-alpine as webserver
 # HTTPS for application, backend, cv and minio
 EXPOSE 3000
 # HTTP for Backend and CV
