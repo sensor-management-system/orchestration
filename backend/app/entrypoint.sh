@@ -34,4 +34,4 @@ do
     sleep 10
 done
 
-exec gunicorn --access-logfile - --workers=$WORKERS --bind 0.0.0.0:5000 manage:app
+exec gunicorn --access-logfile - --workers=$WORKERS --bind 0.0.0.0:5000 manage:app --timeout 60

@@ -12,6 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 Changed:
 
 - Updated the gfz nginx base to stable-alpine ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/780))
+- Increased timeout for the gunicorn ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/782))
 
 Fixed:
 - Show the begin description when editing a static location action ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/781))
