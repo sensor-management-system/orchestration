@@ -79,6 +79,7 @@ class PlatformMountActionSchema(Schema):
         type_="configuration",
         id_field="id",
     )
+    begin_contact_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     begin_contact = Relationship(
         attribute="begin_contact",
         related_view="api.contact_detail",
@@ -88,6 +89,7 @@ class PlatformMountActionSchema(Schema):
         type_="contact",
         id_field="id",
     )
+    end_contact_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     end_contact = Relationship(
         attribute="end_contact",
         related_view="api.contact_detail",
@@ -196,6 +198,7 @@ class DeviceMountActionSchema(Schema):
         type_="configuration",
         id_field="id",
     )
+    begin_contact_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     begin_contact = Relationship(
         attribute="begin_contact",
         related_view="api.contact_detail",
@@ -205,6 +208,7 @@ class DeviceMountActionSchema(Schema):
         type_="contact",
         id_field="id",
     )
+    end_contact_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     end_contact = Relationship(
         attribute="end_contact",
         related_view="api.contact_detail",

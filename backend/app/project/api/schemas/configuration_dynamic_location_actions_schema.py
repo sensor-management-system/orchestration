@@ -38,6 +38,7 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
     elevation_datum_name = fields.Str(allow_none=True)
     elevation_datum_uri = fields.Str(allow_none=True)
 
+    begin_contact_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     begin_contact = Relationship(
         attribute="begin_contact",
         related_view="api.contact_detail",
@@ -47,6 +48,7 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
         type_="contact",
         id_field="id",
     )
+    end_contact_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     end_contact = Relationship(
         attribute="end_contact",
         related_view="api.contact_detail",
