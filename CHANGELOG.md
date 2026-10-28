@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.30.2 (Unreleased)
 
+Added:
+- Option to filter more actions for contact ids ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/783))
+
 Changed:
 
 - Updated the gfz nginx base to stable-alpine ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/780))
