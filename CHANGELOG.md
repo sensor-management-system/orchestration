@@ -16,6 +16,7 @@ Changed:
 
 - Updated the gfz nginx base to stable-alpine ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/780))
 - Increased timeout for the gunicorn ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/782))
+- Increased memory limits for the elasicsearch at GFZ ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/785))
 
 Fixed:
 - Show the begin description when editing a static location action ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/781))
