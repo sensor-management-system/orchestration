@@ -27,7 +27,7 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true"
+      - "ES_JAVA_OPTS=-Xms768m -Xmx768m -Dlog4j2.formatMsgNoLookups=true"
       - cluster.routing.allocation.disk.threshold_enabled=false
     ulimits:
       memlock:
