@@ -18,7 +18,7 @@ import { PermissionGroup, IPermissionGroup, IPermissionableSingleGroup } from '@
 import { Visibility, IVisible } from '@/models/Visibility'
 import { Parameter, IParameter } from '@/models/Parameter'
 
-export type ConfigurationStatus = 'draft' | 'active' | 'deprecated'
+export type ConfigurationStatus = 'in preparation' | 'active' | 'completed'
 
 export interface IConfiguration extends IMountActions, IPermissionableSingleGroup {
   id: string
@@ -145,20 +145,20 @@ export class Configuration implements IConfiguration, IVisible {
   getConfigurationStatus (date: DateTime): ConfigurationStatus {
     if (!this._startDate) {
       if (!this._endDate) {
-        return 'draft'
+        return 'in preparation'
       }
       if (this._endDate > date) {
         return 'active'
       }
-      return 'deprecated'
+      return 'completed'
     }
     if (this._startDate > date) {
-      return 'draft'
+      return 'in preparation'
     }
     if (!this._endDate || this._endDate > date) {
       return 'active'
     }
-    return 'deprecated'
+    return 'completed'
   }
 
   get contacts (): IContact[] {

@@ -34,7 +34,7 @@ describe('Configuration', () => {
         57 // second
       )
       const configuration = new Configuration()
-      expect(configuration.getConfigurationStatus(date)).toEqual('draft')
+      expect(configuration.getConfigurationStatus(date)).toEqual('in preparation')
     })
     it('should return draft if the start date is after the test date', () => {
       const date = DateTime.utc(
@@ -55,7 +55,7 @@ describe('Configuration', () => {
       )
       const configuration = new Configuration()
       configuration.startDate = startDate
-      expect(configuration.getConfigurationStatus(date)).toEqual('draft')
+      expect(configuration.getConfigurationStatus(date)).toEqual('in preparation')
     })
     it('should return active if the start date is before the test date', () => {
       const date = DateTime.utc(
@@ -136,7 +136,7 @@ describe('Configuration', () => {
       const configuration = new Configuration()
       configuration.startDate = startDate
       configuration.endDate = endDate
-      expect(configuration.getConfigurationStatus(date)).toEqual('deprecated')
+      expect(configuration.getConfigurationStatus(date)).toEqual('completed')
     })
     it('should return deprecated if there is only an end date in the past', () => {
       const date = DateTime.utc(
@@ -157,7 +157,7 @@ describe('Configuration', () => {
       )
       const configuration = new Configuration()
       configuration.endDate = endDate
-      expect(configuration.getConfigurationStatus(date)).toEqual('deprecated')
+      expect(configuration.getConfigurationStatus(date)).toEqual('completed')
     })
     it('should return active if there is only an end date in the future', () => {
       const date = DateTime.utc(
