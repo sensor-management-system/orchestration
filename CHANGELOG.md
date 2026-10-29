@@ -7,13 +7,14 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.30.2 (Unreleased)
+## 1.30.3 (Unreleased)
+
+## 1.30.2 - 2026-10-29
 
 Added:
 - Option to filter more actions for contact ids ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/783))
 
 Changed:
-
 - Updated the gfz nginx base to stable-alpine ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/780))
 - Increased timeout for the gunicorn ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/782))
 - Increased memory limits for the elasicsearch at GFZ ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/785))
