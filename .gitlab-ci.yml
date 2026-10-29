@@ -65,7 +65,7 @@ build-backend-test-image:
     - echo "ENV HTTP_ORIGINS" $HTTP_ORIGINS >> $CI_PROJECT_DIR/backend/Dockerfile.ci
     - echo "ENV OIDC_USERNAME_CLAIM" $OIDC_USERNAME_CLAIM >> $CI_PROJECT_DIR/backend/Dockerfile.ci
     - echo "ENV CV_URL https://webapp-stage.intranet.ufz.de/sms/cv/api/v1" >> $CI_PROJECT_DIR/backend/Dockerfile.ci
-    - docker build --tag $BACKEND_TEST_IMAGE backend
+    - docker build --pull --tag $BACKEND_TEST_IMAGE backend
     - docker push $BACKEND_TEST_IMAGE
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -309,12 +309,12 @@ build-deploy-image-nginx-gfz-fzj-staging:
     CLIENT_ID_FZJ: ${FZJ_STAGING_HIFIS_OIDC_CLIENT_ID}
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID_GFZ \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
           .
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:fzj-latest" -f docker/build/nginx/fzj/staging/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/nginx:fzj-latest" -f docker/build/nginx/fzj/staging/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID_FZJ \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
@@ -339,7 +339,7 @@ build-deploy-image-nginx-fzj-dev:
     CLIENT_ID: ${FZJ_DEV_HIFIS_OIDC_CLIENT_ID}
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:fzj-dev-latest" -f docker/build/nginx/fzj/dev/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/nginx:fzj-dev-latest" -f docker/build/nginx/fzj/dev/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
@@ -364,7 +364,7 @@ build-deploy-image-nginx-gfz-sandbox:
     CLIENT_ID: ${GFZ_SANDBOX_HIFIS_OIDC_CLIENT_ID}
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-sandbox-latest" -f docker/build/nginx/gfz/sandbox/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/nginx:gfz-sandbox-latest" -f docker/build/nginx/gfz/sandbox/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
@@ -390,7 +390,7 @@ build-deploy-image-nginx-gfz-prod:
     CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-prod-latest}" -f docker/build/nginx/gfz/prod/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-prod-latest}" -f docker/build/nginx/gfz/prod/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
@@ -415,7 +415,7 @@ build-deploy-image-nginx-fzj-prod:
     CLIENT_ID: ${FZJ_PROD_HIFIS_OIDC_CLIENT_ID}
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:fzj-prod-latest" -f docker/build/nginx/fzj/prod/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/nginx:fzj-prod-latest" -f docker/build/nginx/fzj/prod/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
@@ -437,7 +437,7 @@ build-deploy-image-nginx-ufz-staging:
   stage: build
   extends: .docker_build
   script:
-    - docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" --build-arg SMS_VERSION_ARG=${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA} -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
+    - docker build --pull --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" --build-arg SMS_VERSION_ARG=${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA} -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
     - docker push "$CI_REGISTRY_IMAGE/nginx:ufz-latest"
   allow_failure: true
   rules:
@@ -453,7 +453,7 @@ build-deploy-image-backend-gfz-fzj-kit-staging:
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-latest" --tag "$CI_REGISTRY_IMAGE/backend:fzj-staging-latest" --tag "$CI_REGISTRY_IMAGE/backend:fzj-dev-latest" --tag "$CI_REGISTRY_IMAGE/backend:kit-staging-latest" -f backend/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/backend:gfz-latest" --tag "$CI_REGISTRY_IMAGE/backend:fzj-staging-latest" --tag "$CI_REGISTRY_IMAGE/backend:fzj-dev-latest" --tag "$CI_REGISTRY_IMAGE/backend:kit-staging-latest" -f backend/Dockerfile \
           backend
     - docker push --all-tags "$CI_REGISTRY_IMAGE/backend"
   rules:
@@ -469,7 +469,7 @@ build-deploy-image-backend-fzj-prod:
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:fzj-prod-latest"  -f backend/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/backend:fzj-prod-latest"  -f backend/Dockerfile \
           backend
     - docker push "$CI_REGISTRY_IMAGE/backend:fzj-prod-latest"
   rules:
@@ -485,7 +485,7 @@ build-deploy-image-backend-gfz-kit-prod:
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-${CI_COMMIT_TAG:-prod-latest}" --tag "$CI_REGISTRY_IMAGE/backend:gfz-sandbox-latest" --tag "$CI_REGISTRY_IMAGE/backend:kit-${CI_COMMIT_TAG:-prod-latest}" -f backend/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/backend:gfz-${CI_COMMIT_TAG:-prod-latest}" --tag "$CI_REGISTRY_IMAGE/backend:gfz-sandbox-latest" --tag "$CI_REGISTRY_IMAGE/backend:kit-${CI_COMMIT_TAG:-prod-latest}" -f backend/Dockerfile \
           backend
     - docker push --all-tags "$CI_REGISTRY_IMAGE/backend"
   rules:
@@ -501,7 +501,7 @@ build-deploy-image-mc-gfz-staging:
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/mc:gfz-latest" -f docker/build/mc/gfz/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/mc:gfz-latest" -f docker/build/mc/gfz/Dockerfile \
           docker/build/mc/gfz
     - docker push "$CI_REGISTRY_IMAGE/mc:gfz-latest"
   rules:
@@ -517,7 +517,7 @@ build-deploy-image-mc-fzj-staging:
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/mc:fzj-staging-latest" -f docker/build/mc/fzj/staging/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/mc:fzj-staging-latest" -f docker/build/mc/fzj/staging/Dockerfile \
           docker/build/mc/fzj/staging
     - docker push "$CI_REGISTRY_IMAGE/mc:fzj-staging-latest"
   rules:
@@ -533,7 +533,7 @@ build-deploy-image-mc-fzj-dev:
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/mc:fzj-dev-latest" -f docker/build/mc/fzj/dev/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/mc:fzj-dev-latest" -f docker/build/mc/fzj/dev/Dockerfile \
           docker/build/mc/fzj/dev
     - docker push "$CI_REGISTRY_IMAGE/mc:fzj-dev-latest"
   rules:
@@ -549,7 +549,7 @@ build-deploy-image-mc-fzj-prod:
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/mc:fzj-prod-latest" -f docker/build/mc/fzj/prod/Dockerfile \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/mc:fzj-prod-latest" -f docker/build/mc/fzj/prod/Dockerfile \
           docker/build/mc/fzj/prod
     - docker push "$CI_REGISTRY_IMAGE/mc:fzj-prod-latest"
   rules:
@@ -563,7 +563,7 @@ build-deploy-image-mc-gfz-prod:
   extends: .docker_build
   script:
     - |
-        docker build \
+        docker build --pull \
           --tag "$CI_REGISTRY_IMAGE/mc:gfz-${CI_COMMIT_TAG}" \
           --tag "$CI_REGISTRY_IMAGE/mc:gfz-prod-latest" \
           --tag "$CI_REGISTRY_IMAGE/mc:gfz-sandbox-latest" \
@@ -581,7 +581,7 @@ build-deploy-image-mq-init-gfz-sandbox:
   extends: .docker_build
   script:
     - |
-        docker build \
+        docker build --pull \
           --tag "$CI_REGISTRY_IMAGE/mq_init:gfz-${CI_COMMIT_TAG}" \
           --tag "$CI_REGISTRY_IMAGE/mq_init:gfz-sandbox-latest" \
           -f docker/build/mq_init/gfz/Dockerfile \
@@ -598,7 +598,7 @@ build-deploy-image-mq-db-gfz-sandbox:
   extends: .docker_build
   script:
     - |
-        docker build \
+        docker build --pull \
           --tag "$CI_REGISTRY_IMAGE/mq_db:gfz-${CI_COMMIT_TAG}" \
           --tag "$CI_REGISTRY_IMAGE/mq_db:gfz-sandbox-latest" \
           -f docker/build/mq_db/gfz/Dockerfile \
@@ -615,7 +615,7 @@ build-deploy-image-mq-staging:
   extends: .docker_build
   script:
     - |
-        docker build \
+        docker build --pull \
           --tag "$CI_REGISTRY_IMAGE/mq:latest" \
           mq
     - docker push --all-tags "$CI_REGISTRY_IMAGE/mq"
@@ -632,7 +632,7 @@ build-deploy-image-mq-prod:
   extends: .docker_build
   script:
     - |
-        docker build \
+        docker build --pull \
           --tag "$CI_REGISTRY_IMAGE/mq:${CI_COMMIT_TAG}" \
           --tag "$CI_REGISTRY_IMAGE/mq:latest" \
           --tag "$CI_REGISTRY_IMAGE/mq:gfz-sandbox-latest" \
@@ -958,7 +958,7 @@ build-ufz-backend-image-staging:
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then        
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-staging-latest" -f backend/docker/deployment/ufz/Dockerfile_Stage \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/backend:ufz-staging-latest" -f backend/docker/deployment/ufz/Dockerfile_Stage \
                         --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
                         --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
                         --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
@@ -968,7 +968,7 @@ build-ufz-backend-image-staging:
                       .
         docker push "$CI_REGISTRY_IMAGE/backend:ufz-staging-latest"
       else
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-staging-$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Stage \
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/backend:ufz-staging-$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Stage \
                 --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
                 --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
                 --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
@@ -992,7 +992,7 @@ build-ufz-backend-image-prod:
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
   script:
     - |
-      docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-prod-$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Prod \
+      docker build --pull --tag "$CI_REGISTRY_IMAGE/backend:ufz-prod-$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Prod \
         --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
         --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
         --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
@@ -1009,10 +1009,10 @@ build-ufz-backend-nginx-image:
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
         docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest"
       else
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
         docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest"
         docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-$CI_COMMIT_TAG"
       fi
@@ -1028,10 +1028,10 @@ build-ufz-orchestration-nginx-image:
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
         docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest"
       else
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
+        docker build --pull --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
         docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest"
         docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-$CI_COMMIT_TAG"
       fi
@@ -1051,7 +1051,7 @@ build-generic-frontend-image-latest:
   extends: .docker_build
   script:
     - |
-      docker build --tag "$CI_REGISTRY_IMAGE/generic-frontend:latest" -f frontend/docker/generic-image/Dockerfile \
+      docker build --pull --tag "$CI_REGISTRY_IMAGE/generic-frontend:latest" -f frontend/docker/generic-image/Dockerfile \
         --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
         .
     - docker push "$CI_REGISTRY_IMAGE/generic-frontend:latest"
@@ -1072,7 +1072,7 @@ build-generic-frontend-image-versioned:
   extends: .docker_build
   script:
     - |
-      docker build --tag "$CI_REGISTRY_IMAGE/generic-frontend:$CI_COMMIT_TAG" -f frontend/docker/generic-image/Dockerfile \
+      docker build --pull --tag "$CI_REGISTRY_IMAGE/generic-frontend:$CI_COMMIT_TAG" -f frontend/docker/generic-image/Dockerfile \
         --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
         .
     - docker push "$CI_REGISTRY_IMAGE/generic-frontend:$CI_COMMIT_TAG"

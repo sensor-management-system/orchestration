@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.30.3 (Unreleased)
 
+Changed:
+- Ensure to pull for the base images on the build steps ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/784))
+
 ## 1.30.2 - 2026-10-29
 
 Added:
