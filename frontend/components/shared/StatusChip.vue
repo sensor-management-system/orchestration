@@ -56,8 +56,8 @@ export default class StatusChip extends Vue {
 
     // for configurations
     active: 'green',
-    deprecated: 'red',
-    draft: 'blue'
+    completed: 'brown',
+    'in preparation': 'blue'
   }
 
   get color (): string {

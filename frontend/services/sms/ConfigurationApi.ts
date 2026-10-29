@@ -365,7 +365,7 @@ export class ConfigurationApi {
     const now = DateTime.utc()
     const orFilterList = []
     for (const searchState of this.searchedStates) {
-      if (searchState === 'draft') {
+      if (searchState === 'in preparation') {
         orFilterList.push({
           or: [
             {

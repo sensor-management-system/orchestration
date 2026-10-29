@@ -131,7 +131,7 @@ const state = (): ConfigurationsState => ({
   configurations: [],
   configuration: null,
   configurationContactRoles: [],
-  configurationStates: ['draft', 'active', 'deprecated'],
+  configurationStates: ['in preparation', 'active', 'completed'],
   projects: [],
   campaigns: [],
   configurationMountingActions: [],
