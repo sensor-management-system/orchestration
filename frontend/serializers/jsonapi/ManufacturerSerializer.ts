@@ -9,17 +9,14 @@
  */
 import { Manufacturer } from '@/models/Manufacturer'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class ManufacturerSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Manufacturer[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class ManufacturerSerializer extends AbstractSerializer<Manufacturer> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Manufacturer {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -29,6 +26,7 @@ export class ManufacturerSerializer {
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
     const url = jsonApiData.links?.self || ''
+    const status = jsonApiData.attributes.status || ''
     let globalProvenanceId = null
 
     if (jsonApiData.relationships?.global_provenance?.data) {
@@ -47,7 +45,8 @@ export class ManufacturerSerializer {
       category,
       note,
       uri: url,
-      globalProvenanceId
+      globalProvenanceId,
+      status
     })
   }
 
@@ -59,6 +58,8 @@ export class ManufacturerSerializer {
       provenance_uri: manufacturer.provenanceUri,
       category: manufacturer.category,
       note: manufacturer.note
+      // When we post the entry, we don't send the status.
+      // (Status will be pending by default).
     }
 
     const relationships: any = {}

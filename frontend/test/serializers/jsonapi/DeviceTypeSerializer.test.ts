@@ -76,7 +76,8 @@ describe('DeviceTypeSerializer', () => {
         note: '',
         category: 'Communications component',
         globalProvenanceId: null,
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttypes/1/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttypes/1/',
+        status: 'Accepted'
 
       })
       const expectedDeviceType2 = DeviceType.createFromObject({
@@ -88,7 +89,8 @@ describe('DeviceTypeSerializer', () => {
         provenanceUri: 'abc',
         note: 'simple note',
         globalProvenanceId: '1',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttypes/2/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttypes/2/',
+        status: 'Accepted'
       })
 
       const serializer = new DeviceTypeSerializer()
@@ -112,7 +114,8 @@ describe('DeviceTypeSerializer', () => {
         provenanceUri: 'abc',
         note: 'simple note',
         globalProvenanceId: '1',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttypes/2/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmenttypes/2/',
+        status: 'Accepted'
       })
 
       const expectedResult = {

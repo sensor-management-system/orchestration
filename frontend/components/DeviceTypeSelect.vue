@@ -76,7 +76,13 @@ export default class DeviceTypeSelect extends Vue {
    * fetches a list of DeviceTypes
    */
   get findAllDeviceTypes (): DeviceTypeLoaderFunction {
-    return () => { return this.$api.deviceTypes.findAll() }
+    return () => {
+      let currentUserEMail: string | null = null
+      if (this.$auth.user) {
+        currentUserEMail = this.$auth.user.email as string
+      }
+      return this.$api.deviceTypes.findAll(currentUserEMail)
+    }
   }
 
   /**

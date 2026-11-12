@@ -191,12 +191,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 <script lang="ts">
 import { Component, mixins, Prop } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 import { Device } from '@/models/Device'
-import { DeviceType } from '@/models/DeviceType'
-import { Status } from '@/models/Status'
-import { Manufacturer } from '@/models/Manufacturer'
 
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 import PidTooltip from '@/components/shared/PidTooltip.vue'
@@ -205,6 +202,7 @@ import QrCodeDialog from '@/components/QrCodeDialog.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 
 import { DownloadAttachmentAction } from '@/store/devices'
+import { LoadDevicetypesAction, LoadEquipmentstatusAction, LoadManufacturersAction, VocabularyState } from '@/store/vocabulary'
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
@@ -216,17 +214,23 @@ import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
     VisibilityChip,
     AttachmentImagesCarousel
   },
+  computed: {
+    ...mapState('vocabulary', ['devicetypes', 'equipmentstatus', 'manufacturers'])
+  },
   methods: {
-    ...mapActions('devices', ['downloadAttachment'])
+    ...mapActions('devices', ['downloadAttachment']),
+    ...mapActions('vocabulary', ['loadDevicetypes', 'loadEquipmentstatus', 'loadManufacturers'])
   }
 })
 export default class DeviceBasicData extends mixins(ExternalUrlLinkMixin) {
-  private states: Status[] = []
-  private manufacturers: Manufacturer[] = []
-  private deviceTypes: DeviceType[] = []
-
   // vuex definition for typescript check
+  devicetypes!: VocabularyState['devicetypes']
+  equipmentstatus!: VocabularyState['equipmentstatus']
+  manufacturers!: VocabularyState['manufacturers']
   downloadAttachment!: DownloadAttachmentAction
+  loadDevicetypes!: LoadDevicetypesAction
+  loadEquipmentstatus!: LoadEquipmentstatusAction
+  loadManufacturers!: LoadManufacturersAction
 
   @Prop({
     default: () => new Device(),
@@ -235,22 +239,16 @@ export default class DeviceBasicData extends mixins(ExternalUrlLinkMixin) {
   })
   readonly value!: Device
 
-  mounted () {
-    this.$api.states.findAllPaginated().then((foundStates) => {
-      this.states = foundStates
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of states failed')
-    })
-    this.$api.manufacturer.findAllPaginated().then((foundManufacturers) => {
-      this.manufacturers = foundManufacturers
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
-    })
-    this.$api.deviceTypes.findAllPaginated().then((foundDeviceTypes) => {
-      this.deviceTypes = foundDeviceTypes
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of device types failed')
-    })
+  async mounted () {
+    try {
+      await Promise.all([
+        this.loadEquipmentstatus(),
+        this.loadManufacturers(),
+        this.loadDevicetypes()
+      ])
+    } catch {
+      this.$store.commit('snackbar/setError', 'Loading of controlled vocabulary failed')
+    }
   }
 
   get manufacturerNames (): string[] {
@@ -258,11 +256,11 @@ export default class DeviceBasicData extends mixins(ExternalUrlLinkMixin) {
   }
 
   get statusNames (): string[] {
-    return this.states.map(s => s.name)
+    return this.equipmentstatus.map(s => s.name)
   }
 
   get deviceTypeNames (): string[] {
-    return this.deviceTypes.map(t => t.name)
+    return this.devicetypes.map(t => t.name)
   }
 
   get deviceManufacturerName (): string {
@@ -282,33 +280,33 @@ export default class DeviceBasicData extends mixins(ExternalUrlLinkMixin) {
   }
 
   get deviceStatusName (): string {
-    const statusIndex = this.states.findIndex(s => s.uri === this.value.statusUri)
+    const statusIndex = this.equipmentstatus.findIndex(s => s.uri === this.value.statusUri)
     if (statusIndex > -1) {
-      return this.states[statusIndex].name
+      return this.equipmentstatus[statusIndex].name
     }
     return this.value.statusName
   }
 
   get deviceStatusDefinition (): string {
-    const statusIndex = this.states.findIndex(s => s.uri === this.value.statusUri)
+    const statusIndex = this.equipmentstatus.findIndex(s => s.uri === this.value.statusUri)
     if (statusIndex > -1) {
-      return this.states[statusIndex].definition
+      return this.equipmentstatus[statusIndex].definition
     }
     return ''
   }
 
   get deviceTypeName (): string {
-    const deviceTypeIndex = this.deviceTypes.findIndex(t => t.uri === this.value.deviceTypeUri)
+    const deviceTypeIndex = this.devicetypes.findIndex(t => t.uri === this.value.deviceTypeUri)
     if (deviceTypeIndex > -1) {
-      return this.deviceTypes[deviceTypeIndex].name
+      return this.devicetypes[deviceTypeIndex].name
     }
     return this.value.deviceTypeName
   }
 
   get deviceTypeDefinition (): string {
-    const deviceTypeIndex = this.deviceTypes.findIndex(t => t.uri === this.value.deviceTypeUri)
+    const deviceTypeIndex = this.devicetypes.findIndex(t => t.uri === this.value.deviceTypeUri)
     if (deviceTypeIndex > -1) {
-      return this.deviceTypes[deviceTypeIndex].definition
+      return this.devicetypes[deviceTypeIndex].definition
     }
     return ''
   }

@@ -76,7 +76,8 @@ describe('CompartmentSerializer', () => {
         note: '',
         provenance: 'Originally from PetDB. Syntax modified to remove underscores.',
         provenanceUri: '',
-        globalProvenanceId: null
+        globalProvenanceId: null,
+        status: 'ACCEPTED'
       })
       const expectedCompartment2 = Compartment.createFromObject({
         id: '2',
@@ -87,7 +88,8 @@ describe('CompartmentSerializer', () => {
         note: 'note',
         provenance: 'Originally from CUAHSI HIS GeneralCategoryCV. See http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=GeneralCategoryCV.',
         provenanceUri: 'uri',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'ACCEPTED'
       })
 
       const serializer = new CompartmentSerializer()
@@ -111,7 +113,8 @@ describe('CompartmentSerializer', () => {
         note: 'note',
         provenance: 'Originally from CUAHSI HIS GeneralCategoryCV. See http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=GeneralCategoryCV.',
         provenanceUri: 'uri',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'ACCEPTED'
       })
 
       const expectedResult = {

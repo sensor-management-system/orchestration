@@ -11,18 +11,15 @@
  */
 import { SiteType } from '@/models/SiteType'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetailsDataDict,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class SiteTypeSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): SiteType[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class SiteTypeSerializer extends AbstractSerializer<SiteType> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): SiteType {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -32,6 +29,7 @@ export class SiteTypeSerializer {
     const provenanceUri = jsonApiData.attributes.provenance_uri || ''
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
+    const status = jsonApiData.attributes.status || ''
 
     const siteUsageId = (jsonApiData.relationships && jsonApiData.relationships.site_usage && (jsonApiData.relationships.site_usage as IJsonApiEntityWithoutDetailsDataDict).data.id) || null
 
@@ -54,7 +52,8 @@ export class SiteTypeSerializer {
       note,
       uri: url,
       globalProvenanceId,
-      siteUsageId
+      siteUsageId,
+      status
     })
   }
 

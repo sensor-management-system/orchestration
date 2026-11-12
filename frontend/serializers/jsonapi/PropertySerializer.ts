@@ -9,18 +9,15 @@
  */
 import { Property } from '@/models/Property'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetailsDataDict,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class PropertySerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Property[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class PropertySerializer extends AbstractSerializer<Property> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Property {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -32,6 +29,7 @@ export class PropertySerializer {
     const note = jsonApiData.attributes.note || ''
     const samplingMediaId = (jsonApiData.relationships && jsonApiData.relationships.sampling_media && (jsonApiData.relationships.sampling_media as IJsonApiEntityWithoutDetailsDataDict).data.id) || null
     const aggregationTypeId = (jsonApiData.relationships && jsonApiData.relationships.aggregation_type && (jsonApiData.relationships.aggregation_type as IJsonApiEntityWithoutDetailsDataDict).data.id) || null
+    const status = jsonApiData.attributes.status || ''
 
     let globalProvenanceId = null
 
@@ -53,7 +51,8 @@ export class PropertySerializer {
       uri: url,
       globalProvenanceId,
       samplingMediaId,
-      aggregationTypeId
+      aggregationTypeId,
+      status
     })
   }
 

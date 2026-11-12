@@ -11,17 +11,14 @@
  */
 import { SiteUsage } from '@/models/SiteUsage'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class SiteUsageSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): SiteUsage[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class SiteUsageSerializer extends AbstractSerializer<SiteUsage> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): SiteUsage {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -31,6 +28,7 @@ export class SiteUsageSerializer {
     const provenanceUri = jsonApiData.attributes.provenance_uri || ''
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
+    const status = jsonApiData.attributes.status || ''
 
     let globalProvenanceId = null
 
@@ -50,7 +48,8 @@ export class SiteUsageSerializer {
       category,
       note,
       uri: url,
-      globalProvenanceId
+      globalProvenanceId,
+      status
     })
   }
 

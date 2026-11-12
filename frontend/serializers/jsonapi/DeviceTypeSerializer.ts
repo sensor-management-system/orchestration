@@ -9,17 +9,14 @@
  */
 import { DeviceType } from '@/models/DeviceType'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class DeviceTypeSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): DeviceType[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class DeviceTypeSerializer extends AbstractSerializer<DeviceType> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): DeviceType {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -29,6 +26,7 @@ export class DeviceTypeSerializer {
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
     const url = jsonApiData.links?.self || ''
+    const status = jsonApiData.attributes.status || ''
 
     let globalProvenanceId = null
 
@@ -47,7 +45,8 @@ export class DeviceTypeSerializer {
       category,
       note,
       uri: url,
-      globalProvenanceId
+      globalProvenanceId,
+      status
     })
   }
 

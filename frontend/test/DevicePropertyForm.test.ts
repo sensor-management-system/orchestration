@@ -116,7 +116,8 @@ describe('DevicePropertyForm', () => {
             category: '',
             definition: '',
             globalProvenanceId: '1',
-            note: ''
+            note: '',
+            status: 'Accepted'
           }),
           AggregationType.createFromObject({
             uri: 'https://foo/aggregationtypes/2',
@@ -127,7 +128,8 @@ describe('DevicePropertyForm', () => {
             category: '',
             definition: '',
             globalProvenanceId: '1',
-            note: ''
+            note: '',
+            status: 'Accepted'
           })
         ]
       }

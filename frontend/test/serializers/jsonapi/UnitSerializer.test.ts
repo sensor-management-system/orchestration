@@ -83,7 +83,8 @@ describe('UnitSerializer', () => {
         provenanceTerm: '1/m',
         provenanceUri: '',
         ucumCaseSensitiveSymbol: 'One/m',
-        globalProvenanceId: null
+        globalProvenanceId: null,
+        status: 'ACCEPTED'
       })
 
       const expectedUnit2 = Unit.createFromObject({
@@ -97,7 +98,8 @@ describe('UnitSerializer', () => {
         provenanceTerm: '',
         provenanceUri: 'uri',
         ucumCaseSensitiveSymbol: '',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'ACCEPTED'
       })
 
       const serializer = new UnitSerializer()
@@ -123,7 +125,8 @@ describe('UnitSerializer', () => {
         provenanceUri: 'uri',
         provenanceTerm: '1/t',
         ucumCaseSensitiveSymbol: 'One/time',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'ACCEPTED'
       })
 
       const expectedResult = {

@@ -8,31 +8,14 @@
  * SPDX-License-Identifier: EUPL-1.2
  */
 import { AxiosInstance } from 'axios'
-import { IPaginationLoader } from '@/utils/PaginatedLoader'
 
+// This is more an interface then an abstract base class.
+// But it helps as a base for the ExtendableCVApi class.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export abstract class CVApi<T> {
   protected axiosApi: AxiosInstance
 
   constructor (axiosInstance: AxiosInstance) {
     this.axiosApi = axiosInstance
-  }
-
-  protected loadPaginated (loader: IPaginationLoader<T>): Promise<T[]> {
-    let result: T[] = loader.elements
-    const promise = new Promise<T[]>((resolve, reject) => {
-      if (!loader.funToLoadNext) {
-        resolve(result)
-        return
-      }
-      loader.funToLoadNext().then((nextLoader) => {
-        this.loadPaginated(nextLoader).then((loadedEntities) => {
-          result = [...result, ...loadedEntities] as T[]
-          resolve(result)
-        })
-      }).catch((_error) => {
-        reject(_error)
-      })
-    })
-    return promise
   }
 }

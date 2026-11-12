@@ -9,17 +9,15 @@
  */
 import { License } from '@/models/License'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
   IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class LicenseSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): License[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class LicenseSerializer extends AbstractSerializer<License> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): License {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -29,6 +27,7 @@ export class LicenseSerializer {
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
     const url = jsonApiData.links?.self || ''
+    const status = jsonApiData.attributes.status || ''
 
     let globalProvenanceId = null
 
@@ -47,7 +46,8 @@ export class LicenseSerializer {
       category,
       note,
       uri: url,
-      globalProvenanceId
+      globalProvenanceId,
+      status
     })
   }
 

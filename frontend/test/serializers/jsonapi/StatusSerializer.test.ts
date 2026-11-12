@@ -76,7 +76,8 @@ describe('StatusSerializer', () => {
         note: '',
         provenance: '',
         provenanceUri: '',
-        globalProvenanceId: null
+        globalProvenanceId: null,
+        status: 'Accepted'
       })
       const expectedStatus2 = Status.createFromObject({
         id: '2',
@@ -87,7 +88,8 @@ describe('StatusSerializer', () => {
         note: 'a note',
         provenance: 'a provenance',
         provenanceUri: 'https://provenance',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'Accepted'
       })
 
       const serializer = new StatusSerializer()
@@ -111,7 +113,8 @@ describe('StatusSerializer', () => {
         note: 'a note',
         provenance: 'a provenance',
         provenanceUri: 'https://provenance',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'Accepted'
       })
 
       const expectedResult = {

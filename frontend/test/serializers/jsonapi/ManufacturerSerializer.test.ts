@@ -76,7 +76,8 @@ describe('ManufacturerSerializer', () => {
         category: '',
         note: '',
         globalProvenanceId: null,
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/1/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/1/',
+        status: 'Accepted'
       })
       const expectedManufacturer2 = Manufacturer.createFromObject({
         id: '2',
@@ -87,7 +88,8 @@ describe('ManufacturerSerializer', () => {
         provenance: 'provenance',
         provenanceUri: 'provenance uri',
         globalProvenanceId: '1',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/2/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/2/',
+        status: 'Accepted'
       })
 
       const serializer = new ManufacturerSerializer()
@@ -111,7 +113,8 @@ describe('ManufacturerSerializer', () => {
         provenanceUri: 'https://somewhere.at.net',
         note: 'simple note',
         globalProvenanceId: '1',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/2/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/2/',
+        status: 'Accepted'
       })
 
       const expectedResult = {

@@ -89,7 +89,8 @@ describe('ActionTypeSerializer', () => {
         category: '',
         note: '',
         globalProvenanceId: null,
-        actionCategoryId: '1'
+        actionCategoryId: '1',
+        status: 'ACCEPTED'
       })
       const expectedActionType2 = ActionType.createFromObject({
         id: '9',
@@ -101,7 +102,8 @@ describe('ActionTypeSerializer', () => {
         category: 'cat',
         note: 'note',
         globalProvenanceId: '1',
-        actionCategoryId: '2'
+        actionCategoryId: '2',
+        status: 'ACCEPTED'
       })
 
       const serializer = new ActionTypeSerializer()
@@ -126,7 +128,8 @@ describe('ActionTypeSerializer', () => {
         category: 'cat',
         note: 'note',
         globalProvenanceId: '1',
-        actionCategoryId: '2'
+        actionCategoryId: '2',
+        status: 'ACCEPTED'
       })
 
       const expectedResult = {

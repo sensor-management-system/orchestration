@@ -76,7 +76,8 @@ describe('PlatformTypeSerializer', () => {
         provenance: 'Definition adapted from Wikipedia',
         provenanceUri: '',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/platformtypes/1/',
-        globalProvenanceId: null
+        globalProvenanceId: null,
+        status: 'Accepted'
       })
       const expectedPlatformType2 = PlatformType.createFromObject({
         id: '2',
@@ -87,7 +88,8 @@ describe('PlatformTypeSerializer', () => {
         provenance: 'somewhere',
         provenanceUri: 'abc',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/platformtypes/2/',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'Accepted'
       })
 
       const serializer = new PlatformTypeSerializer()
@@ -111,7 +113,8 @@ describe('PlatformTypeSerializer', () => {
         provenanceUri: 'abc',
         note: 'simple note',
         globalProvenanceId: '1',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/platformtypes/2/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/platformtypes/2/',
+        status: 'Accepted'
       })
 
       const expectedResult = {

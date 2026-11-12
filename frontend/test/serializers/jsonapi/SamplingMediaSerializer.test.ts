@@ -89,7 +89,8 @@ describe('SamplingMediaSerializer', () => {
         note: '',
         provenance: '',
         provenanceUri: '',
-        globalProvenanceId: null
+        globalProvenanceId: null,
+        status: 'Accepted'
       })
       const expectedSamplingMedium2 = SamplingMedia.createFromObject({
         id: '2',
@@ -101,7 +102,8 @@ describe('SamplingMediaSerializer', () => {
         note: 'note',
         provenance: 'prov',
         provenanceUri: 'uri',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'Accepted'
       })
 
       const serializer = new SamplingMediaSerializer()
@@ -126,7 +128,8 @@ describe('SamplingMediaSerializer', () => {
         note: 'note',
         provenance: 'prov',
         provenanceUri: 'uri',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'Accepted'
       })
 
       const expectedResult = {

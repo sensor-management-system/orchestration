@@ -9,17 +9,14 @@
  */
 import { PlatformType } from '@/models/PlatformType'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class PlatformTypeSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): PlatformType[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class PlatformTypeSerializer extends AbstractSerializer<PlatformType> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): PlatformType {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -29,6 +26,7 @@ export class PlatformTypeSerializer {
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
     const url = jsonApiData.links?.self || ''
+    const status = jsonApiData.attributes.status || ''
 
     let globalProvenanceId = null
 
@@ -48,7 +46,8 @@ export class PlatformTypeSerializer {
       category,
       note,
       uri: url,
-      globalProvenanceId
+      globalProvenanceId,
+      status
     })
   }
 

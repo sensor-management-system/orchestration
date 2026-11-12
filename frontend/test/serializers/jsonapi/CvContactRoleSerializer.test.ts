@@ -76,7 +76,8 @@ describe('CvContactRoleSerializer', () => {
         category: '',
         note: '',
         globalProvenanceId: null,
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/v1/contactroles/6/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/v1/contactroles/6/',
+        status: 'ACCEPTED'
       })
       const expectedContactRole2 = CvContactRole.createFromObject({
         id: '7',
@@ -87,7 +88,8 @@ describe('CvContactRoleSerializer', () => {
         category: 'category',
         note: 'note',
         globalProvenanceId: '1',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/v1/contactroles/7/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/v1/contactroles/7/',
+        status: 'ACCEPTED'
       })
 
       const serializer = new CvContactRoleSerializer()
@@ -111,7 +113,8 @@ describe('CvContactRoleSerializer', () => {
         category: 'category',
         note: 'note',
         globalProvenanceId: '1',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/v1/contactroles/7/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/v1/contactroles/7/',
+        status: 'ACCEPTED'
       })
       const expectedResult = {
         id: '7',

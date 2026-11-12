@@ -9,17 +9,14 @@
  */
 import { AggregationType } from '@/models/AggregationType'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class AggregationTypeSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): AggregationType[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class AggregationTypeSerializer extends AbstractSerializer<AggregationType> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): AggregationType {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -29,6 +26,7 @@ export class AggregationTypeSerializer {
     const provenanceUri = jsonApiData.attributes.provenance_uri || ''
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
+    const status = jsonApiData.attributes.status || ''
 
     let globalProvenanceId = null
 
@@ -48,7 +46,8 @@ export class AggregationTypeSerializer {
       category,
       note,
       uri: url,
-      globalProvenanceId
+      globalProvenanceId,
+      status
     })
   }
 

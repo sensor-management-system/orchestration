@@ -76,7 +76,8 @@ describe('AggregationTypeSerializer', () => {
         note: '',
         provenance: '',
         provenanceUri: '',
-        globalProvenanceId: null
+        globalProvenanceId: null,
+        status: 'ACCEPTED'
       })
       const expectedAggregationType2 = AggregationType.createFromObject({
         id: '2',
@@ -87,7 +88,8 @@ describe('AggregationTypeSerializer', () => {
         note: 'note',
         provenance: 'prov',
         provenanceUri: 'uri',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'ACCEPTED'
       })
 
       const serializer = new AggregationTypeSerializer()
@@ -111,7 +113,8 @@ describe('AggregationTypeSerializer', () => {
         note: 'note',
         provenance: 'statistics handbook',
         provenanceUri: 'uri',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'ACCEPTED'
       })
 
       const expectedResult = {

@@ -77,7 +77,13 @@ export default class PlatformTypeSelect extends Vue {
    * @return {PlatformTypeLoaderFunction} a function that returns a promise which returns a list of PlatformTypes
    */
   get findAllPlatformTypes (): PlatformTypeLoaderFunction {
-    return () => { return this.$api.platformTypes.findAll() }
+    return () => {
+      let currentUserEMail: string | null = null
+      if (this.$auth.user) {
+        currentUserEMail = this.$auth.user.email as string
+      }
+      return this.$api.platformTypes.findAll(currentUserEMail)
+    }
   }
 
   /**

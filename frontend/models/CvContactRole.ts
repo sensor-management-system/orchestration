@@ -17,6 +17,7 @@ export interface ICvContactRole {
   category: string
   note: string
   globalProvenanceId: string | null
+  status: string
 }
 
 export class CvContactRole implements ICvContactRole {
@@ -29,6 +30,7 @@ export class CvContactRole implements ICvContactRole {
   private _category: string = ''
   private _note: string = ''
   private _globalProvenanceId: string | null = null
+  private _status: string = ''
 
   get id (): string {
     return this._id
@@ -102,6 +104,14 @@ export class CvContactRole implements ICvContactRole {
     this._globalProvenanceId = newId
   }
 
+  get status (): string {
+    return this._status
+  }
+
+  set status (newStatus: string) {
+    this._status = newStatus
+  }
+
   toString (): string {
     return this._name
   }
@@ -127,6 +137,7 @@ export class CvContactRole implements ICvContactRole {
     newObject.note = someObject.note
     newObject.uri = someObject.uri
     newObject.globalProvenanceId = someObject.globalProvenanceId
+    newObject.status = someObject.status
 
     return newObject
   }

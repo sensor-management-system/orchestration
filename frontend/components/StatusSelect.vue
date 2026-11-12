@@ -78,7 +78,13 @@ export default class StatusSelect extends Vue {
    * @return {StatesLoaderFunction} a function that returns a promise which returns a list of states
    */
   get findAllStates (): StatesLoaderFunction {
-    return () => { return this.$api.states.findAll() }
+    return () => {
+      let currentUserEMail: string | null = null
+      if (this.$auth.user) {
+        currentUserEMail = this.$auth.user.email as string
+      }
+      return this.$api.states.findAll(currentUserEMail)
+    }
   }
 
   /**

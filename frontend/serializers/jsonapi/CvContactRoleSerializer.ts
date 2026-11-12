@@ -10,17 +10,14 @@
 
 import { CvContactRole } from '@/models/CvContactRole'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class CvContactRoleSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): CvContactRole[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class CvContactRoleSerializer extends AbstractSerializer<CvContactRole> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): CvContactRole {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -30,6 +27,7 @@ export class CvContactRoleSerializer {
     const provenanceUri = jsonApiData.attributes.provenance_uri || ''
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
+    const status = jsonApiData.attributes.status || ''
 
     let globalProvenanceId = null
 
@@ -49,7 +47,8 @@ export class CvContactRoleSerializer {
       category,
       note,
       uri: url,
-      globalProvenanceId
+      globalProvenanceId,
+      status
     })
   }
 

@@ -9,17 +9,14 @@
  */
 import { Status } from '@/models/Status'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class StatusSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Status[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class StatusSerializer extends AbstractSerializer<Status> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Status {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -29,6 +26,7 @@ export class StatusSerializer {
     const provenanceUri = jsonApiData.attributes.provenance_uri || ''
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
+    const status = jsonApiData.attributes.status || ''
 
     let globalProvenanceId = null
 
@@ -48,7 +46,8 @@ export class StatusSerializer {
       category,
       note,
       uri: url,
-      globalProvenanceId
+      globalProvenanceId,
+      status
     })
   }
 

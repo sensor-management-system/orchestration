@@ -78,7 +78,14 @@ export default class ManufacturerSelect extends Vue {
    * @return {ManufacturersLoaderFunction} a list of Manufacturer
    */
   get findAllManufacturers (): ManufacturersLoaderFunction {
-    return () => { return this.$api.manufacturer.findAll() }
+    return () => {
+      let currentUserEMail: string | null = null
+      if (this.$auth.user) {
+        currentUserEMail = this.$auth.user.email as string
+      }
+
+      return this.$api.manufacturer.findAll(currentUserEMail)
+    }
   }
 
   /**

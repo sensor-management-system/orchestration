@@ -18,6 +18,7 @@ export interface ISamplingMedia {
   note: string
   compartmentId: string | null
   globalProvenanceId: string | null
+  status: string
 }
 
 export class SamplingMedia implements ISamplingMedia {
@@ -31,6 +32,7 @@ export class SamplingMedia implements ISamplingMedia {
   private _note: string = ''
   private _compartmentId: string | null = null
   private _globalProvenanceId: string | null = null
+  private _status: string = ''
 
   get id (): string {
     return this._id
@@ -112,6 +114,14 @@ export class SamplingMedia implements ISamplingMedia {
     this._globalProvenanceId = newId
   }
 
+  get status (): string {
+    return this._status
+  }
+
+  set status (newStatus: string) {
+    this._status = newStatus
+  }
+
   toString (): string {
     return this._name
   }
@@ -139,6 +149,7 @@ export class SamplingMedia implements ISamplingMedia {
     newObject.uri = someObject.uri
     newObject.globalProvenanceId = someObject.globalProvenanceId
     newObject.compartmentId = someObject.compartmentId
+    newObject.status = someObject.status
 
     return newObject
   }
