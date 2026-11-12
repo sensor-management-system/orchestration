@@ -19,6 +19,7 @@ export interface ISiteUsage {
   category: string
   note: string
   globalProvenanceId: string | null
+  status: string
 }
 
 export class SiteUsage implements ISiteUsage {
@@ -31,6 +32,7 @@ export class SiteUsage implements ISiteUsage {
   private _category: string = ''
   private _note: string = ''
   private _globalProvenanceId: string | null = null
+  private _status: string = ''
 
   get id (): string {
     return this._id
@@ -104,6 +106,14 @@ export class SiteUsage implements ISiteUsage {
     this._globalProvenanceId = newId
   }
 
+  get status (): string {
+    return this._status
+  }
+
+  set status (newStatus: string) {
+    this._status = newStatus
+  }
+
   toString (): string {
     return this._name
   }
@@ -129,6 +139,7 @@ export class SiteUsage implements ISiteUsage {
     newObject.note = someObject.note
     newObject.uri = someObject.uri
     newObject.globalProvenanceId = someObject.globalProvenanceId
+    newObject.status = someObject.status
 
     return newObject
   }

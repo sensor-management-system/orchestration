@@ -20,6 +20,7 @@ export interface ISiteType {
   note: string
   siteUsageId: string | null
   globalProvenanceId: string | null
+  status: string
 }
 
 export class SiteType implements ISiteType {
@@ -33,6 +34,7 @@ export class SiteType implements ISiteType {
   private _note: string = ''
   private _siteUsageId: string | null = null
   private _globalProvenanceId: string | null = null
+  private _status: string = ''
 
   get id (): string {
     return this._id
@@ -114,6 +116,14 @@ export class SiteType implements ISiteType {
     this._globalProvenanceId = newId
   }
 
+  get status (): string {
+    return this._status
+  }
+
+  set status (newStatus: string) {
+    this._status = newStatus
+  }
+
   toString (): string {
     return this._name
   }
@@ -131,6 +141,7 @@ export class SiteType implements ISiteType {
     newObject.uri = someObject.uri
     newObject.globalProvenanceId = someObject.globalProvenanceId
     newObject.siteUsageId = someObject.siteUsageId
+    newObject.status = someObject.status
 
     return newObject
   }

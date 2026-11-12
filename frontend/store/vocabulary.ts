@@ -378,44 +378,56 @@ export type AddSiteTypeAction = ({ siteType }: { siteType: SiteType }) => Promis
 export type AddAggregationTypeAction = ({ aggregationType }: { aggregationType: AggregationType}) => Promise<AggregationType>
 export type AddLicenseAction = ({ license }: { license: License }) => Promise<License>
 
+const getCurrentUserEmail = (auth: object): string | null => {
+  // The auth class is not that easily to handle with the type system.
+  // @ts-ignore
+  return auth.user?.email ?? null
+}
+
 const actions: ActionTree<VocabularyState, RootState> = {
   async loadManufacturers ({ commit }: { commit: Commit }): Promise<void> {
-    // @ts-ignore
-    commit('setManufacturers', await this.$api.manufacturer.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setManufacturers', await this.$api.manufacturer.findAll(currentUserEMail))
   },
   async loadEquipmentstatus ({ commit }: { commit: Commit }): Promise<void> {
-    // @ts-ignore
-    commit('setEquipmentstatus', await this.$api.states.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setEquipmentstatus', await this.$api.states.findAll(currentUserEMail))
   },
   async loadDevicetypes ({ commit }: { commit: Commit }): Promise<void> {
-    // @ts-ignore
-    commit('setDevicetypes', await this.$api.deviceTypes.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setDevicetypes', await this.$api.deviceTypes.findAll(currentUserEMail))
   },
   async loadPlatformtypes ({ commit }: { commit: Commit }): Promise<void> {
-    // @ts-ignore
-    commit('setPlatformtypes', await this.$api.platformTypes.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setPlatformtypes', await this.$api.platformTypes.findAll(currentUserEMail))
   },
   async loadPlatformGenericActionTypes ({ commit }: { commit: Commit }): Promise<void> { // TODO check api and maybe refactor
-    commit('setPlatformGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_PLATFORM).build().findMatchingAsList()
-    )
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setPlatformGenericActionTypes', await this.$api.actionTypes.findAllForType(ACTION_TYPE_API_FILTER_PLATFORM, currentUserEMail))
   },
   async loadDeviceGenericActionTypes ({ commit }: { commit: Commit }): Promise<void> {
-    commit('setDeviceGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_DEVICE).build().findMatchingAsList())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setDeviceGenericActionTypes', await this.$api.actionTypes.findAllForType(ACTION_TYPE_API_FILTER_DEVICE, currentUserEMail))
   },
   async loadConfigurationGenericActionTypes ({ commit }: { commit: Commit }): Promise<void> {
-    commit('setConfigurationGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_CONFIGURATION).build().findMatchingAsList())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setConfigurationGenericActionTypes', await this.$api.actionTypes.findAllForType(ACTION_TYPE_API_FILTER_CONFIGURATION, currentUserEMail))
   },
   async loadCompartments ({ commit }: { commit: Commit }): Promise<void> {
-    commit('setCompartments', await this.$api.compartments.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setCompartments', await this.$api.compartments.findAll(currentUserEMail))
   },
   async loadSamplingMedia ({ commit }: { commit: Commit }): Promise<void> {
-    commit('setSamplingMedia', await this.$api.samplingMedia.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setSamplingMedia', await this.$api.samplingMedia.findAll(currentUserEMail))
   },
   async loadProperties ({ commit }: { commit: Commit }): Promise<void> {
-    commit('setProperties', await this.$api.properties.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setProperties', await this.$api.properties.findAll(currentUserEMail))
   },
   async loadUnits ({ commit }: { commit: Commit }): Promise<void> {
-    commit('setUnits', await this.$api.units.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setUnits', await this.$api.units.findAll(currentUserEMail))
   },
   async loadMeasuredQuantityUnits ({ commit }: { commit: Commit }): Promise<void> {
     commit('setMeasuredQuantityUnits', await this.$api.measuredQuantityUnits.findAll())
@@ -427,28 +439,33 @@ const actions: ActionTree<VocabularyState, RootState> = {
     commit('setElevationData', await this.$api.elevationData.findAll())
   },
   async loadCvContactRoles ({ commit }: {commit: Commit }): Promise<void> {
-    commit('setCvContactRoles', await this.$api.cvContactRoles.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setCvContactRoles', await this.$api.cvContactRoles.findAll(currentUserEMail))
   },
   async loadGlobalProvenances ({ commit }: { commit: Commit }): Promise<void> {
     commit('setGlobalProvenances', await this.$api.globalProvenances.findAll())
   },
   async loadAggregationtypes ({ commit }: { commit: Commit }): Promise<void> {
-    commit('setAggregationtypes', await this.$api.aggregationTypes.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setAggregationtypes', await this.$api.aggregationTypes.findAll(currentUserEMail))
   },
   async loadActionCategories ({ commit }: { commit: Commit }): Promise<void> {
     commit('setActionCategories', await this.$api.actionCategories.findAll())
   },
   async loadSiteUsages ({ commit }: { commit: Commit }): Promise<void> {
-    commit('setSiteUsages', await this.$api.siteUsages.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setSiteUsages', await this.$api.siteUsages.findAll(currentUserEMail))
   },
   async loadSiteTypes ({ commit }: { commit: Commit }): Promise<void> {
-    commit('setSiteTypes', await this.$api.siteTypes.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setSiteTypes', await this.$api.siteTypes.findAll(currentUserEMail))
   },
   async loadCountries ({ commit }: { commit: Commit }): Promise<void> {
     commit('setCountries', await this.$api.countries.findAll())
   },
   async loadLicenses ({ commit }: { commit: Commit }): Promise<void> {
-    commit('setLicenses', await this.$api.licenses.findAll())
+    const currentUserEMail = getCurrentUserEmail(this.$auth)
+    commit('setLicenses', await this.$api.licenses.findAll(currentUserEMail))
   },
   async loadSoftwareTypes ({ commit }: { commit: Commit }): Promise<void> {
     commit('setSoftwareTypes', await this.$api.softwareTypes.findAll())

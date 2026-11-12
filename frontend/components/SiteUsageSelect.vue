@@ -78,7 +78,13 @@ export default class SiteUsageSelect extends Vue {
    * @return {SiteUsageLoaderFunction} a list of site usages
    */
   get findAllSiteUsages (): SiteUsagesLoaderFunction {
-    return () => { return this.$api.siteUsages.findAll() }
+    return () => {
+      let currentUserEMail: string | null = null
+      if (this.$auth.user) {
+        currentUserEMail = this.$auth.user.email as string
+      }
+      return this.$api.siteUsages.findAll(currentUserEMail)
+    }
   }
 
   /**

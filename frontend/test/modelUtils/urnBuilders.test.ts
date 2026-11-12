@@ -49,7 +49,8 @@ describe('createDeviceUrn', () => {
       category: '',
       provenance: '',
       provenanceUri: '',
-      globalProvenanceId: null
+      globalProvenanceId: null,
+      status: 'Accepted'
     })
     device.manufacturerUri = manufacturer.uri
     device.manufacturerName = manufacturer.name
@@ -83,7 +84,8 @@ describe('createPlatformUrn', () => {
       provenance: '',
       provenanceUri: '',
       globalProvenanceId: null,
-      uri: 'https://foo.bar'
+      uri: 'https://foo.bar',
+      status: 'Accepted'
     })
     platform.platformTypeUri = platformType.uri
     platform.platformTypeName = platformType.name

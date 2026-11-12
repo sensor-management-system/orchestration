@@ -19,6 +19,7 @@ export interface IProperty {
   note: string
   globalProvenanceId: string | null
   aggregationTypeId: string | null
+  status: string
 }
 
 export class Property implements IProperty {
@@ -33,6 +34,7 @@ export class Property implements IProperty {
   private _note: string = ''
   private _globalProvenanceId: string | null = null
   private _aggregationTypeId: string | null = null
+  private _status: string = ''
 
   get id (): string {
     return this._id
@@ -122,6 +124,14 @@ export class Property implements IProperty {
     this._aggregationTypeId = newAggregationTypeId
   }
 
+  get status (): string {
+    return this._status
+  }
+
+  set status (newStatus: string) {
+    this._status = newStatus
+  }
+
   toString (): string {
     return this._name
   }
@@ -150,6 +160,7 @@ export class Property implements IProperty {
     newObject.globalProvenanceId = someObject.globalProvenanceId
     newObject.samplingMediaId = someObject.samplingMediaId
     newObject.aggregationTypeId = someObject.aggregationTypeId
+    newObject.status = someObject.status
 
     return newObject
   }

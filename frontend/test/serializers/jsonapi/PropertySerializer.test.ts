@@ -102,7 +102,8 @@ describe('PropertySerializer', () => {
         provenance: '',
         provenanceUri: 'http://cbavalanchecenter.org/interpreting-snowpack-layers-and-hardness/',
         globalProvenanceId: null,
-        aggregationTypeId: '1'
+        aggregationTypeId: '1',
+        status: 'Accepted'
       })
       const expectedProperty2 = Property.createFromObject({
         id: '2',
@@ -115,7 +116,8 @@ describe('PropertySerializer', () => {
         provenance: 'Originally from the CUAHSI HIS VariableNameCV.  See: http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=VariableNameCV.',
         provenanceUri: 'uri',
         globalProvenanceId: '1',
-        aggregationTypeId: '2'
+        aggregationTypeId: '2',
+        status: 'Accepted'
       })
 
       const serializer = new PropertySerializer()
@@ -141,7 +143,8 @@ describe('PropertySerializer', () => {
         provenance: 'Originally from the CUAHSI HIS VariableNameCV.  See: http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=VariableNameCV.',
         provenanceUri: 'uri',
         globalProvenanceId: '1',
-        aggregationTypeId: '2'
+        aggregationTypeId: '2',
+        status: 'Accepted'
       })
 
       const expectedResult = {

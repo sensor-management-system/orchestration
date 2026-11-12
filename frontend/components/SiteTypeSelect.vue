@@ -78,7 +78,13 @@ export default class SiteTypeSelect extends Vue {
    * @return {SiteTypeLoaderFunction} a list of site types
    */
   get findAllSiteTypes (): SiteTypesLoaderFunction {
-    return () => { return this.$api.siteTypes.findAll() }
+    return () => {
+      let currentUserEMail: string | null = null
+      if (this.$auth.user) {
+        currentUserEMail = this.$auth.user.email as string
+      }
+      return this.$api.siteTypes.findAll(currentUserEMail)
+    }
   }
 
   /**

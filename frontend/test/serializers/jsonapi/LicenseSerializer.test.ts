@@ -76,7 +76,8 @@ describe('LicenseSerializer', () => {
         note: '',
         category: 'Software license',
         globalProvenanceId: null,
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/licenses/1/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/licenses/1/',
+        status: 'Accepted'
 
       })
       const expectedLicense2 = License.createFromObject({
@@ -88,7 +89,8 @@ describe('LicenseSerializer', () => {
         provenanceUri: 'abc',
         note: 'simple note',
         globalProvenanceId: '1',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/licenses/2/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/licenses/2/',
+        status: 'Accepted'
       })
 
       const serializer = new LicenseSerializer()
@@ -112,7 +114,8 @@ describe('LicenseSerializer', () => {
         provenanceUri: 'abc',
         note: 'simple note',
         globalProvenanceId: '1',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/licenses/2/'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/licenses/2/',
+        status: 'Accepted'
       })
 
       const expectedResult = {

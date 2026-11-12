@@ -13,8 +13,6 @@ import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { MeasuredQuantityUnitSerializer } from '@/serializers/jsonapi/MeasuredQuantityUnitSerializer'
 import { CVApi } from '@/services/cv/CVApi'
 
-import { IPaginationLoader } from '@/utils/PaginatedLoader'
-
 export class MeasuredQuantityUnitApi extends CVApi<MeasuredQuantityUnit> {
   private serializer: MeasuredQuantityUnitSerializer
   readonly basePath: string
@@ -25,16 +23,20 @@ export class MeasuredQuantityUnitApi extends CVApi<MeasuredQuantityUnit> {
     this.serializer = new MeasuredQuantityUnitSerializer()
   }
 
-  newSearchBuilder (): MeasuredQuantityUnitSearchBuilder {
-    return new MeasuredQuantityUnitSearchBuilder(this.axiosApi, this.basePath, this.serializer)
-  }
-
   findAll (): Promise<MeasuredQuantityUnit[]> {
-    return this.newSearchBuilder().build().findMatchingAsList()
-  }
-
-  findAllPaginated (pageSize: number = 100): Promise<MeasuredQuantityUnit[]> {
-    return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize).then(loader => this.loadPaginated(loader))
+    return this.axiosApi.get(
+      this.basePath,
+      {
+        params: {
+          'page[size]': 10000,
+          include: 'unit'
+        }
+      }
+    ).then((rawResponse) => {
+      const response = rawResponse.data
+      this.serializer.included = response.included
+      return this.serializer.convertJsonApiObjectListToModelList(response)
+    })
   }
 
   async find (id: string): Promise<MeasuredQuantityUnit> {
@@ -61,89 +63,5 @@ export class MeasuredQuantityUnitApi extends CVApi<MeasuredQuantityUnit> {
     const response = rawResponse.data
     const id = response.data.id
     return await this.find(id)
-  }
-}
-
-export class MeasuredQuantityUnitSearchBuilder {
-  private axiosApi: AxiosInstance
-  readonly basePath: string
-  private serializer: MeasuredQuantityUnitSerializer
-
-  constructor (axiosApi: AxiosInstance, basePath: string, serializer: MeasuredQuantityUnitSerializer) {
-    this.axiosApi = axiosApi
-    this.basePath = basePath
-    this.serializer = serializer
-  }
-
-  build (): MeasuredQuantityUnitSearcher {
-    return new MeasuredQuantityUnitSearcher(this.axiosApi, this.basePath, this.serializer)
-  }
-}
-
-export class MeasuredQuantityUnitSearcher {
-  private axiosApi: AxiosInstance
-  readonly basePath: string
-  private serializer: MeasuredQuantityUnitSerializer
-
-  constructor (axiosApi: AxiosInstance, basePath: string, serializer: MeasuredQuantityUnitSerializer) {
-    this.axiosApi = axiosApi
-    this.basePath = basePath
-    this.serializer = serializer
-  }
-
-  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<MeasuredQuantityUnit>> {
-    return this.axiosApi.get(
-      this.basePath,
-      {
-        params: {
-          'page[size]': pageSize,
-          'page[number]': page,
-          include: 'unit'
-        }
-      }
-    ).then((rawResponse) => {
-      const response = rawResponse.data
-      this.serializer.included = response.included
-      const elements: MeasuredQuantityUnit[] = this.serializer.convertJsonApiObjectListToModelList(response)
-      const totalCount = response.meta.pagination.count
-
-      let funToLoadNext = null
-      if (response.meta.pagination.page < response.meta.pagination.pages) {
-        funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
-      }
-
-      let funToLoadPage = null
-      if (elements.length > 0) {
-        funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
-      }
-
-      return {
-        elements,
-        totalCount,
-        page,
-        funToLoadNext,
-        funToLoadPage
-      }
-    })
-  }
-
-  findMatchingAsList (): Promise<MeasuredQuantityUnit[]> {
-    return this.axiosApi.get(
-      this.basePath,
-      {
-        params: {
-          'page[size]': 10000,
-          include: 'unit'
-        }
-      }
-    ).then((rawResponse) => {
-      const response = rawResponse.data
-      this.serializer.included = response.included
-      return this.serializer.convertJsonApiObjectListToModelList(response)
-    })
-  }
-
-  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<MeasuredQuantityUnit>> {
-    return this.findAllOnPage(1, pageSize)
   }
 }

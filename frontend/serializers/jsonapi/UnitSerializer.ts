@@ -9,17 +9,14 @@
  */
 import { Unit } from '@/models/Unit'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class UnitSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Unit[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class UnitSerializer extends AbstractSerializer<Unit> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): Unit {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -31,6 +28,7 @@ export class UnitSerializer {
     const ucumCaseSensitiveSymbol = jsonApiData.attributes.ucum_case_sensitive_symbol || ''
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
+    const status = jsonApiData.attributes.status || ''
 
     let globalProvenanceId = null
 
@@ -52,7 +50,8 @@ export class UnitSerializer {
       category,
       note,
       uri: url,
-      globalProvenanceId
+      globalProvenanceId,
+      status
     })
   }
 

@@ -13,8 +13,6 @@ import { SoftwareType } from '@/models/SoftwareType'
 import { SoftwareTypeSerializer } from '@/serializers/jsonapi/SoftwareTypeSerializer'
 import { CVApi } from '@/services/cv/CVApi'
 
-import { IPaginationLoader } from '@/utils/PaginatedLoader'
-
 export class SoftwareTypeApi extends CVApi<SoftwareType> {
   private serializer: SoftwareTypeSerializer
   readonly basePath: string
@@ -25,16 +23,21 @@ export class SoftwareTypeApi extends CVApi<SoftwareType> {
     this.serializer = new SoftwareTypeSerializer()
   }
 
-  newSearchBuilder (): SoftwareTypeSearchBuilder {
-    return new SoftwareTypeSearchBuilder(this.axiosApi, this.basePath, this.serializer)
-  }
-
   findAll (): Promise<SoftwareType[]> {
-    return this.newSearchBuilder().build().findMatchingAsList().then(data => SoftwareTypeApi.sort(data))
-  }
-
-  findAllPaginated (pageSize: number = 100): Promise<SoftwareType[]> {
-    return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize).then(loader => this.loadPaginated(loader)).then(data => SoftwareTypeApi.sort(data))
+    const params: { [idx: string]: any } = {
+      'page[size]': 10000,
+      'filter[status.iexact]': 'ACCEPTED',
+      sort: 'term'
+    }
+    return this.axiosApi.get(
+      this.basePath,
+      {
+        params
+      }
+    ).then((rawResponse) => {
+      const response = rawResponse.data
+      return SoftwareTypeApi.sort(this.serializer.convertJsonApiObjectListToModelList(response))
+    })
   }
 
   static sort (softwareTypes: SoftwareType[]): SoftwareType[] {
@@ -56,91 +59,5 @@ export class SoftwareTypeApi extends CVApi<SoftwareType> {
       softwareTypesCopy.push(other)
     }
     return softwareTypesCopy
-  }
-}
-
-export class SoftwareTypeSearchBuilder {
-  private axiosApi: AxiosInstance
-  readonly basePath: string
-  private serializer: SoftwareTypeSerializer
-
-  constructor (axiosApi: AxiosInstance, basePath: string, serializer: SoftwareTypeSerializer) {
-    this.axiosApi = axiosApi
-    this.basePath = basePath
-    this.serializer = serializer
-  }
-
-  build (): SoftwareTypeSearcher {
-    return new SoftwareTypeSearcher(this.axiosApi, this.basePath, this.serializer)
-  }
-}
-
-export class SoftwareTypeSearcher {
-  private axiosApi: AxiosInstance
-  readonly basePath: string
-  private serializer: SoftwareTypeSerializer
-
-  constructor (axiosApi: AxiosInstance, basePath: string, serializer: SoftwareTypeSerializer) {
-    this.axiosApi = axiosApi
-    this.basePath = basePath
-    this.serializer = serializer
-  }
-
-  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<SoftwareType>> {
-    const params: { [idx: string]: any } = {
-      'page[size]': pageSize,
-      'page[number]': page,
-      'filter[status.iexact]': 'ACCEPTED',
-      sort: 'term'
-    }
-    return this.axiosApi.get(
-      this.basePath,
-      {
-        params
-      }
-    ).then((rawResponse) => {
-      const response = rawResponse.data
-      const elements: SoftwareType[] = this.serializer.convertJsonApiObjectListToModelList(response)
-      const totalCount = response.meta.count
-
-      let funToLoadNext = null
-      if (response.meta.pagination.page < response.meta.pagination.pages) {
-        funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
-      }
-
-      let funToLoadPage = null
-      if (elements.length > 0) {
-        funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
-      }
-
-      return {
-        elements,
-        totalCount,
-        page,
-        funToLoadNext,
-        funToLoadPage
-      }
-    })
-  }
-
-  findMatchingAsList (): Promise<SoftwareType[]> {
-    const params: { [idx: string]: any } = {
-      'page[size]': 10000,
-      'filter[status.iexact]': 'ACCEPTED',
-      sort: 'term'
-    }
-    return this.axiosApi.get(
-      this.basePath,
-      {
-        params
-      }
-    ).then((rawResponse) => {
-      const response = rawResponse.data
-      return this.serializer.convertJsonApiObjectListToModelList(response)
-    })
-  }
-
-  findMatchingAsPaginationLoader (pageSize: number): Promise<IPaginationLoader<SoftwareType>> {
-    return this.findAllOnPage(1, pageSize)
   }
 }

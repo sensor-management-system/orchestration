@@ -9,18 +9,15 @@
  */
 import { ActionType } from '@/models/ActionType'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetails,
   IJsonApiEntityWithoutDetailsDataDict
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class ActionTypeSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): ActionType[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class ActionTypeSerializer extends AbstractSerializer<ActionType> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): ActionType {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -31,7 +28,7 @@ export class ActionTypeSerializer {
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
     const actionCategoryId = (jsonApiData.relationships && jsonApiData.relationships.action_category && (jsonApiData.relationships.action_category as IJsonApiEntityWithoutDetailsDataDict).data.id) || null
-
+    const status = jsonApiData.attributes.status || ''
     let globalProvenanceId = null
 
     if (jsonApiData.relationships?.global_provenance?.data) {
@@ -51,7 +48,8 @@ export class ActionTypeSerializer {
       note,
       category,
       actionCategoryId,
-      globalProvenanceId
+      globalProvenanceId,
+      status
     })
   }
 

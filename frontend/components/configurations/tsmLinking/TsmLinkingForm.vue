@@ -659,7 +659,8 @@ export default class TsmLinkingForm extends mixins(Rules) {
       category: '',
       note: '',
       uri: this.copyValue.licenseUri,
-      globalProvenanceId: null
+      globalProvenanceId: null,
+      status: ''
     })
 
     return [additionalLicense, ...items]

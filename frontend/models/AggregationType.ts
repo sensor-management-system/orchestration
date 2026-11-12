@@ -17,6 +17,7 @@ export interface IAggregationType {
   note: string
   uri: string
   globalProvenanceId: string | null
+  status: string
 }
 
 export class AggregationType implements IAggregationType {
@@ -29,6 +30,7 @@ export class AggregationType implements IAggregationType {
   private _category: string = ''
   private _note: string = ''
   private _globalProvenanceId: string | null = null
+  private _status: string = ''
 
   get id (): string {
     return this._id
@@ -102,6 +104,14 @@ export class AggregationType implements IAggregationType {
     this._globalProvenanceId = newId
   }
 
+  get status (): string {
+    return this._status
+  }
+
+  set status (newStatus: string) {
+    this._status = newStatus
+  }
+
   toString (): string {
     return this._name
   }
@@ -118,6 +128,7 @@ export class AggregationType implements IAggregationType {
     newObject.note = someObject.note
     newObject.uri = someObject.uri
     newObject.globalProvenanceId = someObject.globalProvenanceId
+    newObject.status = someObject.status
 
     return newObject
   }

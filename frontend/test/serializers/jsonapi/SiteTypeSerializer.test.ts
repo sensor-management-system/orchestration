@@ -91,7 +91,8 @@ describe('SiteTypeSerializer', () => {
         note: '',
         provenance: '',
         provenanceUri: '',
-        globalProvenanceId: null
+        globalProvenanceId: null,
+        status: 'Accepted'
       })
       const expectedSiteType2 = SiteType.createFromObject({
         id: '2',
@@ -103,7 +104,8 @@ describe('SiteTypeSerializer', () => {
         note: 'note',
         provenance: 'prov',
         provenanceUri: 'uri',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'Accepted'
       })
 
       const serializer = new SiteTypeSerializer()
@@ -128,7 +130,8 @@ describe('SiteTypeSerializer', () => {
         note: 'note',
         provenance: 'prov',
         provenanceUri: 'uri',
-        globalProvenanceId: '1'
+        globalProvenanceId: '1',
+        status: 'Accepted'
       })
 
       const expectedResult = {

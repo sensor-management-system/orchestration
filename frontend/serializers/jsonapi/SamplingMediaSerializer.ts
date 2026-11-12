@@ -9,18 +9,15 @@
  */
 import { SamplingMedia } from '@/models/SamplingMedia'
 
+import { AbstractSerializer } from '@/serializers/jsonapi/AbstractSerializer'
+
 import {
-  IJsonApiEntityListEnvelope,
   IJsonApiEntity,
   IJsonApiEntityWithoutDetailsDataDict,
   IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-export class SamplingMediaSerializer {
-  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): SamplingMedia[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
-  }
-
+export class SamplingMediaSerializer extends AbstractSerializer<SamplingMedia> {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): SamplingMedia {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
@@ -30,6 +27,7 @@ export class SamplingMediaSerializer {
     const provenanceUri = jsonApiData.attributes.provenance_uri || ''
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
+    const status = jsonApiData.attributes.status || ''
 
     const compartmentId = (jsonApiData.relationships && jsonApiData.relationships.compartment && (jsonApiData.relationships.compartment as IJsonApiEntityWithoutDetailsDataDict).data.id) || null
 
@@ -52,7 +50,8 @@ export class SamplingMediaSerializer {
       note,
       uri: url,
       globalProvenanceId,
-      compartmentId
+      compartmentId,
+      status
     })
   }
 

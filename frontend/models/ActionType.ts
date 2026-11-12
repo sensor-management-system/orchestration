@@ -18,6 +18,7 @@ export interface IActionType {
   note: string
   globalProvenanceId: string | null
   actionCategoryId: string | null
+  status: string
 }
 
 export class ActionType implements IActionType {
@@ -31,6 +32,7 @@ export class ActionType implements IActionType {
   private _note: string = ''
   private _globalProvenanceId: string | null = null
   private _actionCategoryId: string | null = null
+  private _status: string = ''
 
   get id (): string {
     return this._id
@@ -112,6 +114,14 @@ export class ActionType implements IActionType {
     this._actionCategoryId = newActionCategoryId
   }
 
+  get status (): string {
+    return this._status
+  }
+
+  set status (newStatus: string) {
+    this._status = newStatus
+  }
+
   toString (): string {
     return this._name
   }
@@ -139,6 +149,7 @@ export class ActionType implements IActionType {
     newObject.uri = someObject.uri
     newObject.globalProvenanceId = someObject.globalProvenanceId
     newObject.actionCategoryId = someObject.actionCategoryId
+    newObject.status = someObject.status
 
     return newObject
   }

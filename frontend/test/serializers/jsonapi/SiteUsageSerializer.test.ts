@@ -78,7 +78,8 @@ describe('SiteUsageSerializer', () => {
         note: '',
         provenance: '',
         provenanceUri: '',
-        globalProvenanceId: null
+        globalProvenanceId: null,
+        status: 'ACCEPTED'
       })
       const expectedSiteUsage2 = SiteUsage.createFromObject({
         id: '2',
@@ -89,7 +90,8 @@ describe('SiteUsageSerializer', () => {
         note: 'note',
         provenance: 'Originally from CUAHSI HIS GeneralCategoryCV.',
         provenanceUri: 'uri',
-        globalProvenanceId: '2'
+        globalProvenanceId: '2',
+        status: 'ACCEPTED'
       })
 
       const serializer = new SiteUsageSerializer()
@@ -113,7 +115,8 @@ describe('SiteUsageSerializer', () => {
         note: 'note',
         provenance: 'Originally from CUAHSI HIS GeneralCategoryCV.',
         provenanceUri: 'uri',
-        globalProvenanceId: '2'
+        globalProvenanceId: '2',
+        status: 'ACCEPTED'
       })
 
       const expectedResult = {

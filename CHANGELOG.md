@@ -12,6 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 Changed:
 - Ensure to pull for the base images on the build steps ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/784))
 - Improved configuration status names ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/786))
+- CV entries now include all pending entries created by the user ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/765))
 
 ## 1.30.2 - 2026-10-29
 
