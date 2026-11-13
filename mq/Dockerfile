@@ -6,7 +6,7 @@
 ARG DEBIAN_IMAGE=trixie-slim
 FROM debian:${DEBIAN_IMAGE} AS build
 ARG GO_VERSION=1.24.0
-ARG MOSQUITTO_VERSION=2.0.19
+ARG MOSQUITTO_VERSION=2.0.22
 WORKDIR /build
 
 # install dependencies
@@ -23,13 +23,15 @@ RUN wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
 # download mosquitto-go-auth repo
 RUN git clone https://github.com/iegomez/mosquitto-go-auth.git /build/mosquitto-go-auth
 
-# download mosquitto repo, save in /repo
-RUN wget http://mosquitto.org/files/source/mosquitto-${MOSQUITTO_VERSION}.tar.gz; \
-    tar xzvf mosquitto-${MOSQUITTO_VERSION}.tar.gz
+# download mosquitto source from GitHub (mosquitto.org drops TLS connections intermittently)
+RUN wget -q -O mosquitto-${MOSQUITTO_VERSION}.tar.gz \
+      https://github.com/eclipse-mosquitto/mosquitto/archive/refs/tags/v${MOSQUITTO_VERSION}.tar.gz && \
+    tar xzf mosquitto-${MOSQUITTO_VERSION}.tar.gz
 
-RUN cd mosquitto-${MOSQUITTO_VERSION}; \
-    make CFLAGS="-Wall -O2 -I/build/lws/include" LDFLAGS="-L/build/lws/lib" WITH_WEBSOCKETS=no; \
-    make install;
+# GitHub archive has no pre-built man pages, so skip docs
+RUN cd mosquitto-${MOSQUITTO_VERSION} && \
+    make CFLAGS="-Wall -O2 -I/build/lws/include" LDFLAGS="-L/build/lws/lib" WITH_WEBSOCKETS=no WITH_DOCS=no && \
+    make install WITH_DOCS=no
 
 ENV CGO_ENABLED=1
 ENV CGO_CFLAGS="-I/usr/local/include -fPIC"
@@ -41,7 +43,7 @@ RUN cd mosquitto-go-auth; \
     go build pw-gen/pw.go
 
 FROM debian:${DEBIAN_IMAGE} AS final
-ARG MOSQUITTO_VERSION=2.0.19
+ARG MOSQUITTO_VERSION=2.0.22
 
 WORKDIR /mosquitto
 
